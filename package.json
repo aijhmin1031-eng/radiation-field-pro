@@ -1,0 +1,15 @@
+{
+  "name": "radiation-field-pro",
+  "type": "module",
+  "private": true,
+  "description": "Professional X-ray/gamma reference-field characterization and dosimetry (ISO 4037).",
+  "scripts": {
+    "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

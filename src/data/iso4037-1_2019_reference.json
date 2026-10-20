@@ -1,0 +1,82 @@
+{
+  "_meta": {
+    "title": "ISO 4037-1:2019 — continuous reference filtered X radiation (4 series) characteristics",
+    "purpose": "X-ray Spectrum Lab 엔진을 ISO 4037-1:2019 기준장에 맞게 피팅/검증하기 위한 내부 기준값",
+    "source": "ISO 4037-1:2019(E), Tables 2–6 (사용자 보유 라이선스본에서 전사)",
+    "privacy": "PRIVATE — ISO 저작권물에서 전사. 공개 저장소/사이트에 업로드·게시 금지. 사내 피팅·검증용으로만.",
+    "extracted_by": "AI 전사 2026-10-20. ⚠️ 전문가(소유자) 검수 필요 — 전사 오류 가능.",
+    "units": {"mean_energy": "keV", "resolution": "% (R_E)", "tube_potential": "kV", "filtration": "mm", "hvl": "mm (material noted)"},
+    "notes": [
+      "additional_filtration_mm: 값이 있는 원소만 기재(Pb/Sn/Cu/Al).",
+      "hvl1/hvl2: focal spot 로부터 1.0 m, 2.5 m 거리값. null = 표에 '—'(해당 거리 미제공; -350/-400 류는 2.5 m만).",
+      "resolution null = 표에 미기재(저에너지 Be 여과 선질, H계열 등).",
+      "총필터 = 고유여과(inherent) + 부가여과(additional)."
+    ]
+  },
+  "series_summary": {
+    "L": {"name": "low air kerma rate", "resolution_RE": "0.11-0.23", "homogeneity_h": "0.91-0.99"},
+    "N": {"name": "narrow spectrum",    "resolution_RE": "0.27-0.37", "homogeneity_h": "0.88-1.0"},
+    "W": {"name": "wide spectrum",      "resolution_RE": "0.48-0.57", "homogeneity_h": "0.81-0.97"},
+    "H": {"name": "high air kerma rate","resolution_RE": "0.35-0.69", "homogeneity_h": "0.64-0.89"}
+  },
+  "qualities": {
+    "L": [
+      {"name":"L-10","kVp":10,"mean_energy":9.0,"resolution":null,"inherent":"1 mm Be","add":{"Al":0.3},"hvl1":{"m":"Al","d1_0":0.068,"d2_5":0.073},"hvl2":{"m":"Al","d1_0":0.071,"d2_5":0.076}},
+      {"name":"L-20","kVp":20,"mean_energy":17.3,"resolution":21,"inherent":"1 mm Be","add":{"Al":2.0},"hvl1":{"m":"Al","d1_0":0.446,"d2_5":0.446},"hvl2":{"m":"Al","d1_0":0.486,"d2_5":0.489}},
+      {"name":"L-30","kVp":30,"mean_energy":26.7,"resolution":21,"inherent":"1 mm Be","add":{"Cu":0.18,"Al":4.0},"hvl1":{"m":"Al","d1_0":1.56,"d2_5":1.56},"hvl2":{"m":"Al","d1_0":1.62,"d2_5":1.63}},
+      {"name":"L-35","kVp":35,"mean_energy":30.4,"resolution":21,"inherent":"4 mm Al","add":{"Cu":0.25},"hvl1":{"m":"Al","d1_0":2.18,"d2_5":2.18},"hvl2":{"m":"Al","d1_0":2.29,"d2_5":2.30}},
+      {"name":"L-55","kVp":55,"mean_energy":47.8,"resolution":22,"inherent":"4 mm Al","add":{"Cu":1.2},"hvl1":{"m":"Cu","d1_0":0.248,"d2_5":0.249},"hvl2":{"m":"Cu","d1_0":0.261,"d2_5":0.261}},
+      {"name":"L-70","kVp":70,"mean_energy":60.6,"resolution":22,"inherent":"4 mm Al","add":{"Cu":2.5},"hvl1":{"m":"Cu","d1_0":0.483,"d2_5":0.484},"hvl2":{"m":"Cu","d1_0":0.505,"d2_5":0.506}},
+      {"name":"L-100","kVp":100,"mean_energy":86.8,"resolution":22,"inherent":"4 mm Al","add":{"Sn":2.0,"Cu":0.5},"hvl1":{"m":"Cu","d1_0":1.22,"d2_5":1.22},"hvl2":{"m":"Cu","d1_0":1.25,"d2_5":1.26}},
+      {"name":"L-125","kVp":125,"mean_energy":109,"resolution":21,"inherent":"4 mm Al","add":{"Sn":4.0,"Cu":1.0},"hvl1":{"m":"Cu","d1_0":1.98,"d2_5":1.98},"hvl2":{"m":"Cu","d1_0":2.02,"d2_5":2.02}},
+      {"name":"L-170","kVp":170,"mean_energy":149,"resolution":18,"inherent":"4 mm Al","add":{"Pb":1.5,"Sn":3.0,"Cu":1.0},"hvl1":{"m":"Cu","d1_0":3.40,"d2_5":3.40},"hvl2":{"m":"Cu","d1_0":3.46,"d2_5":3.47}},
+      {"name":"L-210","kVp":210,"mean_energy":185,"resolution":18,"inherent":"4 mm Al","add":{"Pb":3.5,"Sn":2.0,"Cu":0.5},"hvl1":{"m":"Cu","d1_0":4.52,"d2_5":4.50},"hvl2":{"m":"Cu","d1_0":4.55,"d2_5":4.55}},
+      {"name":"L-240","kVp":240,"mean_energy":211,"resolution":18,"inherent":"4 mm Al","add":{"Pb":5.5,"Sn":2.0,"Cu":0.5},"hvl1":{"m":"Cu","d1_0":5.19,"d2_5":5.18},"hvl2":{"m":"Cu","d1_0":5.22,"d2_5":5.21}}
+    ],
+    "N": [
+      {"name":"N-10","kVp":10,"mean_energy":8.5,"resolution":28,"inherent":"1 mm Be","add":{"Al":0.1},"hvl1":{"m":"Al","d1_0":0.055,"d2_5":0.065},"hvl2":{"m":"Al","d1_0":0.060,"d2_5":0.068}},
+      {"name":"N-15","kVp":15,"mean_energy":12.4,"resolution":33,"inherent":"1 mm Be","add":{"Al":0.5},"hvl1":{"m":"Al","d1_0":0.157,"d2_5":0.173},"hvl2":{"m":"Al","d1_0":0.177,"d2_5":0.198}},
+      {"name":"N-20","kVp":20,"mean_energy":16.3,"resolution":34,"inherent":"1 mm Be","add":{"Al":1.0},"hvl1":{"m":"Al","d1_0":0.344,"d2_5":0.362},"hvl2":{"m":"Al","d1_0":0.396,"d2_5":0.412}},
+      {"name":"N-25","kVp":25,"mean_energy":20.3,"resolution":33,"inherent":"1 mm Be","add":{"Al":2.0},"hvl1":{"m":"Al","d1_0":0.662,"d2_5":0.677},"hvl2":{"m":"Al","d1_0":0.746,"d2_5":0.760}},
+      {"name":"N-30","kVp":30,"mean_energy":24.6,"resolution":32,"inherent":"1 mm Be","add":{"Al":4.0},"hvl1":{"m":"Al","d1_0":1.16,"d2_5":1.17},"hvl2":{"m":"Al","d1_0":1.28,"d2_5":1.29}},
+      {"name":"N-40","kVp":40,"mean_energy":33.3,"resolution":30,"inherent":"4 mm Al","add":{"Cu":0.21},"hvl1":{"m":"Al","d1_0":2.63,"d2_5":2.65},"hvl2":{"m":"Al","d1_0":2.83,"d2_5":2.84}},
+      {"name":"N-60","kVp":60,"mean_energy":47.9,"resolution":36,"inherent":"4 mm Al","add":{"Cu":0.6},"hvl1":{"m":"Cu","d1_0":0.234,"d2_5":0.235},"hvl2":{"m":"Cu","d1_0":0.263,"d2_5":0.264}},
+      {"name":"N-80","kVp":80,"mean_energy":65.2,"resolution":32,"inherent":"4 mm Al","add":{"Cu":2.0},"hvl1":{"m":"Cu","d1_0":0.578,"d2_5":0.580},"hvl2":{"m":"Cu","d1_0":0.622,"d2_5":0.623}},
+      {"name":"N-100","kVp":100,"mean_energy":83.3,"resolution":28,"inherent":"4 mm Al","add":{"Cu":5.0},"hvl1":{"m":"Cu","d1_0":1.09,"d2_5":1.09},"hvl2":{"m":"Cu","d1_0":1.15,"d2_5":1.15}},
+      {"name":"N-120","kVp":120,"mean_energy":100,"resolution":27,"inherent":"4 mm Al","add":{"Sn":1.0,"Cu":5.0},"hvl1":{"m":"Cu","d1_0":1.67,"d2_5":1.67},"hvl2":{"m":"Cu","d1_0":1.73,"d2_5":1.74}},
+      {"name":"N-150","kVp":150,"mean_energy":118,"resolution":37,"inherent":"4 mm Al","add":{"Sn":2.5},"hvl1":{"m":"Cu","d1_0":2.30,"d2_5":2.30},"hvl2":{"m":"Cu","d1_0":2.41,"d2_5":2.41}},
+      {"name":"N-200","kVp":200,"mean_energy":165,"resolution":30,"inherent":"4 mm Al","add":{"Pb":1.0,"Sn":3.0,"Cu":2.0},"hvl1":{"m":"Cu","d1_0":3.92,"d2_5":3.91},"hvl2":{"m":"Cu","d1_0":3.99,"d2_5":3.99}},
+      {"name":"N-250","kVp":250,"mean_energy":207,"resolution":28,"inherent":"4 mm Al","add":{"Pb":3.0,"Sn":2.0},"hvl1":{"m":"Cu","d1_0":5.10,"d2_5":5.08},"hvl2":{"m":"Cu","d1_0":5.14,"d2_5":5.14}},
+      {"name":"N-300","kVp":300,"mean_energy":248,"resolution":27,"inherent":"4 mm Al","add":{"Pb":5.0,"Sn":3.0},"hvl1":{"m":"Cu","d1_0":5.96,"d2_5":5.94},"hvl2":{"m":"Cu","d1_0":6.00,"d2_5":5.99}},
+      {"name":"N-350","kVp":350,"mean_energy":288,"resolution":29,"inherent":"4 mm Al","add":{"Pb":7.0,"Sn":4.5},"hvl1":{"m":"Cu","d1_0":null,"d2_5":6.69},"hvl2":{"m":"Cu","d1_0":null,"d2_5":6.74}},
+      {"name":"N-400","kVp":400,"mean_energy":328,"resolution":29,"inherent":"4 mm Al","add":{"Pb":10.0,"Sn":6.0},"hvl1":{"m":"Cu","d1_0":null,"d2_5":7.31},"hvl2":{"m":"Cu","d1_0":null,"d2_5":7.34}}
+    ],
+    "W": [
+      {"name":"W-30","kVp":30,"mean_energy":22.9,"resolution":null,"inherent":"1 mm Be","add":{"Al":2.0},"hvl1":{"m":"Al","d1_0":0.863,"d2_5":0.886},"hvl2":{"m":"Al","d1_0":1.02,"d2_5":1.04}},
+      {"name":"W-40","kVp":40,"mean_energy":29.8,"resolution":null,"inherent":"1 mm Be","add":{"Al":4.0},"hvl1":{"m":"Al","d1_0":1.72,"d2_5":1.75},"hvl2":{"m":"Al","d1_0":2.03,"d2_5":2.06}},
+      {"name":"W-60","kVp":60,"mean_energy":44.8,"resolution":48,"inherent":"4 mm Al","add":{"Cu":0.3},"hvl1":{"m":"Cu","d1_0":0.180,"d2_5":0.181},"hvl2":{"m":"Cu","d1_0":0.215,"d2_5":0.216}},
+      {"name":"W-80","kVp":80,"mean_energy":56.5,"resolution":55,"inherent":"4 mm Al","add":{"Cu":0.5},"hvl1":{"m":"Cu","d1_0":0.349,"d2_5":0.350},"hvl2":{"m":"Cu","d1_0":0.433,"d2_5":0.434}},
+      {"name":"W-110","kVp":110,"mean_energy":79.1,"resolution":56,"inherent":"4 mm Al","add":{"Cu":2.0},"hvl1":{"m":"Cu","d1_0":0.933,"d2_5":0.934},"hvl2":{"m":"Cu","d1_0":1.08,"d2_5":1.08}},
+      {"name":"W-150","kVp":150,"mean_energy":104,"resolution":56,"inherent":"4 mm Al","add":{"Sn":1.0},"hvl1":{"m":"Cu","d1_0":1.78,"d2_5":1.79},"hvl2":{"m":"Cu","d1_0":2.03,"d2_5":2.04}},
+      {"name":"W-200","kVp":200,"mean_energy":138,"resolution":57,"inherent":"4 mm Al","add":{"Sn":2.0},"hvl1":{"m":"Cu","d1_0":3.00,"d2_5":3.01},"hvl2":{"m":"Cu","d1_0":3.24,"d2_5":3.25}},
+      {"name":"W-250","kVp":250,"mean_energy":172,"resolution":56,"inherent":"4 mm Al","add":{"Sn":4.0},"hvl1":{"m":"Cu","d1_0":4.14,"d2_5":4.14},"hvl2":{"m":"Cu","d1_0":4.34,"d2_5":4.34}},
+      {"name":"W-300","kVp":300,"mean_energy":205,"resolution":57,"inherent":"4 mm Al","add":{"Sn":6.5},"hvl1":{"m":"Cu","d1_0":5.03,"d2_5":5.02},"hvl2":{"m":"Cu","d1_0":5.18,"d2_5":5.18}}
+    ],
+    "H": [
+      {"name":"H-10","kVp":10,"mean_energy":8.0,"resolution":null,"inherent":"1 mm Be","add":{},"hvl1":{"m":"Al","d1_0":0.044,"d2_5":0.059},"hvl2":{"m":"Al","d1_0":0.050,"d2_5":0.063}},
+      {"name":"H-20","kVp":20,"mean_energy":13.1,"resolution":null,"inherent":"1 mm Be","add":{"Al":0.15},"hvl1":{"m":"Al","d1_0":0.128,"d2_5":0.169},"hvl2":{"m":"Al","d1_0":0.172,"d2_5":0.228}},
+      {"name":"H-30","kVp":30,"mean_energy":19.5,"resolution":null,"inherent":"1 mm Be","add":{"Al":0.50},"hvl1":{"m":"Al","d1_0":0.364,"d2_5":0.441},"hvl2":{"m":"Al","d1_0":0.563,"d2_5":0.636}},
+      {"name":"H-40","kVp":40,"mean_energy":25.4,"resolution":null,"inherent":"1 mm Be","add":{"Al":1.0},"hvl1":{"m":"Al","d1_0":0.815,"d2_5":0.884},"hvl2":{"m":"Al","d1_0":1.17,"d2_5":1.24}},
+      {"name":"H-60","kVp":60,"mean_energy":38.0,"resolution":null,"inherent":"1 mm Be","add":{"Al":3.9},"hvl1":{"m":"Al","d1_0":2.53,"d2_5":2.61},"hvl2":{"m":"Al","d1_0":3.38,"d2_5":3.44}},
+      {"name":"H-80","kVp":80,"mean_energy":48.8,"resolution":null,"inherent":"4 mm Al","add":{"Al":3.2},"hvl1":{"m":"Cu","d1_0":0.176,"d2_5":0.181},"hvl2":{"m":"Cu","d1_0":0.268,"d2_5":0.268}},
+      {"name":"H-100","kVp":100,"mean_energy":57.3,"resolution":null,"inherent":"4 mm Al","add":{"Cu":0.15},"hvl1":{"m":"Cu","d1_0":0.294,"d2_5":0.299},"hvl2":{"m":"Cu","d1_0":0.462,"d2_5":0.466}},
+      {"name":"H-150","kVp":150,"mean_energy":78.0,"resolution":null,"inherent":"4 mm Al","add":{"Cu":0.5},"hvl1":{"m":"Cu","d1_0":0.808,"d2_5":0.811},"hvl2":{"m":"Cu","d1_0":1.21,"d2_5":1.21}},
+      {"name":"H-200","kVp":200,"mean_energy":99.3,"resolution":null,"inherent":"4 mm Al","add":{"Cu":1.0},"hvl1":{"m":"Cu","d1_0":1.54,"d2_5":1.55},"hvl2":{"m":"Cu","d1_0":2.28,"d2_5":2.28}},
+      {"name":"H-250","kVp":250,"mean_energy":122,"resolution":null,"inherent":"4 mm Al","add":{"Cu":1.6},"hvl1":{"m":"Cu","d1_0":2.42,"d2_5":2.42},"hvl2":{"m":"Cu","d1_0":3.24,"d2_5":3.23}},
+      {"name":"H-280","kVp":280,"mean_energy":145,"resolution":null,"inherent":"4 mm Al","add":{"Cu":3.0},"hvl1":{"m":"Cu","d1_0":3.26,"d2_5":3.28},"hvl2":{"m":"Cu","d1_0":3.88,"d2_5":3.89},"note":"300 kV 대체용"},
+      {"name":"H-300","kVp":300,"mean_energy":143,"resolution":null,"inherent":"4 mm Al","add":{"Cu":2.2},"hvl1":{"m":"Cu","d1_0":3.22,"d2_5":3.22},"hvl2":{"m":"Cu","d1_0":4.00,"d2_5":3.98}},
+      {"name":"H-350","kVp":350,"mean_energy":167,"resolution":null,"inherent":"4 mm Al","add":{"Cu":3.4},"hvl1":{"m":"Cu","d1_0":null,"d2_5":4.01},"hvl2":{"m":"Cu","d1_0":null,"d2_5":4.65}},
+      {"name":"H-400","kVp":400,"mean_energy":190,"resolution":null,"inherent":"4 mm Al","add":{"Cu":4.7},"hvl1":{"m":"Cu","d1_0":null,"d2_5":4.65},"hvl2":{"m":"Cu","d1_0":null,"d2_5":5.22}}
+    ]
+  }
+}
