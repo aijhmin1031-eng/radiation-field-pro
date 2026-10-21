@@ -4,8 +4,8 @@
 import json, datetime, numpy as np, spekpy as sp
 
 ANODE_ANGLE = 20
-EMAX = 300
-KVP_GRID = list(range(20, 301, 10))
+EMAX = 400                # keV ceiling — must cover the highest tube voltage (400 kV -> 400 keV)
+KVP_GRID = list(range(10, 151, 5)) + list(range(160, 401, 10))  # 10-400 kV; fine (5 kV) below 150
 SRC_DK = 0.5
 INT_E = np.arange(0, EMAX + 1)
 
