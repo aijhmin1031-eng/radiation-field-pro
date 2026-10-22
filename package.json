@@ -5,7 +5,8 @@
   "description": "Professional X-ray/gamma reference-field characterization and dosimetry (ISO 4037).",
   "scripts": {
     "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "report:accuracy": "tsx scripts/gen-accuracy-report.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
