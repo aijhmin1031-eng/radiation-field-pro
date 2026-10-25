@@ -61,3 +61,9 @@
 - **계산 모드**: 기본 수동 — 입력(초안)을 바꾸면 결과가 대기 상태(흐림 + "조건이 바뀌었습니다" 띠), [계산하기]로 반영. 판독창마다 **직전 계산 대비 ▲▼ 변화량(절대·%)** 표시. "자동 계산" 토글로 live 복귀(localStorage 기억).
 - **모바일(≤980px)**: [입력 | 결과] 탭, 하단 고정 계산 바(계산하기 + HVL1·Hp(10) 요약), 판독창 2열, 차트 compact 좌표계(420×240)와 도구 버튼 상단 배치.
 - E2E 갱신: 수동/자동 모드, 탭 전환, 모바일 스크린샷(test-results/mobile-*.png).
+
+## 공개 준비 (2026-10-25, 브랜치 public-prep)
+- 주소 `https://pro.radiation-lab.com/`(Radiation Lab 하위 도메인). 라이선스 MIT(저작권자 Radiation Lab), README 영어 요약 + 한글 본문.
+- `index.html`: 제목·설명·canonical·OG(`public/og.png` 1200×630), `noindex` 제거. `public/robots.txt`·`sitemap.xml`·`favicon.svg`.
+- 머리글 좌측 「Radiation Lab / Field Pro」(Radiation Lab → radiation-lab.com), 영어 한 줄 소개. 꼬리말: Radiation Lab·About·Privacy·Contact·Source(MIT), 브라우저 안 계산 안내, 정확도 사양 링크. 모바일은 꼬리말이 하단 계산 바 높이만큼 여백을 맡는다.
+- 광고 코드 없음(입력칸·버튼 근처 광고 금지 원칙).

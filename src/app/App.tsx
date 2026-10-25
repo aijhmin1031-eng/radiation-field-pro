@@ -237,11 +237,22 @@ export function App() {
         본문으로 건너뛰기
       </a>
       <header className="hdr">
+        {/* 공개용(2026-10-25): 좌측 브랜드 = 「Radiation Lab / Field Pro」. 제품명 표기(Field 주황)는 그대로. */}
         <h1>
-          Radiation <span>Field</span> Pro
+          <a className="home" href="https://radiation-lab.com/">
+            Radiation Lab
+          </a>
+          <span className="slash" aria-hidden="true">
+            /
+          </span>
+          <span className="field">Field</span> Pro
         </h1>
         <span className="sub">기준 X선·감마장 특성화 및 선량 워크벤치</span>
         <span className="std">ISO 4037-1/-3/-4 · GUM</span>
+        <p className="en" lang="en">
+          A workbench for ISO 4037 reference X-ray and gamma fields: spectrum, half-value layers, operational dose
+          conversion and uncertainty.
+        </p>
         <div className="toolbar no-print" role="toolbar" aria-label="세션">
           <button type="button" className={`calc${dirty ? " dirty" : ""}`} onClick={runCalc} disabled={autoMode}>
             {dirty ? "계산하기 — 조건 변경됨" : autoMode ? "자동 계산 중" : "계산하기"}
@@ -332,6 +343,20 @@ export function App() {
           <UncertaintyPanel u={fast.uncertainty} />
         </div>
       </main>
+      <footer className={`foot no-print${narrow ? " narrow" : ""}`}>
+        <nav aria-label="Radiation Lab">
+          <a href="https://radiation-lab.com/">Radiation Lab</a>
+          <a href="https://radiation-lab.com/about">About</a>
+          <a href="https://radiation-lab.com/privacy">Privacy</a>
+          <a href="https://radiation-lab.com/contact">Contact</a>
+          <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>
+        </nav>
+        <p>
+          계산은 모두 이 브라우저 안에서 이루어지며 입력값은 서버로 보내지 않습니다. 정확도 범위는{" "}
+          <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">정확도 사양</a>에
+          있습니다. 실제 기준장의 값은 그 시설의 측정으로 정합니다.
+        </p>
+      </footer>
       {narrow && (
         <div className="mbar no-print">
           <button type="button" className={`calc${dirty ? " dirty" : ""}`} onClick={runCalc} disabled={autoMode && !dirty}>
