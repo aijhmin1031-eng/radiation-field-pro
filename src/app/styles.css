@@ -121,8 +121,22 @@ svg.spec .mk-t.eff { fill: var(--ok); }
 svg.spec text { font-size: 11px; }
 /* 포커스 링은 절대 제거하지 않음 — 키보드 사용자용 공통 링 */
 button:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+/* ---- 모션 마감 (emil-design-eng 점검) ---- */
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+/* 판독창 점등: 즉시 켜지고 200 ms 로 소등(300 ms 미만, 강한 ease-out) */
+.ro .v { transition: color 200ms var(--ease-out); }
+/* 눌림 피드백: 모든 누를 수 있는 요소 */
+.seg button, .frow button, .add, .chart-tools button { transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out), border-color 160ms var(--ease-out); }
+.seg button:active, .frow button:active, .add:active, .chart-tools button:active { transform: scale(0.97); }
+/* 호버는 정밀 포인터에서만 */
+.frow button:hover, .add:hover { border-color: inherit; color: inherit; }
+@media (hover: hover) and (pointer: fine) {
+  .frow button:hover, .add:hover { border-color: var(--signal); color: var(--signal); }
+}
 /* 모션 축소 설정 존중: 판독창 점등 전환·색 전환 제거 */
 @media (prefers-reduced-motion: reduce) {
   .ro .v { transition: none; }
   .ro.tick .v { color: var(--ink); }
+  /* 움직임(스케일)은 제거, 색 전환만 유지 */
+  .seg button:active, .frow button:active, .add:active, .chart-tools button:active { transform: none; }
 }

@@ -22,7 +22,7 @@ function Readout({
     if (prev.current !== value) {
       prev.current = value;
       setTick(true);
-      const t = setTimeout(() => setTick(false), 380);
+      const t = setTimeout(() => setTick(false), 160); // 짧게 켜고 CSS 200 ms 로 소등
       return () => clearTimeout(t);
     }
   }, [value]);
