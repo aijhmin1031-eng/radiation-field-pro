@@ -12,7 +12,7 @@ readings into a GUM uncertainty budget. Everything runs in the browser; nothing 
 - Live: https://pro.radiation-lab.com/
 - Accuracy specification (generated from the engine and enforced by tests): [docs/accuracy-spec.md](docs/accuracy-spec.md)
 - Part of [Radiation Lab](https://radiation-lab.com/) · [About](https://radiation-lab.com/about) · [Contact](https://radiation-lab.com/contact)
-- The interface is in Korean; quantity symbols and units are international.
+- The interface is in English by default, with a Korean option (EN/KO toggle in the header; the choice is remembered in the browser). Quantity symbols and units follow ISO 4037 and ICRU usage.
 
 ---
 
