@@ -4,13 +4,22 @@
   "private": true,
   "description": "Professional X-ray/gamma reference-field characterization and dosimetry (ISO 4037).",
   "scripts": {
-    "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts src/app/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "report:accuracy": "tsx scripts/gen-accuracy-report.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "^8.3.5"
   }
 }
