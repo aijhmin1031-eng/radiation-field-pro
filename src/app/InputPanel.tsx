@@ -34,9 +34,9 @@ export function InputPanel({ input, onChange }: Props) {
   return (
     <div className="stack">
       <section className="panel">
-        <div className="ph">
+        <h2 className="ph">
           <span className="idx">01</span> 선원
-        </div>
+        </h2>
         <div className="pb">
           <div className="seg" role="group" aria-label="선원 종류">
             {(["xray", "Cs-137", "Co-60"] as SourceKind[]).map((s) => (
@@ -85,6 +85,8 @@ export function InputPanel({ input, onChange }: Props) {
                   />
                   <input
                     type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                     style={{ width: 72 }}
                     min={KVP_MIN}
                     max={KVP_MAX}
@@ -101,6 +103,8 @@ export function InputPanel({ input, onChange }: Props) {
                   <input
                     id="air"
                     type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                     min={0}
                     step={100}
                     value={input.xray.airMm}
@@ -123,6 +127,8 @@ export function InputPanel({ input, onChange }: Props) {
                     <div className="ctl">
                       <input
                         type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                         min={0}
                         step={0.1}
                         value={f.thicknessMm}
@@ -157,6 +163,8 @@ export function InputPanel({ input, onChange }: Props) {
                   <input
                     id="act"
                     type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                     min={0}
                     step={0.1}
                     value={input.gamma.activity}
@@ -187,6 +195,8 @@ export function InputPanel({ input, onChange }: Props) {
                   <input
                     id="dist"
                     type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                     min={0.01}
                     step={0.1}
                     value={input.gamma.distanceM}
@@ -201,9 +211,9 @@ export function InputPanel({ input, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <div className="ph">
+        <h2 className="ph">
           <span className="idx">02</span> 기하·평가 조건
-        </div>
+        </h2>
         <div className="pb">
           <div className="row">
             <label htmlFor="alpha">입사각 α</label>
@@ -256,6 +266,8 @@ export function InputPanel({ input, onChange }: Props) {
                   <input
                     id="tol"
                     type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
                     min={0.1}
                     step={0.5}
                     value={input.tolerancePct}
@@ -270,32 +282,40 @@ export function InputPanel({ input, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <div className="ph">
+        <h2 className="ph">
           <span className="idx">03</span> 판독값 보정 (ISO 4037-4)
-        </div>
+        </h2>
         <div className="pb">
           <div className="row">
             <label htmlFor="rd">판독값</label>
-            <input id="rd" type="number" step={0.001} value={input.airReading.reading} onChange={(e) => setR({ reading: num(e.target.value, input.airReading.reading) })} />
+            <input id="rd" type="number"
+                    inputMode="decimal"
+                    autoComplete="off" step={0.001} value={input.airReading.reading} onChange={(e) => setR({ reading: num(e.target.value, input.airReading.reading) })} />
           </div>
           <div className="row">
             <label htmlFor="t">온도</label>
             <div className="ctl">
-              <input id="t" type="number" step={0.1} value={input.airReading.tempC} onChange={(e) => setR({ tempC: num(e.target.value, input.airReading.tempC) })} />
+              <input id="t" type="number"
+                    inputMode="decimal"
+                    autoComplete="off" step={0.1} value={input.airReading.tempC} onChange={(e) => setR({ tempC: num(e.target.value, input.airReading.tempC) })} />
               <span className="unit">°C</span>
             </div>
           </div>
           <div className="row">
             <label htmlFor="p">기압</label>
             <div className="ctl">
-              <input id="p" type="number" step={0.01} value={input.airReading.pressureKPa} onChange={(e) => setR({ pressureKPa: num(e.target.value, input.airReading.pressureKPa) })} />
+              <input id="p" type="number"
+                    inputMode="decimal"
+                    autoComplete="off" step={0.01} value={input.airReading.pressureKPa} onChange={(e) => setR({ pressureKPa: num(e.target.value, input.airReading.pressureKPa) })} />
               <span className="unit">kPa</span>
             </div>
           </div>
           <div className="row">
             <label htmlFor="rh">상대습도</label>
             <div className="ctl">
-              <input id="rh" type="number" min={0} max={100} step={1} value={input.airReading.relHumidityPct} onChange={(e) => setR({ relHumidityPct: num(e.target.value, input.airReading.relHumidityPct) })} />
+              <input id="rh" type="number"
+                    inputMode="decimal"
+                    autoComplete="off" min={0} max={100} step={1} value={input.airReading.relHumidityPct} onChange={(e) => setR({ relHumidityPct: num(e.target.value, input.airReading.relHumidityPct) })} />
               <span className="unit">%</span>
             </div>
           </div>

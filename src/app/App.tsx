@@ -67,6 +67,7 @@ export function App() {
 
   return (
     <>
+      <a className="skip" href="#main">본문으로 건너뛰기</a>
       <header className="hdr">
         <h1>
           Radiation <span>Field</span> Pro
@@ -74,16 +75,16 @@ export function App() {
         <span className="sub">기준 X선·감마장 특성화 및 선량 워크벤치</span>
         <span className="std">ISO 4037-1/-3/-4 · GUM</span>
       </header>
-      <main className="bench">
+      <main id="main" className="bench">
         <InputPanel input={input} onChange={setInput} />
         <div className="stack">
           <section className="panel">
-            <div className="ph">
+            <h2 className="ph">
               <span className="idx">00</span> 스펙트럼
               <span className="hint" style={{ marginTop: 0, marginLeft: "auto" }}>
                 {input.source === "xray" ? `W 양극 20° · ${input.xray.kvp} kV · 여과 후` : `${input.source} 선 스펙트럼`}
               </span>
-            </div>
+            </h2>
             <div className="pb">
               <SpectrumChart
                 spectrum={fast.spectrum}

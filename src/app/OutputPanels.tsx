@@ -49,10 +49,10 @@ export function CharacteristicsPanel({
 }) {
   return (
     <section className="panel">
-      <div className="ph">
+      <h2 className="ph">
         <span className="idx">A</span> 선질 특성
-        {provisional && <span className="stale">재질 확정 중…</span>}
-      </div>
+        {provisional && <span className="stale" aria-live="polite">재질 확정 중…</span>}
+      </h2>
       <div className="pb readouts">
         <Readout label="평균 에너지 Ē" value={fmt(c.meanEnergyKeV)} unit="keV" />
         <Readout label="유효 에너지 E_eff" value={fmt(c.effectiveEnergyKeV)} unit="keV" />
@@ -70,9 +70,9 @@ export function OperationalPanel({ fast }: { fast: FastOutput }) {
   const a = `${o.alphaDeg}°`;
   return (
     <section className="panel">
-      <div className="ph">
+      <h2 className="ph">
         <span className="idx">B</span> 운영선량 변환계수 (ISO 4037-3, 스펙트럼 평균)
-      </div>
+      </h2>
       <div className="pb readouts">
         <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note="ICRU 슬랩 팬텀" primary />
         <Readout label="H*(10) / Ka" value={fmt(o.hStar10)} unit="Sv/Gy" note="등방" />
@@ -97,10 +97,10 @@ export function OperationalPanel({ fast }: { fast: FastOutput }) {
 export function IsoPanel({ iso, stale }: { iso: IsoOutput; stale: boolean }) {
   return (
     <section className="panel">
-      <div className="ph">
+      <h2 className="ph">
         <span className="idx">C</span> ISO 4037-1 기준장 비교
-        {stale && <span className="stale">매칭 중…</span>}
-      </div>
+        {stale && <span className="stale" aria-live="polite">매칭 중…</span>}
+      </h2>
       <div className="pb">
         {!iso.applicable || !iso.comparison ? (
           <div className="na">해당 없음 — 핵종 기준장(S-Cs / S-Co)은 ISO 4037-1 연속 X선 표의 대상이 아닙니다.</div>

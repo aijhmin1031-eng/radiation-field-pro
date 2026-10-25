@@ -80,7 +80,8 @@ export function isoPresetNames(): { name: string; series: string }[] {
   return isoQualities().map((q) => ({ name: q.name, series: q.series }));
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+/** 로컬 날짜 yyyy-mm-dd (toISOString은 UTC라 한국 00~09시에 어제가 됨). */
+const today = () => new Date().toLocaleDateString("sv-SE");
 
 export const DEFAULT_INPUT: WorkbenchInput = {
   source: "xray",
