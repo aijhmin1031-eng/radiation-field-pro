@@ -120,7 +120,6 @@ export interface Characteristics {
   hvl1Mm: number;
   hvl2Mm: number;
   homogeneity: number;
-  relativeAirKerma: number;
 }
 export interface OperationalDose {
   alphaDeg: number;
@@ -141,6 +140,7 @@ export interface AirReadingOutput {
 export interface FastOutput {
   spectrum: Spectrum;
   characteristics: Characteristics;
+  kermaTransmission: number; // 여과 후/전 공기커마 비 (감마 1)
   operational: OperationalDose;
   gamma: GammaOutput | null;
   airReading: AirReadingOutput;
@@ -154,8 +154,17 @@ export function characterize(spec: Spectrum, material: string): Characteristics 
     hvl1Mm: hvl1(spec, material),
     hvl2Mm: hvl2(spec, material),
     homogeneity: homogeneityCoefficient(spec, material),
-    relativeAirKerma: airKerma(spec),
   };
+}
+
+/** 부가여과 커마 투과율: 전체 여과 후 공기커마 / 고유여과(첫 행)+공기만 통과한 공기커마.
+ *  관 출구 스펙트럼은 10 keV 이하 연성분이 커마를 지배해 기준으로 무의미하므로 고유여과를 기준으로 삼는다. 감마는 1. */
+export function kermaTransmission(input: WorkbenchInput): number {
+  if (input.source !== "xray") return 1;
+  const inherent = input.xray.filters.slice(0, 1);
+  const baseline = buildSpectrum({ ...input, xray: { ...input.xray, filters: inherent } });
+  const k0 = airKerma(baseline);
+  return k0 > 0 ? airKerma(buildSpectrum(input)) / k0 : 0;
 }
 
 export function computeFast(input: WorkbenchInput, material = provisionalMaterial(input)): FastOutput {
@@ -186,6 +195,7 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
   return {
     spectrum,
     characteristics: characterize(spectrum, material),
+    kermaTransmission: kermaTransmission(input),
     operational,
     gamma,
     airReading: { factor, corrected: r.reading * factor },

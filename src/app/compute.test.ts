@@ -86,6 +86,14 @@ test("감마(Cs-137 1 GBq, 1 m, 같은 날): 커마율 ≈ 77 μGy/h, 한 반감
   assert.ok(Math.abs(later.gamma!.activityNowBq / out.gamma!.activityNowBq - 0.5) < 0.01);
 });
 
+test("커마 투과율: N-80 은 0~1 사이, 여과 없으면 1, 감마는 1", () => {
+  const n80 = computeFast(DEFAULT_INPUT).kermaTransmission;
+  assert.ok(n80 > 0 && n80 < 1, `${n80}`);
+  const bare = computeFast(withInput({ xray: { kvp: 80, filters: [], airMm: 0 } })).kermaTransmission;
+  assert.ok(Math.abs(bare - 1) < 1e-12);
+  assert.equal(computeFast(withInput({ source: "Co-60" })).kermaTransmission, 1);
+});
+
 test("판독값 보정: 고온·저압이면 k_ρ > 1 이고 보정값 = 판독값 × k_ρ", () => {
   const out = computeFast(withInput({ airReading: { reading: 2, tempC: 30, pressureKPa: 95, relHumidityPct: 50 } }));
   assert.ok(out.airReading.factor > 1);
