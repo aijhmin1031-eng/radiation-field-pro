@@ -205,6 +205,7 @@ export function App() {
                 meanEnergyKeV={chars.meanEnergyKeV}
                 effectiveEnergyKeV={chars.effectiveEnergyKeV}
                 discrete={isGamma(input.source)}
+                kermaWeights={fast.kermaWeights}
               />
             </div>
           </section>

@@ -192,3 +192,7 @@ button:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var
   .led.ok, .led.bad, .badge, .ro.primary { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .led.ok, .led.bad { box-shadow: none; }
 }
+
+/* 커마 가중 오버레이 */
+svg.spec .kerma { fill: none; stroke: var(--signal); stroke-width: 1.4; stroke-dasharray: 4 3; }
+svg.spec .kerma-t { fill: var(--signal); font-weight: 600; }

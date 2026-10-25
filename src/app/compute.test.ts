@@ -179,7 +179,8 @@ test("GUM 불확도: 판독 1개 이하면 null, parseReadings는 구분자 혼�
 
 test("ISO 해당 없음 사유 문구", () => {
   const g = computeIso(withInput({ source: "Co-60" }), buildSpectrum(withInput({ source: "Co-60" })));
-  assert.match(g.reason ?? "", /S-Cs/);
+  assert.match(g.reason ?? "", /핵종 기준장/);
+  assert.equal(g.radionuclide?.quality, "S-Co");
   const i = computeIso(withInput({ source: "import", imported: null }), buildSpectrum(withInput({ source: "import", imported: null })));
   assert.match(i.reason ?? "", /불러온 스펙트럼/);
 });
@@ -194,4 +195,21 @@ test("세션 저장/불러오기: 왕복 동일, 부분 저장본은 기본값�
   assert.equal(merged.xray.kvp, 80);
   assert.throws(() => deserializeSession(JSON.stringify({ foo: 1 })));
   assert.throws(() => deserializeSession("not json"));
+});
+
+test("커마 가중 오버레이: 표본 수 일치, 고에너지 쪽 가중이 플루언스보다 크다", () => {
+  const out = computeFast(DEFAULT_INPUT);
+  assert.equal(out.kermaWeights.length, out.spectrum.energy.length);
+  const i = out.spectrum.energy.indexOf(60);
+  assert.ok(out.kermaWeights[i] > 0);
+});
+
+test("핵종 기준장: S-Cs/S-Co 공칭 평균에너지와 0.1 % 이내", () => {
+  for (const [n, q] of [["Cs-137", "S-Cs"], ["Co-60", "S-Co"]] as const) {
+    const inp = withInput({ source: n });
+    const iso = computeIso(inp, buildSpectrum(inp));
+    assert.equal(iso.applicable, false);
+    assert.equal(iso.radionuclide?.quality, q);
+    assert.ok(Math.abs(iso.radionuclide!.deviationPct) < 0.1, `${n} ${iso.radionuclide!.deviationPct}`);
+  }
 });

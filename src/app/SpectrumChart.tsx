@@ -8,6 +8,7 @@ interface Props {
   meanEnergyKeV: number;
   effectiveEnergyKeV: number;
   discrete: boolean;
+  kermaWeights?: number[]; // 공기커마 기여(상대) 오버레이
 }
 
 const W = 760;
@@ -21,8 +22,9 @@ function niceStep(range: number, target = 8): number {
   return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
 }
 
-export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, discrete }: Props) {
+export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, discrete, kermaWeights }: Props) {
   const [log, setLog] = useState(false);
+  const [showKerma, setShowKerma] = useState(false);
 
   const g = useMemo(() => {
     const pts = spectrum.energy.map((e, i) => [e, spectrum.fluence[i]] as const).filter((p) => p[1] > 0 || !log);
@@ -47,8 +49,15 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
       path = pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
       area = `${path}L${x(pts[pts.length - 1][0]).toFixed(1)},${(H - M.b).toFixed(1)}L${x(pts[0][0]).toFixed(1)},${(H - M.b).toFixed(1)}Z`;
     }
-    return { x, y, xticks, yticks, maxF, path, area, pts, eMax };
-  }, [spectrum, log, discrete]);
+    // 커마 가중 곡선: 자기 최대값으로 정규화해 같은 y 스케일(0..1)에 겹친다
+    let kermaPath = "";
+    if (showKerma && kermaWeights && kermaWeights.length === spectrum.energy.length && !discrete) {
+      const maxK = Math.max(1e-30, ...kermaWeights);
+      const kp = spectrum.energy.map((e, i) => [e, (kermaWeights[i] / maxK) * maxF] as const).filter((p) => p[1] > 0 || !log);
+      kermaPath = kp.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
+    }
+    return { x, y, xticks, yticks, maxF, path, area, pts, eMax, kermaPath };
+  }, [spectrum, log, discrete, showKerma, kermaWeights]);
 
   const yLabel = (f: number) => (log ? f.toExponential(0) : (f / g.maxF).toFixed(2));
 
@@ -61,6 +70,11 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
         <button type="button" aria-pressed={log} onClick={() => setLog(true)}>
           log
         </button>
+        {!discrete && (
+          <button type="button" aria-pressed={showKerma} onClick={() => setShowKerma((v) => !v)} title="공기커마 기여 φ·E·(μen/ρ) 오버레이">
+            커마
+          </button>
+        )}
       </div>
       <svg className="spec" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="스펙트럼: 상대 플루언스 대 에너지">
         {/* 모눈 */}
@@ -105,6 +119,14 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
               </>
             )}
         {/* 마커 */}
+        {g.kermaPath && (
+          <>
+            <path className="kerma" d={g.kermaPath} />
+            <text className="kerma-t" x={M.l + 4} y={M.t + 8}>
+              커마 가중 (상대)
+            </text>
+          </>
+        )}
         {/* 마커 라벨: Ē 는 선 오른쪽 위, E_eff 는 선 왼쪽 아래(끝 정렬)로 두어 가까워도 겹치지 않게 */}
         {Number.isFinite(meanEnergyKeV) && (
           <>

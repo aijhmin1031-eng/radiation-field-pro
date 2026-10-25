@@ -20,6 +20,7 @@ import { activityAt, daysBetween, airKermaRate } from "../engine/decay";
 import { densityCorrectionFactor } from "../engine/air-density";
 import { parseSpectrumText, type ParseOptions } from "../engine/spectrum-import";
 import { typeAUncertainty, combineRelative, type TypeAResult, type CombinedResult } from "../engine/uncertainty";
+import { airMuenOverRho } from "../engine/attenuation";
 
 export type SourceKind = "xray" | "Cs-137" | "Co-60" | "import";
 export const isGamma = (s: SourceKind) => s === "Cs-137" || s === "Co-60";
@@ -193,6 +194,7 @@ export interface UncertaintyOutput {
 }
 export interface FastOutput {
   spectrum: Spectrum;
+  kermaWeights: number[]; // 표본별 공기커마 기여 φ·E·(μen/ρ)_air (상대, 차트 오버레이용)
   characteristics: Characteristics;
   kermaTransmission: number; // 여과 후/전 공기커마 비 (감마 1)
   operational: OperationalDose;
@@ -262,6 +264,7 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
   return {
     uncertainty: { n: corrected.length, corrected, typeA, combined },
     spectrum,
+    kermaWeights: spectrum.energy.map((e, i) => spectrum.fluence[i] * e * airMuenOverRho(e)),
     characteristics: characterize(spectrum, material),
     kermaTransmission: kermaTransmission(input),
     operational,
@@ -270,9 +273,21 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
   };
 }
 
+/** ISO 4037-1 §5 핵종 기준장 공칭값(평균 광자에너지, keV). */
+export const RADIONUCLIDE_REFERENCE: Record<string, { quality: string; nominalMeanKeV: number }> = {
+  "Cs-137": { quality: "S-Cs", nominalMeanKeV: 661.6 },
+  "Co-60": { quality: "S-Co", nominalMeanKeV: 1252.9 },
+};
+export interface RadionuclideCheck {
+  quality: string;
+  nominalMeanKeV: number;
+  modelMeanKeV: number;
+  deviationPct: number;
+}
 export interface IsoOutput {
   applicable: boolean; // X선·(400 keV 이하) 불러온 스펙트럼
   reason: string | null; // 해당 없음 사유
+  radionuclide: RadionuclideCheck | null; // 핵종이면 공칭 평균에너지 대조
   matched: IsoQuality | null;
   matchHvl1DeviationPct: number | null;
   selected: string | null; // 비교에 쓴 선질명
@@ -283,6 +298,7 @@ export interface IsoOutput {
 const NOT_APPLICABLE: IsoOutput = {
   applicable: false,
   reason: null,
+  radionuclide: null,
   matched: null,
   matchHvl1DeviationPct: null,
   selected: null,
@@ -293,7 +309,15 @@ const NOT_APPLICABLE: IsoOutput = {
 /** ISO 자동매칭 + 비교(느린 경로). spectrum 은 computeFast 결과를 재사용한다. */
 export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput {
   // ISO 4037-1 연속 X선 표는 X선과 (400 keV 이하) 불러온 스펙트럼에만 적용한다.
-  if (isGamma(input.source)) return { ...NOT_APPLICABLE, reason: "핵종 기준장(S-Cs / S-Co)은 ISO 4037-1 연속 X선 표의 대상이 아닙니다." };
+  if (isGamma(input.source)) {
+    const ref = RADIONUCLIDE_REFERENCE[input.source];
+    const modelMeanKeV = meanEnergy(spectrum);
+    return {
+      ...NOT_APPLICABLE,
+      reason: "핵종 기준장은 연속 X선 표(HVL·균질도) 대상이 아니며, ISO 4037-1 §5 공칭 평균에너지로 대조합니다.",
+      radionuclide: { quality: ref.quality, nominalMeanKeV: ref.nominalMeanKeV, modelMeanKeV, deviationPct: ((modelMeanKeV - ref.nominalMeanKeV) / ref.nominalMeanKeV) * 100 },
+    };
+  }
   if (input.source === "import" && !input.imported) return { ...NOT_APPLICABLE, reason: "불러온 스펙트럼이 없습니다." };
   if (input.source === "import" && Math.max(...spectrum.energy) > 400) return { ...NOT_APPLICABLE, reason: "최대 에너지가 400 keV를 넘어 ISO 4037-1 연속 X선 표 범위 밖입니다." };
   const m = matchQuality(spectrum);
@@ -303,6 +327,7 @@ export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput
   return {
     applicable: true,
     reason: null,
+    radionuclide: null,
     matched: m.quality,
     matchHvl1DeviationPct: m.hvl1DeviationPct,
     selected,

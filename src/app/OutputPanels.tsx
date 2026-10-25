@@ -103,7 +103,20 @@ export function IsoPanel({ iso, stale }: { iso: IsoOutput; stale: boolean }) {
       </h2>
       <div className="pb">
         {!iso.applicable || !iso.comparison ? (
-          <div className="na">해당 없음 — {iso.reason ?? "ISO 4037-1 연속 X선 표의 대상이 아닙니다."}</div>
+          <>
+            {iso.radionuclide && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+                <span className={`led ${Math.abs(iso.radionuclide.deviationPct) < 0.5 ? "ok" : "bad"}`} />
+                <strong className="mono" style={{ fontSize: 15 }}>
+                  {iso.radionuclide.quality}
+                </strong>
+                <span className="hint" style={{ marginTop: 0 }}>
+                  공칭 평균에너지 {fmt(iso.radionuclide.nominalMeanKeV, 5)} keV · 모델 {fmt(iso.radionuclide.modelMeanKeV, 5)} keV ({fmtDev(iso.radionuclide.deviationPct)})
+                </span>
+              </div>
+            )}
+            <div className="na">{iso.reason ?? "ISO 4037-1 연속 X선 표의 대상이 아닙니다."}</div>
+          </>
         ) : (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
