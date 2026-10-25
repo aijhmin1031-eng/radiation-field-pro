@@ -13,6 +13,7 @@ import {
   type SourceKind,
   type WorkbenchInput,
 } from "./compute";
+import { useI18n } from "./i18n";
 
 interface Props {
   input: WorkbenchInput;
@@ -25,6 +26,7 @@ const num = (v: string, fallback: number) => {
 };
 
 export function InputPanel({ input, onChange }: Props) {
+  const { t } = useI18n();
   const set = (patch: Partial<WorkbenchInput>) => onChange({ ...input, ...patch });
   const setX = (patch: Partial<WorkbenchInput["xray"]>) => set({ xray: { ...input.xray, ...patch } });
   const setG = (patch: Partial<WorkbenchInput["gamma"]>) => set({ gamma: { ...input.gamma, ...patch } });
@@ -38,13 +40,13 @@ export function InputPanel({ input, onChange }: Props) {
     <div className="stack">
       <section className="panel">
         <h2 className="ph">
-          <span className="idx">01</span> 선원
+          <span className="idx">01</span> {t("p01")}
         </h2>
         <div className="pb">
-          <div className="seg" role="group" aria-label="선원 종류">
+          <div className="seg" role="group" aria-label={t("segAria")}>
             {(["xray", "Cs-137", "Co-60", "import"] as SourceKind[]).map((s) => (
               <button key={s} type="button" aria-pressed={input.source === s} onClick={() => set({ source: s })}>
-                {s === "xray" ? "X선관" : s === "import" ? "불러오기" : s}
+                {s === "xray" ? t("srcXray") : s === "import" ? t("srcImport") : s}
               </button>
             ))}
           </div>
@@ -52,7 +54,7 @@ export function InputPanel({ input, onChange }: Props) {
           {isX ? (
             <>
               <div className="row">
-                <label htmlFor="preset">ISO 선질</label>
+                <label htmlFor="preset">{t("isoQuality")}</label>
                 <select
                   id="preset"
                   value=""
@@ -60,9 +62,9 @@ export function InputPanel({ input, onChange }: Props) {
                     if (e.target.value) set({ xray: presetFromIso(e.target.value), isoQuality: "auto" });
                   }}
                 >
-                  <option value="">프리셋 불러오기…</option>
+                  <option value="">{t("presetPh")}</option>
                   {(["L", "N", "W", "H"] as const).map((s) => (
-                    <optgroup key={s} label={`${s} 시리즈`}>
+                    <optgroup key={s} label={t("series", s)}>
                       {presets
                         .filter((p) => p.series === s)
                         .map((p) => (
@@ -75,7 +77,7 @@ export function InputPanel({ input, onChange }: Props) {
                 </select>
               </div>
               <div className="row">
-                <label htmlFor="kvp">관전압</label>
+                <label htmlFor="kvp">{t("kvp")}</label>
                 <div className="ctl">
                   <input
                     id="kvp"
@@ -95,13 +97,13 @@ export function InputPanel({ input, onChange }: Props) {
                     max={KVP_MAX}
                     value={input.xray.kvp}
                     onChange={(e) => setX({ kvp: num(e.target.value, input.xray.kvp) })}
-                    aria-label="관전압 kV"
+                    aria-label={t("kvpAria")}
                   />
                   <span className="unit">kV</span>
                 </div>
               </div>
               <div className="row">
-                <label htmlFor="air">공기 경로</label>
+                <label htmlFor="air">{t("air")}</label>
                 <div className="ctl">
                   <input
                     id="air"
@@ -119,8 +121,8 @@ export function InputPanel({ input, onChange }: Props) {
               <div className="filters">
                 {input.xray.filters.map((f, i) => (
                   <div className="frow" key={i}>
-                    <span className="tag">{i === 0 ? "고유" : `부가 ${i}`}</span>
-                    <select value={f.material} onChange={(e) => setFilter(i, { material: e.target.value })} aria-label="여과 재질">
+                    <span className="tag">{i === 0 ? t("tagInherent") : t("tagAdded", i)}</span>
+                    <select value={f.material} onChange={(e) => setFilter(i, { material: e.target.value })} aria-label={t("filterMatAria")}>
                       {FILTER_MATERIALS.map((m) => (
                         <option key={m} value={m}>
                           {m}
@@ -136,13 +138,13 @@ export function InputPanel({ input, onChange }: Props) {
                         step={0.1}
                         value={f.thicknessMm}
                         onChange={(e) => setFilter(i, { thicknessMm: num(e.target.value, f.thicknessMm) })}
-                        aria-label="여과 두께 mm"
+                        aria-label={t("filterThickAria")}
                       />
                       <span className="unit">mm</span>
                     </div>
                     <button
                       type="button"
-                      aria-label="여과층 삭제"
+                      aria-label={t("removeFilter")}
                       onClick={() => setX({ filters: input.xray.filters.filter((_, j) => j !== i) })}
                     >
                       ×
@@ -154,7 +156,7 @@ export function InputPanel({ input, onChange }: Props) {
                   className="add"
                   onClick={() => setX({ filters: [...input.xray.filters, { material: "Cu", thicknessMm: 0.1 }] })}
                 >
-                  + 여과층
+                  {t("addFilter")}
                 </button>
               </div>
             </>
@@ -163,7 +165,7 @@ export function InputPanel({ input, onChange }: Props) {
           ) : (
             <>
               <div className="row">
-                <label htmlFor="act">활동도</label>
+                <label htmlFor="act">{t("activity")}</label>
                 <div className="ctl">
                   <input
                     id="act"
@@ -179,7 +181,7 @@ export function InputPanel({ input, onChange }: Props) {
                     style={{ width: 80 }}
                     value={input.gamma.activityUnit}
                     onChange={(e) => setG({ activityUnit: e.target.value as "MBq" | "GBq" })}
-                    aria-label="활동도 단위"
+                    aria-label={t("activityUnitAria")}
                   >
                     <option>MBq</option>
                     <option>GBq</option>
@@ -187,15 +189,15 @@ export function InputPanel({ input, onChange }: Props) {
                 </div>
               </div>
               <div className="row">
-                <label htmlFor="ref">교정 기준일</label>
+                <label htmlFor="ref">{t("refDate")}</label>
                 <input id="ref" type="date" value={input.gamma.referenceDate} onChange={(e) => setG({ referenceDate: e.target.value })} />
               </div>
               <div className="row">
-                <label htmlFor="eval">평가일</label>
+                <label htmlFor="eval">{t("evalDate")}</label>
                 <input id="eval" type="date" value={input.gamma.evalDate} onChange={(e) => setG({ evalDate: e.target.value })} />
               </div>
               <div className="row">
-                <label htmlFor="dist">거리</label>
+                <label htmlFor="dist">{t("distance")}</label>
                 <div className="ctl">
                   <input
                     id="dist"
@@ -217,11 +219,11 @@ export function InputPanel({ input, onChange }: Props) {
 
       <section className="panel">
         <h2 className="ph">
-          <span className="idx">02</span> 기하·평가 조건
+          <span className="idx">02</span> {t("p02")}
         </h2>
         <div className="pb">
           <div className="row">
-            <label htmlFor="alpha">입사각 α</label>
+            <label htmlFor="alpha">{t("alpha")}</label>
             <div className="ctl">
               <input
                 id="alpha"
@@ -244,9 +246,9 @@ export function InputPanel({ input, onChange }: Props) {
             </div>
           </div>
           <div className="row">
-            <label htmlFor="hvlm">HVL 재질</label>
+            <label htmlFor="hvlm">{t("hvlMat")}</label>
             <select id="hvlm" value={input.hvlMaterial} onChange={(e) => set({ hvlMaterial: e.target.value as WorkbenchInput["hvlMaterial"] })}>
-              <option value="auto">자동 (ISO 매칭 재질)</option>
+              <option value="auto">{t("hvlAuto")}</option>
               <option value="Al">Al</option>
               <option value="Cu">Cu</option>
               <option value="Pb">Pb</option>
@@ -255,9 +257,9 @@ export function InputPanel({ input, onChange }: Props) {
           {isX && (
             <>
               <div className="row">
-                <label htmlFor="isoq">ISO 비교 대상</label>
+                <label htmlFor="isoq">{t("isoTarget")}</label>
                 <select id="isoq" value={input.isoQuality} onChange={(e) => set({ isoQuality: e.target.value })}>
-                  <option value="auto">자동 매칭</option>
+                  <option value="auto">{t("autoMatch")}</option>
                   {presets.map((p) => (
                     <option key={p.name} value={p.name}>
                       {p.name}
@@ -266,7 +268,7 @@ export function InputPanel({ input, onChange }: Props) {
                 </select>
               </div>
               <div className="row">
-                <label htmlFor="tol">허용 밴드</label>
+                <label htmlFor="tol">{t("tolerance")}</label>
                 <div className="ctl">
                   <input
                     id="tol"
@@ -288,17 +290,17 @@ export function InputPanel({ input, onChange }: Props) {
 
       <section className="panel">
         <h2 className="ph">
-          <span className="idx">03</span> 판독값 보정 (ISO 4037-4)
+          <span className="idx">03</span> {t("p03")}
         </h2>
         <div className="pb">
           <div className="row">
-            <label htmlFor="rd">판독값</label>
+            <label htmlFor="rd">{t("reading")}</label>
             <input id="rd" type="number"
                     inputMode="decimal"
                     autoComplete="off" step={0.001} value={input.airReading.reading} onChange={(e) => setR({ reading: num(e.target.value, input.airReading.reading) })} />
           </div>
           <div className="row">
-            <label htmlFor="t">온도</label>
+            <label htmlFor="t">{t("temp")}</label>
             <div className="ctl">
               <input id="t" type="number"
                     inputMode="decimal"
@@ -307,7 +309,7 @@ export function InputPanel({ input, onChange }: Props) {
             </div>
           </div>
           <div className="row">
-            <label htmlFor="p">기압</label>
+            <label htmlFor="p">{t("pressure")}</label>
             <div className="ctl">
               <input id="p" type="number"
                     inputMode="decimal"
@@ -316,7 +318,7 @@ export function InputPanel({ input, onChange }: Props) {
             </div>
           </div>
           <div className="row">
-            <label htmlFor="rh">상대습도</label>
+            <label htmlFor="rh">{t("rh")}</label>
             <div className="ctl">
               <input id="rh" type="number"
                     inputMode="decimal"
@@ -324,22 +326,22 @@ export function InputPanel({ input, onChange }: Props) {
               <span className="unit">%</span>
             </div>
           </div>
-          <div className="hint">기준조건 20 °C · 101.325 kPa · 65 % RH 로 환산합니다.</div>
+          <div className="hint">{t("airHint")}</div>
         </div>
       </section>
 
       <section className="panel">
         <h2 className="ph">
-          <span className="idx">04</span> 반복측정 불확도 (GUM Type A)
+          <span className="idx">04</span> {t("p04")}
         </h2>
         <div className="pb">
           <div className="row" style={{ alignItems: "start" }}>
-            <label htmlFor="rd-vals">판독값 목록</label>
+            <label htmlFor="rd-vals">{t("readings")}</label>
             <textarea
               id="rd-vals"
               className="mono"
               rows={3}
-              placeholder={"1.482 1.495 1.471 …  (공백·쉼표·줄바꿈 구분)"}
+              placeholder={t("readingsPh")}
               defaultValue={input.readings.values.join(" ")}
               onBlur={(e) => set({ readings: { ...input.readings, values: parseReadings(e.target.value) } })}
               spellCheck={false}
@@ -347,7 +349,7 @@ export function InputPanel({ input, onChange }: Props) {
             />
           </div>
           <div className="row">
-            <label htmlFor="rd-air">밀도 보정</label>
+            <label htmlFor="rd-air">{t("densityCorr")}</label>
             <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
               <input
                 id="rd-air"
@@ -355,7 +357,7 @@ export function InputPanel({ input, onChange }: Props) {
                 checked={input.readings.applyAirCorrection}
                 onChange={(e) => set({ readings: { ...input.readings, applyAirCorrection: e.target.checked } })}
               />
-              판독값마다 k_ρ(03 패널 조건) 적용
+              {t("applyKrho")}
             </label>
           </div>
           <div className="filters">
@@ -364,7 +366,7 @@ export function InputPanel({ input, onChange }: Props) {
                 <input
                   type="text"
                   value={b.label}
-                  aria-label="Type B 성분 이름"
+                  aria-label={t("typeBNameAria")}
                   onChange={(e) => set({ readings: { ...input.readings, typeB: input.readings.typeB.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) } })}
                   style={{ border: "1px solid var(--rule-strong)", borderRadius: "var(--r)", padding: "4px 6px", fontSize: 12, minWidth: 0 }}
                 />
@@ -376,21 +378,21 @@ export function InputPanel({ input, onChange }: Props) {
                     min={0}
                     step={0.1}
                     value={b.relPct}
-                    aria-label="상대 표준불확도 %"
+                    aria-label={t("relStdAria")}
                     onChange={(e) => set({ readings: { ...input.readings, typeB: input.readings.typeB.map((x, j) => (j === i ? { ...x, relPct: num(e.target.value, x.relPct) } : x)) } })}
                   />
                   <span className="unit">%</span>
                 </div>
-                <button type="button" aria-label="성분 삭제" onClick={() => set({ readings: { ...input.readings, typeB: input.readings.typeB.filter((_, j) => j !== i) } })}>
+                <button type="button" aria-label={t("removeComp")} onClick={() => set({ readings: { ...input.readings, typeB: input.readings.typeB.filter((_, j) => j !== i) } })}>
                   ×
                 </button>
               </div>
             ))}
-            <button type="button" className="add" onClick={() => set({ readings: { ...input.readings, typeB: [...input.readings.typeB, { label: "Type B 성분", relPct: 0.5 }] } })}>
-              + Type B 성분 (상대 표준불확도)
+            <button type="button" className="add" onClick={() => set({ readings: { ...input.readings, typeB: [...input.readings.typeB, { label: t("newTypeB"), relPct: 0.5 }] } })}>
+              {t("addTypeB")}
             </button>
           </div>
-          <div className="hint">Type A: u = s/√n, k = t₀.₉₇₅,ₙ₋₁ (95 %). Type B와 제곱합 합성, Welch–Satterthwaite ν_eff.</div>
+          <div className="hint">{t("gumHint")}</div>
         </div>
       </section>
     </div>
@@ -399,6 +401,7 @@ export function InputPanel({ input, onChange }: Props) {
 
 /** 측정 스펙트럼 불러오기: 파일 선택 또는 붙여넣기 → 파싱 → 상태 저장. */
 function ImportBox({ input, onChange }: Props) {
+  const { t } = useI18n();
   const [text, setText] = useState("");
   const [name, setName] = useState("");
   const [unit, setUnit] = useState<"keV" | "MeV" | "eV">("keV");
@@ -407,7 +410,7 @@ function ImportBox({ input, onChange }: Props) {
 
   const apply = (raw: string, label: string) => {
     try {
-      const imported = parseImportedSpectrum(raw, label || "붙여넣기", { energyUnit: unit, fluenceIsDensity: density });
+      const imported = parseImportedSpectrum(raw, label || t("pasted"), { energyUnit: unit, fluenceIsDensity: density });
       setError(null);
       onChange({ ...input, imported, isoQuality: "auto" });
     } catch (e) {
@@ -416,21 +419,21 @@ function ImportBox({ input, onChange }: Props) {
   };
   const onFile = (f: File | undefined) => {
     if (!f) return;
-    f.text().then((t) => {
-      setText(t);
+    f.text().then((raw) => {
+      setText(raw);
       setName(f.name);
-      apply(t, f.name);
+      apply(raw, f.name);
     });
   };
   const im = input.imported;
   return (
     <>
       <div className="row">
-        <label htmlFor="imp-file">파일</label>
+        <label htmlFor="imp-file">{t("file")}</label>
         <input id="imp-file" type="file" accept=".csv,.txt,.tsv,.dat,text/plain,text/csv" onChange={(e) => onFile(e.target.files?.[0])} />
       </div>
       <div className="row">
-        <label htmlFor="imp-unit">에너지 단위</label>
+        <label htmlFor="imp-unit">{t("energyUnit")}</label>
         <div className="ctl">
           <select id="imp-unit" value={unit} onChange={(e) => setUnit(e.target.value as "keV" | "MeV" | "eV")} style={{ width: 90 }}>
             <option>keV</option>
@@ -438,17 +441,17 @@ function ImportBox({ input, onChange }: Props) {
             <option>eV</option>
           </select>
           <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}>
-            <input type="checkbox" checked={density} onChange={(e) => setDensity(e.target.checked)} /> 값이 /keV 밀도
+            <input type="checkbox" checked={density} onChange={(e) => setDensity(e.target.checked)} /> {t("perKeV")}
           </label>
         </div>
       </div>
       <div className="row" style={{ alignItems: "start" }}>
-        <label htmlFor="imp-text">붙여넣기</label>
+        <label htmlFor="imp-text">{t("paste")}</label>
         <textarea
           id="imp-text"
           className="mono"
           rows={5}
-          placeholder={"에너지, 플루언스\n20, 1.2e3\n30, 4.5e3\n…"}
+          placeholder={t("pastePh")}
           value={text}
           onChange={(e) => setText(e.target.value)}
           spellCheck={false}
@@ -457,20 +460,20 @@ function ImportBox({ input, onChange }: Props) {
       </div>
       <div className="ctl" style={{ justifyContent: "flex-end", marginTop: 6 }}>
         <button type="button" className="add" style={{ marginTop: 0 }} onClick={() => apply(text, name)} disabled={!text.trim()}>
-          스펙트럼 적용
+          {t("applySpectrum")}
         </button>
       </div>
       {error && (
         <div className="hint" role="alert" style={{ color: "var(--bad)" }}>
-          불러오기 실패: {error} — 열 순서(에너지, 플루언스)·단위·구분자를 확인하세요.
+          {t("importFailed", error)}
         </div>
       )}
       {im ? (
         <div className="hint" aria-live="polite">
-          적용됨: <span className="mono">{im.name}</span> · {im.energy.length} 점 · {im.energy[0]}–{im.energy[im.energy.length - 1]} keV
+          {t("applied")} <span className="mono">{im.name}</span> · {im.energy.length} {t("points")} · {im.energy[0]}–{im.energy[im.energy.length - 1]} keV
         </div>
       ) : (
-        <div className="hint">불러온 스펙트럼이 없으면 X선 설정으로 표시합니다. CSV/TSV/공백 구분, 헤더·#주석 허용.</div>
+        <div className="hint">{t("importHint")}</div>
       )}
     </>
   );

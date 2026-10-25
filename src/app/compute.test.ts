@@ -177,12 +177,12 @@ test("GUM 불확도: 판독 1개 이하면 null, parseReadings는 구분자 혼�
   assert.deepEqual(parseReadings("1.2, 1.3\n1.4;abc 1.5"), [1.2, 1.3, 1.4, 1.5]);
 });
 
-test("ISO 해당 없음 사유 문구", () => {
+test("ISO 해당 없음 사유 코드", () => {
   const g = computeIso(withInput({ source: "Co-60" }), buildSpectrum(withInput({ source: "Co-60" })));
-  assert.match(g.reason ?? "", /핵종 기준장/);
+  assert.equal(g.reason, "radionuclide");
   assert.equal(g.radionuclide?.quality, "S-Co");
   const i = computeIso(withInput({ source: "import", imported: null }), buildSpectrum(withInput({ source: "import", imported: null })));
-  assert.match(i.reason ?? "", /불러온 스펙트럼/);
+  assert.equal(i.reason, "no-import");
 });
 
 test("세션 저장/불러오기: 왕복 동일, 부분 저장본은 기본값과 병합, 잘못된 파일은 예외", () => {
@@ -193,7 +193,7 @@ test("세션 저장/불러오기: 왕복 동일, 부분 저장본은 기본값�
   const merged = mergeInput({ alphaDeg: 30 } as Partial<cmod.WorkbenchInput>);
   assert.equal(merged.alphaDeg, 30);
   assert.equal(merged.xray.kvp, 80);
-  assert.throws(() => deserializeSession(JSON.stringify({ foo: 1 })));
+  assert.throws(() => deserializeSession(JSON.stringify({ foo: 1 })), (e: unknown) => e instanceof cmod.SessionError && e.code === "not-session");
   assert.throws(() => deserializeSession("not json"));
 });
 
