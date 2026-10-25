@@ -1,6 +1,6 @@
 // 우측 출력: 판독창(특성·운영선량·감마·보정), ISO 비교 패널.
 import { useEffect, useRef, useState } from "react";
-import { fmt, fmtDev, type Characteristics, type FastOutput, type IsoOutput } from "./compute";
+import { fmt, fmtDev, type Characteristics, type FastOutput, type IsoOutput, type UncertaintyOutput } from "./compute";
 
 /** 값이 바뀌면 잠깐 주황으로 점등하는 판독창. */
 function Readout({
@@ -103,7 +103,7 @@ export function IsoPanel({ iso, stale }: { iso: IsoOutput; stale: boolean }) {
       </h2>
       <div className="pb">
         {!iso.applicable || !iso.comparison ? (
-          <div className="na">해당 없음 — 핵종 기준장(S-Cs / S-Co)은 ISO 4037-1 연속 X선 표의 대상이 아닙니다.</div>
+          <div className="na">해당 없음 — {iso.reason ?? "ISO 4037-1 연속 X선 표의 대상이 아닙니다."}</div>
         ) : (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
@@ -146,6 +146,55 @@ export function IsoPanel({ iso, stale }: { iso: IsoOutput; stale: boolean }) {
                         <span className={`badge ${r.withinTolerance ? "ok" : "bad"}`}>{r.withinTolerance ? "✓" : "✗"}</span>
                       )}
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+export function UncertaintyPanel({ u }: { u: UncertaintyOutput }) {
+  const a = u.typeA;
+  const c = u.combined;
+  return (
+    <section className="panel">
+      <h2 className="ph">
+        <span className="idx">D</span> 측정 불확도 (GUM, 95 %)
+      </h2>
+      <div className="pb">
+        {!a || !c ? (
+          <div className="na">판독값을 2개 이상 입력하면 Type A 평가와 합성 불확도를 계산합니다. (입력 패널 04)</div>
+        ) : (
+          <>
+            <div className="readouts">
+              <Readout label={`평균 x̄ (n = ${u.n})`} value={fmt(a.mean, 5)} primary note={`s = ${fmt(a.standardDeviation, 3)} · u(x̄) = ${fmt(a.standardUncertainty, 3)}`} />
+              <Readout label={`Type A 확장불확도 U (k = ${a.coverageFactor.toFixed(3)}, ν = ${a.degreesOfFreedom})`} value={fmt(a.expandedUncertainty, 3)} note={`상대 ${(a.relativeExpandedUncertainty * 100).toFixed(2)} %`} />
+              <Readout
+                label={`합성 확장불확도 U_c (k = ${c.coverageFactor.toFixed(3)}, ν_eff = ${Number.isFinite(c.effectiveDegreesOfFreedom) ? c.effectiveDegreesOfFreedom.toFixed(1) : "∞"})`}
+                value={fmt(c.expandedUncertainty, 3)}
+                primary
+                note={`상대 ${(c.relativeExpandedUncertainty * 100).toFixed(2)} % · u_c/|y| = ${(c.combinedRelativeStandardUncertainty * 100).toFixed(3)} %`}
+              />
+              <Readout label="보고 형식" value={`${fmt(c.value, 5)} ± ${fmt(c.expandedUncertainty, 2)}`} note={`(k = ${c.coverageFactor.toFixed(2)}, 약 95 %)`} />
+            </div>
+            <table className="cmp" style={{ marginTop: 10 }}>
+              <thead>
+                <tr>
+                  <th>성분</th>
+                  <th>상대 표준불확도</th>
+                  <th>자유도</th>
+                </tr>
+              </thead>
+              <tbody>
+                {c.components.map((k) => (
+                  <tr key={k.label}>
+                    <td>{k.label}</td>
+                    <td className="num">{(k.relativeStandardUncertainty * 100).toFixed(3)} %</td>
+                    <td className="num">{Number.isFinite(k.degreesOfFreedom) ? k.degreesOfFreedom : "∞"}</td>
                   </tr>
                 ))}
               </tbody>

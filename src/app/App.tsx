@@ -5,7 +5,7 @@ import "./styles.css";
 import { DEFAULT_INPUT, buildSpectrum, computeFast, computeIso, isGamma, presetFromIso, type WorkbenchInput } from "./compute";
 import { InputPanel } from "./InputPanel";
 import { SpectrumChart } from "./SpectrumChart";
-import { CharacteristicsPanel, IsoPanel, OperationalPanel } from "./OutputPanels";
+import { CharacteristicsPanel, IsoPanel, OperationalPanel, UncertaintyPanel } from "./OutputPanels";
 
 const STORAGE_KEY = "rfp.input.v1";
 
@@ -38,6 +38,7 @@ function loadInput(): WorkbenchInput {
       xray: { ...DEFAULT_INPUT.xray, ...(saved.xray ?? {}) },
         gamma: { ...DEFAULT_INPUT.gamma, ...(saved.gamma ?? {}) },
         airReading: { ...DEFAULT_INPUT.airReading, ...(saved.airReading ?? {}) },
+      readings: { ...DEFAULT_INPUT.readings, ...(saved.readings ?? {}) },
       };
     }
   } catch {
@@ -104,6 +105,7 @@ export function App() {
           <CharacteristicsPanel c={chars} transmission={fast.kermaTransmission} provisional={provisional} />
           <OperationalPanel fast={fast} />
           <IsoPanel iso={iso} stale={isoStale} />
+          <UncertaintyPanel u={fast.uncertainty} />
         </div>
       </main>
     </>

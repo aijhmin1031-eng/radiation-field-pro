@@ -4,6 +4,7 @@ import {
   ALPHA_MAX,
   FILTER_MATERIALS,
   parseImportedSpectrum,
+  parseReadings,
   KVP_MAX,
   KVP_MIN,
   isoPresetNames,
@@ -324,6 +325,72 @@ export function InputPanel({ input, onChange }: Props) {
             </div>
           </div>
           <div className="hint">기준조건 20 °C · 101.325 kPa · 65 % RH 로 환산합니다.</div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <h2 className="ph">
+          <span className="idx">04</span> 반복측정 불확도 (GUM Type A)
+        </h2>
+        <div className="pb">
+          <div className="row" style={{ alignItems: "start" }}>
+            <label htmlFor="rd-vals">판독값 목록</label>
+            <textarea
+              id="rd-vals"
+              className="mono"
+              rows={3}
+              placeholder={"1.482 1.495 1.471 …  (공백·쉼표·줄바꿈 구분)"}
+              defaultValue={input.readings.values.join(" ")}
+              onBlur={(e) => set({ readings: { ...input.readings, values: parseReadings(e.target.value) } })}
+              spellCheck={false}
+              style={{ width: "100%", border: "1px solid var(--rule-strong)", borderRadius: "var(--r)", padding: 6, fontSize: 12 }}
+            />
+          </div>
+          <div className="row">
+            <label htmlFor="rd-air">밀도 보정</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+              <input
+                id="rd-air"
+                type="checkbox"
+                checked={input.readings.applyAirCorrection}
+                onChange={(e) => set({ readings: { ...input.readings, applyAirCorrection: e.target.checked } })}
+              />
+              판독값마다 k_ρ(03 패널 조건) 적용
+            </label>
+          </div>
+          <div className="filters">
+            {input.readings.typeB.map((b, i) => (
+              <div className="frow" key={i} style={{ gridTemplateColumns: "1fr 86px 26px" }}>
+                <input
+                  type="text"
+                  value={b.label}
+                  aria-label="Type B 성분 이름"
+                  onChange={(e) => set({ readings: { ...input.readings, typeB: input.readings.typeB.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) } })}
+                  style={{ border: "1px solid var(--rule-strong)", borderRadius: "var(--r)", padding: "4px 6px", fontSize: 12, minWidth: 0 }}
+                />
+                <div className="ctl">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    min={0}
+                    step={0.1}
+                    value={b.relPct}
+                    aria-label="상대 표준불확도 %"
+                    onChange={(e) => set({ readings: { ...input.readings, typeB: input.readings.typeB.map((x, j) => (j === i ? { ...x, relPct: num(e.target.value, x.relPct) } : x)) } })}
+                  />
+                  <span className="unit">%</span>
+                </div>
+                <button type="button" aria-label="성분 삭제" onClick={() => set({ readings: { ...input.readings, typeB: input.readings.typeB.filter((_, j) => j !== i) } })}>
+                  ×
+                </button>
+              </div>
+            ))}
+            <button type="button" className="add" onClick={() => set({ readings: { ...input.readings, typeB: [...input.readings.typeB, { label: "Type B 성분", relPct: 0.5 }] } })}>
+              + Type B 성분 (상대 표준불확도)
+            </button>
+          </div>
+          <div className="hint">Type A: u = s/√n, k = t₀.₉₇₅,ₙ₋₁ (95 %). Type B와 제곱합 합성, Welch–Satterthwaite ν_eff.</div>
         </div>
       </section>
     </div>

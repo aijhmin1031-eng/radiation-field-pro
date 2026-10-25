@@ -19,6 +19,7 @@ import {
 import { activityAt, daysBetween, airKermaRate } from "../engine/decay";
 import { densityCorrectionFactor } from "../engine/air-density";
 import { parseSpectrumText, type ParseOptions } from "../engine/spectrum-import";
+import { typeAUncertainty, combineRelative, type TypeAResult, type CombinedResult } from "../engine/uncertainty";
 
 export type SourceKind = "xray" | "Cs-137" | "Co-60" | "import";
 export const isGamma = (s: SourceKind) => s === "Cs-137" || s === "Co-60";
@@ -54,6 +55,16 @@ export interface AirReadingInput {
   pressureKPa: number;
   relHumidityPct: number;
 }
+/** 반복측정 입력(GUM Type A) + Type B 성분. */
+export interface TypeBComponent {
+  label: string;
+  relPct: number; // 상대 표준불확도 %
+}
+export interface ReadingsInput {
+  values: number[]; // 반복 판독값
+  applyAirCorrection: boolean; // 각 판독값에 k_ρ 적용
+  typeB: TypeBComponent[];
+}
 export interface WorkbenchInput {
   source: SourceKind;
   imported: ImportedSpectrum | null;
@@ -64,6 +75,7 @@ export interface WorkbenchInput {
   isoQuality: "auto" | string;
   tolerancePct: number;
   airReading: AirReadingInput;
+  readings: ReadingsInput;
 }
 
 export const KVP_MIN = 10;
@@ -103,7 +115,16 @@ export const DEFAULT_INPUT: WorkbenchInput = {
   isoQuality: "auto",
   tolerancePct: 5,
   airReading: { reading: 1, tempC: 20, pressureKPa: 101.325, relHumidityPct: 65 },
+  readings: { values: [], applyAirCorrection: true, typeB: [{ label: "교정 성적서(기준 전리함)", relPct: 1.0 }] },
 };
+
+/** 공백·쉼표·줄바꿈으로 구분된 숫자 목록 파싱(비숫자는 무시). */
+export function parseReadings(text: string): number[] {
+  return text
+    .split(/[\s,;]+/)
+    .map((t) => Number(t))
+    .filter((v) => Number.isFinite(v));
+}
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -164,6 +185,12 @@ export interface AirReadingOutput {
   factor: number;
   corrected: number;
 }
+export interface UncertaintyOutput {
+  n: number;
+  corrected: number[]; // 보정 적용 후 판독값
+  typeA: TypeAResult | null; // n >= 2
+  combined: CombinedResult | null; // Type A + Type B 합성
+}
 export interface FastOutput {
   spectrum: Spectrum;
   characteristics: Characteristics;
@@ -171,6 +198,7 @@ export interface FastOutput {
   operational: OperationalDose;
   gamma: GammaOutput | null;
   airReading: AirReadingOutput;
+  uncertainty: UncertaintyOutput;
 }
 
 export function characterize(spec: Spectrum, material: string): Characteristics {
@@ -219,7 +247,20 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
   }
   const r = input.airReading;
   const factor = densityCorrectionFactor(r.tempC, r.pressureKPa, clamp(r.relHumidityPct, 0, 100) / 100);
+  // GUM: 반복 판독(보정 후) → Type A → Type B와 제곱합 합성(Welch-Satterthwaite)
+  const rd = input.readings;
+  const corrected = rd.values.map((v) => (rd.applyAirCorrection ? v * factor : v));
+  let typeA: TypeAResult | null = null;
+  let combined: CombinedResult | null = null;
+  if (corrected.length >= 2) {
+    typeA = typeAUncertainty(corrected);
+    combined = combineRelative(typeA.mean, [
+      { label: "반복성 (Type A)", relativeStandardUncertainty: typeA.relativeStandardUncertainty || 0, degreesOfFreedom: typeA.degreesOfFreedom },
+      ...rd.typeB.filter((b) => b.relPct > 0).map((b) => ({ label: b.label, relativeStandardUncertainty: b.relPct / 100 })),
+    ]);
+  }
   return {
+    uncertainty: { n: corrected.length, corrected, typeA, combined },
     spectrum,
     characteristics: characterize(spectrum, material),
     kermaTransmission: kermaTransmission(input),
@@ -230,7 +271,8 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
 }
 
 export interface IsoOutput {
-  applicable: boolean; // X선만
+  applicable: boolean; // X선·(400 keV 이하) 불러온 스펙트럼
+  reason: string | null; // 해당 없음 사유
   matched: IsoQuality | null;
   matchHvl1DeviationPct: number | null;
   selected: string | null; // 비교에 쓴 선질명
@@ -240,6 +282,7 @@ export interface IsoOutput {
 
 const NOT_APPLICABLE: IsoOutput = {
   applicable: false,
+  reason: null,
   matched: null,
   matchHvl1DeviationPct: null,
   selected: null,
@@ -250,14 +293,16 @@ const NOT_APPLICABLE: IsoOutput = {
 /** ISO 자동매칭 + 비교(느린 경로). spectrum 은 computeFast 결과를 재사용한다. */
 export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput {
   // ISO 4037-1 연속 X선 표는 X선과 (400 keV 이하) 불러온 스펙트럼에만 적용한다.
-  if (isGamma(input.source)) return NOT_APPLICABLE;
-  if (input.source === "import" && (!input.imported || Math.max(...spectrum.energy) > 400)) return NOT_APPLICABLE;
+  if (isGamma(input.source)) return { ...NOT_APPLICABLE, reason: "핵종 기준장(S-Cs / S-Co)은 ISO 4037-1 연속 X선 표의 대상이 아닙니다." };
+  if (input.source === "import" && !input.imported) return { ...NOT_APPLICABLE, reason: "불러온 스펙트럼이 없습니다." };
+  if (input.source === "import" && Math.max(...spectrum.energy) > 400) return { ...NOT_APPLICABLE, reason: "최대 에너지가 400 keV를 넘어 ISO 4037-1 연속 X선 표 범위 밖입니다." };
   const m = matchQuality(spectrum);
   const selected = input.isoQuality === "auto" ? m.quality.name : input.isoQuality;
   const comparison = compareToQuality(spectrum, selected, input.tolerancePct);
   const material = input.hvlMaterial === "auto" ? comparison.material : input.hvlMaterial;
   return {
     applicable: true,
+    reason: null,
     matched: m.quality,
     matchHvl1DeviationPct: m.hvl1DeviationPct,
     selected,

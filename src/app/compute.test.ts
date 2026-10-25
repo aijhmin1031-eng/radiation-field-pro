@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import * as cmod from "./compute.ts";
 import {
   DEFAULT_INPUT,
   presetFromIso,
@@ -153,4 +154,32 @@ test("불러오기 선원: 스펙트럼이 없으면 X선 설정으로 대체, 4
   const iso = computeIso(withInput({ source: "import", imported: hi }), buildSpectrum(withInput({ source: "import", imported: hi })));
   assert.equal(iso.applicable, false);
   assert.equal(provisionalMaterial(withInput({ source: "import", imported: hi })), "Pb");
+});
+
+test("GUM 불확도: 판독 5개 → Type A(k=2.776) + Type B 합성, 보정 적용 토글", () => {
+  const values = [1.482, 1.495, 1.471, 1.488, 1.479];
+  const out = computeFast(withInput({ readings: { values, applyAirCorrection: false, typeB: [{ label: "교정", relPct: 1.8 }] } }));
+  const u = out.uncertainty;
+  assert.equal(u.n, 5);
+  assert.ok(u.typeA && Math.abs(u.typeA.coverageFactor - 2.776) < 1e-3);
+  assert.ok(u.combined && u.combined.combinedRelativeStandardUncertainty > u.typeA!.relativeStandardUncertainty);
+  // 보정 적용: 고온·저압이면 평균이 k_ρ배 커진다
+  const hot = computeFast(withInput({ airReading: { reading: 1, tempC: 30, pressureKPa: 95, relHumidityPct: 50 }, readings: { values, applyAirCorrection: true, typeB: [] } }));
+  assert.ok(hot.uncertainty.typeA!.mean > u.typeA!.mean);
+  assert.ok(Math.abs(hot.uncertainty.typeA!.relativeStandardUncertainty - u.typeA!.relativeStandardUncertainty) < 1e-12); // 상대값은 불변
+});
+
+test("GUM 불확도: 판독 1개 이하면 null, parseReadings는 구분자 혼합·비숫자 허용", () => {
+  const out = computeFast(withInput({ readings: { values: [1.2], applyAirCorrection: true, typeB: [] } }));
+  assert.equal(out.uncertainty.typeA, null);
+  assert.equal(out.uncertainty.combined, null);
+  const { parseReadings } = cmod;
+  assert.deepEqual(parseReadings("1.2, 1.3\n1.4;abc 1.5"), [1.2, 1.3, 1.4, 1.5]);
+});
+
+test("ISO 해당 없음 사유 문구", () => {
+  const g = computeIso(withInput({ source: "Co-60" }), buildSpectrum(withInput({ source: "Co-60" })));
+  assert.match(g.reason ?? "", /S-Cs/);
+  const i = computeIso(withInput({ source: "import", imported: null }), buildSpectrum(withInput({ source: "import", imported: null })));
+  assert.match(i.reason ?? "", /불러온 스펙트럼/);
 });
