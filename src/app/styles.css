@@ -106,3 +106,17 @@ svg.spec .mk { stroke: var(--signal); stroke-width: 1; stroke-dasharray: 3 3; }
 svg.spec .mk-eff { stroke: var(--ok); }
 svg.spec .mk-t { fill: var(--signal); font-weight: 600; }
 svg.spec .mk-t.eff { fill: var(--ok); }
+
+/* ---- 접근성·일관성 보강 (ui-ux-pro-max 점검) ---- */
+/* WCAG 2.2 포인터 타깃 최소 24 CSS px */
+.chart-tools button, .frow button, .add, .seg button { min-height: 26px; min-width: 26px; }
+/* 보조 텍스트 하한 11.5 px (밀도 유지하면서 가독성 확보) */
+.panel > .ph, .ro .n, .badge, .frow .tag, .hint { font-size: 11.5px; }
+svg.spec text { font-size: 11px; }
+/* 포커스 링은 절대 제거하지 않음 — 키보드 사용자용 공통 링 */
+button:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+/* 모션 축소 설정 존중: 판독창 점등 전환·색 전환 제거 */
+@media (prefers-reduced-motion: reduce) {
+  .ro .v { transition: none; }
+  .ro.tick .v { color: var(--ink); }
+}
