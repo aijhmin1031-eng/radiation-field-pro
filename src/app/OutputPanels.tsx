@@ -2,6 +2,38 @@
 import { useEffect, useRef, useState } from "react";
 import { fmt, fmtDev, type Characteristics, type FastOutput, type IsoOutput, type UncertaintyOutput } from "./compute";
 
+/** 직전 계산 대비 변화량(절대·%). */
+export interface Delta {
+  abs: number;
+  pct: number;
+}
+export interface Deltas {
+  meanEnergy?: Delta;
+  effectiveEnergy?: Delta;
+  hvl1?: Delta;
+  hvl2?: Delta;
+  homogeneity?: Delta;
+  transmission?: Delta;
+  hp10?: Delta;
+  hStar10?: Delta;
+  hPrime007?: Delta;
+  kermaRate?: Delta;
+  airFactor?: Delta;
+}
+
+function DeltaTag({ d, sig = 3 }: { d?: Delta; sig?: number }) {
+  if (!d) return null;
+  const tiny = Math.abs(d.pct) < 0.005 || !Number.isFinite(d.pct);
+  if (tiny && Math.abs(d.abs) < 1e-12) return <span className="delta same">변화 없음</span>;
+  const up = d.abs > 0;
+  return (
+    <span className={`delta ${up ? "up" : "down"}`} title="직전 계산 대비">
+      {up ? "▲" : "▼"} {fmt(Math.abs(d.abs), sig)}
+      {Number.isFinite(d.pct) ? ` (${d.pct >= 0 ? "+" : ""}${d.pct.toFixed(2)} %)` : ""}
+    </span>
+  );
+}
+
 /** 값이 바뀌면 잠깐 주황으로 점등하는 판독창. */
 function Readout({
   label,
@@ -9,12 +41,14 @@ function Readout({
   unit,
   note,
   primary = false,
+  delta,
 }: {
   label: string;
   value: string;
   unit?: string;
   note?: string;
   primary?: boolean; // 핵심량: 더 큰 판독창(위계)
+  delta?: Delta; // 직전 계산 대비 변화량
 }) {
   const [tick, setTick] = useState(false);
   const prev = useRef(value);
@@ -34,6 +68,7 @@ function Readout({
         {unit && <span className="u">{unit}</span>}
       </div>
       {note && <div className="n">{note}</div>}
+      <DeltaTag d={delta} />
     </div>
   );
 }
@@ -42,10 +77,12 @@ export function CharacteristicsPanel({
   c,
   transmission,
   provisional,
+  deltas = {},
 }: {
   c: Characteristics;
   transmission: number;
   provisional: boolean;
+  deltas?: Deltas;
 }) {
   return (
     <section className="panel">
@@ -54,18 +91,18 @@ export function CharacteristicsPanel({
         {provisional && <span className="stale" aria-live="polite">재질 확정 중…</span>}
       </h2>
       <div className="pb readouts">
-        <Readout label="평균 에너지 Ē" value={fmt(c.meanEnergyKeV)} unit="keV" />
-        <Readout label="유효 에너지 E_eff" value={fmt(c.effectiveEnergyKeV)} unit="keV" />
-        <Readout label="HVL1" value={fmt(c.hvl1Mm)} unit={`mm ${c.material}`} primary />
-        <Readout label="HVL2" value={fmt(c.hvl2Mm)} unit={`mm ${c.material}`} />
-        <Readout label="균질도 h = HVL1/HVL2" value={fmt(c.homogeneity, 3)} />
-        <Readout label="부가여과 커마 투과율 (고유여과 기준)" value={fmt(transmission * 100, 3)} unit="%" />
+        <Readout label="평균 에너지 Ē" value={fmt(c.meanEnergyKeV)} unit="keV" delta={deltas.meanEnergy} />
+        <Readout label="유효 에너지 E_eff" value={fmt(c.effectiveEnergyKeV)} unit="keV" delta={deltas.effectiveEnergy} />
+        <Readout label="HVL1" value={fmt(c.hvl1Mm)} unit={`mm ${c.material}`} primary delta={deltas.hvl1} />
+        <Readout label="HVL2" value={fmt(c.hvl2Mm)} unit={`mm ${c.material}`} delta={deltas.hvl2} />
+        <Readout label="균질도 h = HVL1/HVL2" value={fmt(c.homogeneity, 3)} delta={deltas.homogeneity} />
+        <Readout label="부가여과 커마 투과율 (고유여과 기준)" value={fmt(transmission * 100, 3)} unit="%" delta={deltas.transmission && { abs: deltas.transmission.abs * 100, pct: deltas.transmission.pct }} />
       </div>
     </section>
   );
 }
 
-export function OperationalPanel({ fast }: { fast: FastOutput }) {
+export function OperationalPanel({ fast, deltas = {} }: { fast: FastOutput; deltas?: Deltas }) {
   const o = fast.operational;
   const a = `${o.alphaDeg}°`;
   return (
@@ -74,9 +111,9 @@ export function OperationalPanel({ fast }: { fast: FastOutput }) {
         <span className="idx">B</span> 운영선량 변환계수 (ISO 4037-3, 스펙트럼 평균)
       </h2>
       <div className="pb readouts">
-        <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note="ICRU 슬랩 팬텀" primary />
-        <Readout label="H*(10) / Ka" value={fmt(o.hStar10)} unit="Sv/Gy" note="등방" />
-        <Readout label={`H′(0.07, ${a}) / Ka`} value={fmt(o.hPrime007)} unit="Sv/Gy" />
+        <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note="ICRU 슬랩 팬텀" primary delta={deltas.hp10} />
+        <Readout label="H*(10) / Ka" value={fmt(o.hStar10)} unit="Sv/Gy" note="등방" delta={deltas.hStar10} />
+        <Readout label={`H′(0.07, ${a}) / Ka`} value={fmt(o.hPrime007)} unit="Sv/Gy" delta={deltas.hPrime007} />
         {fast.gamma && (
           <>
             <Readout
@@ -85,10 +122,10 @@ export function OperationalPanel({ fast }: { fast: FastOutput }) {
               unit="GBq"
               note={`경과 ${fast.gamma.elapsedDays.toFixed(0)} 일`}
             />
-            <Readout label="공기커마율 (점선원)" value={fmt(fast.gamma.airKermaRateUGyPerH)} unit="μGy/h" note="역제곱·공기감쇠 무시" />
+            <Readout label="공기커마율 (점선원)" value={fmt(fast.gamma.airKermaRateUGyPerH)} unit="μGy/h" note="역제곱·공기감쇠 무시" delta={deltas.kermaRate} />
           </>
         )}
-        <Readout label="판독 보정 k_ρ" value={fmt(fast.airReading.factor, 5)} note={`보정값 ${fmt(fast.airReading.corrected)}`} />
+        <Readout label="판독 보정 k_ρ" value={fmt(fast.airReading.factor, 5)} note={`보정값 ${fmt(fast.airReading.corrected)}`} delta={deltas.airFactor} />
       </div>
     </section>
   );

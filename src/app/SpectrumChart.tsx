@@ -9,10 +9,13 @@ interface Props {
   effectiveEnergyKeV: number;
   discrete: boolean;
   kermaWeights?: number[]; // 공기커마 기여(상대) 오버레이
+  compact?: boolean; // 모바일: 좁은 viewBox 로 글자 크기 유지
 }
 
-const W = 760;
-const H = 300;
+const W_FULL = 760;
+const W_COMPACT = 420;
+const H_FULL = 300;
+const H_COMPACT = 240;
 const M = { l: 54, r: 18, t: 18, b: 34 };
 
 function niceStep(range: number, target = 8): number {
@@ -22,7 +25,9 @@ function niceStep(range: number, target = 8): number {
   return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
 }
 
-export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, discrete, kermaWeights }: Props) {
+export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, discrete, kermaWeights, compact = false }: Props) {
+  const W = compact ? W_COMPACT : W_FULL;
+  const H = compact ? H_COMPACT : H_FULL;
   const [log, setLog] = useState(false);
   const [showKerma, setShowKerma] = useState(false);
 
@@ -37,7 +42,7 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
       const v = log ? (Math.log10(Math.max(f, minF)) - Math.log10(minF)) / (Math.log10(maxF) - Math.log10(minF)) : f / maxF;
       return H - M.b - v * (H - M.t - M.b);
     };
-    const xs = niceStep(eMax - eMin);
+    const xs = niceStep(eMax - eMin, compact ? 5 : 8);
     const xticks: number[] = [];
     for (let v = 0; v <= eMax + 1e-9; v += xs) xticks.push(v);
     const yticks = log
@@ -57,7 +62,7 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
       kermaPath = kp.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
     }
     return { x, y, xticks, yticks, maxF, path, area, pts, eMax, kermaPath };
-  }, [spectrum, log, discrete, showKerma, kermaWeights]);
+  }, [spectrum, log, discrete, showKerma, kermaWeights, W, H, compact]);
 
   const yLabel = (f: number) => (log ? f.toExponential(0) : (f / g.maxF).toFixed(2));
 
