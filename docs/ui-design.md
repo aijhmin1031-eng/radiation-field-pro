@@ -5,8 +5,8 @@
 ## 기반
 - 스택: Vite + React + TypeScript 순수 SPA. 같은 저장소 `src/app/`(UI), `src/engine/`(그대로 import).
 - 배포: Vercel 프로젝트 `radiation-field-pro` ← GitHub `master`(공개 저장소, MIT). 프로덕션 공개, 미리보기는 Vercel Authentication(팀 로그인) 보호. 로컬 `npm run dev` 상시 가능.
-- 언어: ~~한글 UI, 영어 토글 없음~~ → **2026-10-26 사용자 지시로 대체: 영어 기본·한국어 선택**(아래 「언어」 절). 물리량 기호·단위(Hp(10), H*(10), HVL, keV, Sv/Gy, μGy/h)는 원형.
-- 이름: `Radiation Field Pro` — 부제 "Reference X-ray and gamma field characterisation and dose workbench"(KO: "기준 X선·감마장 특성화 및 선량 워크벤치"). 탭 제목 "Radiation Field Pro — ISO 4037 reference X-ray and gamma field workbench".
+- 언어: ~~한글 UI, 영어 토글 없음~~ → **2026-10-26 사용자 지시로 대체: 영어 전용(한국어 토글 없음)**(아래 「언어」 절). 물리량 기호·단위(Hp(10), H*(10), HVL, keV, Sv/Gy, μGy/h)는 원형.
+- 이름: `Radiation Field Pro` — 부제 "Reference X-ray and gamma field characterisation and dose workbench". 탭 제목 "Radiation Field Pro — ISO 4037 reference X-ray and gamma field workbench".
 
 ## 화면
 - 좌: 입력 패널 / 우: 출력(차트 위, 수치표 아래) 2단 워크벤치. 데스크톱 우선, 좁은 화면에서 세로로 접힘.
@@ -68,11 +68,14 @@
 - 머리글 좌측 「Radiation Lab / Field Pro」(Radiation Lab → radiation-lab.com), 영어 한 줄 소개. 꼬리말: Radiation Lab·About·Privacy·Contact·Source(MIT), 브라우저 안 계산 안내, 정확도 사양 링크. 모바일은 꼬리말이 하단 계산 바 높이만큼 여백을 맡는다.
 - 광고 코드 없음(입력칸·버튼 근처 광고 금지 원칙).
 
-## 언어 (2026-10-26 사용자 지시: 영어 기본·한국어 선택, 기존 한글 UI 결정 대체)
-- 기본 영어, 머리글 오른쪽 EN/KO 토글로 한국어 선택. 선택은 localStorage `rfp.lang.v1`에 남고 `<html lang>`을 맞춘다. `index.html`은 `lang="en"`, 제목·설명·OG 영어(`og:locale` en_US, 대체 ko_KR).
-- 화면 문자열은 모두 `src/app/i18n.ts`의 en/ko 사전에 두고 `t(key, …)`로 쓴다(패널 제목·라벨·단위 설명·단추·툴팁·오류·세션 불러오기/저장·인쇄 리포트·PrintSummary·차트 축·범례·안내 문구). ko 는 en 과 키·인자 형태가 같아야 하며 타입과 `src/app/i18n.test.ts`가 확인한다.
-- 엔진·계산·숫자 포맷은 그대로다. `compute.ts`는 화면 문구 대신 코드만 낸다: ISO 해당 없음 사유 `IsoReason`("radionuclide"·"no-import"·"above-400-kev"), 세션 오류 `SessionError.code`("not-session"·"unknown-source"), Type A 성분 이름 `TYPE_A_LABEL`. 화면이 사전으로 바꿔 보인다.
-- 영어 용어는 ISO 4037·ICRU 표기: tube voltage kV, inherent/added filtration, HVL1/HVL2, homogeneity coefficient h, mean energy Ē, effective energy E_eff, air kerma Ka, Hp(10,α), H*(10), H′(0.07,α), readout correction k_ρ, Type A/Type B uncertainty, Welch–Satterthwaite ν_eff.
-- 세션 파일 이름은 언어와 무관하게 `yyyymmdd_HHMM_radiation-field-pro_session.json`. 기본 Type B 성분 이름은 "Calibration certificate (reference chamber)"(사용자가 고칠 수 있는 입력값).
-- 측정 스펙트럼 파싱 오류(엔진 `spectrum-import.ts`)는 원래 영어라 두 언어 모두 그 문장을 그대로 보인다.
-- E2E는 영어 기본 화면으로 돌고, KO 토글 1건이 한국어 전환·`<html lang="ko">`·새로고침 뒤 유지를 확인한다.
+## 언어 (2026-10-26 사용자 지시: 영어 전용(한국어 토글 없음), 기존 한글 UI 결정 대체)
+- 화면은 영어 하나다. 언어 토글·한국어 사전·KO E2E는 두지 않는다(같은 날 「영어 기본·한국어 선택」 지시를 사용자가 범위 축소로 바꿈). `index.html`은 `lang="en"`, 제목·설명·OG 영어(`og:locale` en_US).
+- 화면 문자열은 `src/app/i18n.ts`의 영어 사전 한 벌에 모으고 `t(key, …)`로 쓴다(패널 제목·라벨·단위 설명·단추·툴팁·오류·세션 불러오기/저장·인쇄 리포트·PrintSummary·차트 축·범례·안내·placeholder). 기본값 문자열(Type B 기본 성분 "Calibration certificate (reference chamber)", 새 성분 "Type B component", 붙여넣은 스펙트럼 "Pasted", Type A "Repeatability (Type A)")도 이 사전에서 가져온다.
+- 한글 UI 시절에 저장된 세션·브라우저 상태의 **기본값 이름**만 `mergeInput`이 영어로 옮긴다(`LEGACY_LABELS`). 사용자가 직접 쓴 이름은 그대로 둔다.
+- 엔진·계산·숫자 포맷은 그대로다. `compute.ts`는 화면 문구 대신 코드를 낸다: ISO 해당 없음 사유 `IsoReason`, 세션 오류 `SessionError.code`.
+- 용어는 ISO 4037·ICRU 표기: tube voltage kV, inherent/added filtration, HVL1/HVL2, homogeneity coefficient h, mean energy Ē, effective energy E_eff, air kerma Ka, Hp(10,α), H*(10), H′(0.07,α), readout correction k_ρ, Type A/Type B uncertainty, Welch–Satterthwaite ν_eff.
+- 세션 파일 이름은 `yyyymmdd_HHMM_radiation-field-pro_session.json`.
+
+## 드롭다운 표시 (2026-10-26 사용자 지적)
+- ISO 선질 프리셋 드롭다운은 지금 입력과 똑같은 프리셋 이름을 보인다(`matchPreset`: 관전압·여과층·공기 경로 일치). 손으로 바꾸면 "Custom (edited)"가 보인다. 예전에는 `value=""`로 고정돼 고른 뒤에도 안내 문구로 되돌아갔다.
+- HVL 재질·ISO 비교 대상·방사능 단위·여과 재질 드롭다운은 상태값에 묶여 있어 같은 문제가 없다. 파일 고르기(세션 불러오기·스펙트럼 파일)는 고른 뒤 값을 비워 같은 파일을 다시 골라도 반영되게 했다.

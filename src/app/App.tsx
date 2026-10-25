@@ -22,7 +22,7 @@ import {
 import { InputPanel } from "./InputPanel";
 import { SpectrumChart } from "./SpectrumChart";
 import { CharacteristicsPanel, IsoPanel, OperationalPanel, UncertaintyPanel, type Deltas } from "./OutputPanels";
-import { LANGS, setLang, useI18n } from "./i18n";
+import { useI18n } from "./i18n";
 
 const STORAGE_KEY = "rfp.input.v1";
 const MODE_KEY = "rfp.autoMode.v1";
@@ -143,7 +143,7 @@ function PrintSummary({ input }: { input: WorkbenchInput }) {
 }
 
 export function App() {
-  const { lang, t } = useI18n();
+  const { t } = useI18n();
   const [draft, setDraft] = useState<WorkbenchInput>(loadInput);
   const [committed, setCommitted] = useState<WorkbenchInput>(draft);
   const [autoMode, setAutoMode] = useState<boolean>(loadAutoMode);
@@ -261,14 +261,6 @@ export function App() {
         </h1>
         <span className="sub">{t("sub")}</span>
         <span className="std">ISO 4037-1/-3/-4 · GUM</span>
-        {/* ★ 2026-10-26 영어 기본·한국어 선택. 선택은 localStorage 에 남고 <html lang> 을 맞춘다(i18n.ts). */}
-        <div className="seg lang no-print" role="group" aria-label={t("langAria")}>
-          {LANGS.map((l) => (
-            <button key={l} type="button" lang={l} aria-pressed={lang === l} onClick={() => setLang(l)}>
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
         <p className="en">{t("intro")}</p>
         <div className="toolbar no-print" role="toolbar" aria-label={t("toolbarAria")}>
           <button type="button" className={`calc${dirty ? " dirty" : ""}`} onClick={runCalc} disabled={autoMode}>
@@ -284,7 +276,16 @@ export function App() {
           <button type="button" onClick={() => fileRef.current?.click()}>
             {t("load")}
           </button>
-          <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => loadSession(e.target.files?.[0])} />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              loadSession(e.target.files?.[0]);
+              e.target.value = ""; // 같은 파일을 다시 골라도 change 가 나도록
+            }}
+          />
           <button type="button" onClick={() => window.print()}>
             {t("print")}
           </button>

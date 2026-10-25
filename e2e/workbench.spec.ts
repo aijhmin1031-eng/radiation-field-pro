@@ -83,21 +83,47 @@ test.describe("워크벤치 U1/U2/U3", () => {
     expect(d.suggestedFilename()).toMatch(/radiation-field-pro_session\.json$/);
   });
 
-  test("영어가 기본, KO 토글로 한국어 전환·<html lang> 동기화·새로고침 뒤 유지", async ({ page }) => {
+  test("영어 전용: <html lang=en>, 화면에 한글 없음, 언어 토글 없음", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    const lang = page.getByRole("group", { name: "Language" });
-    await expect(lang.getByRole("button", { name: "EN" })).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByRole("button", { name: "Save session" })).toBeVisible();
-    await lang.getByRole("button", { name: "KO" }).click();
-    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
-    await expect(page.getByRole("button", { name: "세션 저장" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /선원/ })).toBeVisible();
-    await page.reload();
-    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
-    await expect(page.getByRole("group", { name: "언어" }).getByRole("button", { name: "KO" })).toHaveAttribute("aria-pressed", "true");
-    await page.getByRole("group", { name: "언어" }).getByRole("button", { name: "EN" }).click();
-    await expect(page.getByRole("button", { name: "Save session" })).toBeVisible();
+    await expect(page.getByRole("group", { name: /Language|언어/ })).toHaveCount(0);
+    for (const view of [showInputs, showResults]) {
+      await view(page);
+      expect((await page.locator("body").innerText()).match(/[가-힣]/g)).toBeNull();
+    }
+  });
+
+  test("기본값 문자열: Type B 기본 성분·새 성분·스펙트럼 붙여넣기 이름이 영어", async ({ page }) => {
+    await page.goto("/");
+    await showInputs(page);
+    const names = page.getByLabel("Type B component name");
+    await expect(names.first()).toHaveValue("Calibration certificate (reference chamber)");
+    await page.getByRole("button", { name: /^\+ Type B component/ }).click();
+    await expect(names.nth(1)).toHaveValue("Type B component");
+    await expect(page.getByLabel("Repeat readings")).toHaveAttribute("placeholder", /separate with spaces/);
+    await page.getByRole("button", { name: "Import", exact: true }).click();
+    await page.getByLabel("Paste", { exact: true }).fill("10 1\n20 2\n30 1");
+    await page.getByRole("button", { name: /^Apply/ }).click();
+    await expect(page.locator("body")).toContainText("Pasted");
+  });
+
+  test("ISO 선질 프리셋: 고르면 그 이름이 남고, 관전압을 손으로 바꾸면 Custom (edited)", async ({ page }) => {
+    await page.goto("/");
+    await showInputs(page);
+    const preset = page.getByLabel("ISO beam quality");
+    await expect(preset.locator("option:checked")).toHaveText("N-80"); // 기본 입력 = N-80
+    await preset.selectOption("H-150");
+    await expect(preset).toHaveValue("H-150");
+    await expect(preset.locator("option:checked")).toHaveText("H-150");
+    await expect(page.getByLabel("Tube voltage kV")).toHaveValue("150");
+    await page.getByLabel("Tube voltage kV").fill("151");
+    await expect(preset).toHaveValue("");
+    await expect(preset.locator("option:checked")).toHaveText("Custom (edited)");
+    // 다른 드롭다운도 고른 값이 그대로 보인다
+    await page.getByLabel("HVL material").selectOption("Cu");
+    await expect(page.getByLabel("HVL material")).toHaveValue("Cu");
+    await page.getByLabel("ISO comparison").selectOption("N-100");
+    await expect(page.getByLabel("ISO comparison")).toHaveValue("N-100");
   });
 
   test("모바일 스크린샷(확인용)", async ({ page, isMobile }) => {

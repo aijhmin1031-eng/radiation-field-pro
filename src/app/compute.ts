@@ -21,6 +21,7 @@ import { densityCorrectionFactor } from "../engine/air-density";
 import { parseSpectrumText, type ParseOptions } from "../engine/spectrum-import";
 import { typeAUncertainty, combineRelative, type TypeAResult, type CombinedResult } from "../engine/uncertainty";
 import { airMuenOverRho } from "../engine/attenuation";
+import { STRINGS } from "./i18n";
 
 export type SourceKind = "xray" | "Cs-137" | "Co-60" | "import";
 export const isGamma = (s: SourceKind) => s === "Cs-137" || s === "Co-60";
@@ -99,6 +100,21 @@ export function presetFromIso(name: string): XrayInput {
   };
 }
 
+/** 지금의 X선 입력이 어느 ISO 선질 프리셋과 똑같은지(관전압·여과층·공기 경로). 손으로 바꿨으면 null. */
+export function matchPreset(x: XrayInput): string | null {
+  for (const q of isoQualities()) {
+    const p = presetFromIso(q.name);
+    if (
+      p.kvp === x.kvp &&
+      p.airMm === x.airMm &&
+      p.filters.length === x.filters.length &&
+      p.filters.every((f, i) => f.material === x.filters[i].material && f.thicknessMm === x.filters[i].thicknessMm)
+    )
+      return q.name;
+  }
+  return null;
+}
+
 export function isoPresetNames(): { name: string; series: string }[] {
   return isoQualities().map((q) => ({ name: q.name, series: q.series }));
 }
@@ -107,7 +123,7 @@ export function isoPresetNames(): { name: string; series: string }[] {
 const today = () => new Date().toLocaleDateString("sv-SE");
 
 /** 합성 불확도 표의 Type A 성분 이름(화면에서는 i18n 사전의 typeALabel 로 바꿔 보인다). */
-export const TYPE_A_LABEL = "Repeatability (Type A)";
+export const TYPE_A_LABEL = STRINGS.typeALabel;
 
 export const DEFAULT_INPUT: WorkbenchInput = {
   source: "xray",
@@ -119,7 +135,7 @@ export const DEFAULT_INPUT: WorkbenchInput = {
   isoQuality: "auto",
   tolerancePct: 5,
   airReading: { reading: 1, tempC: 20, pressureKPa: 101.325, relHumidityPct: 65 },
-  readings: { values: [], applyAirCorrection: true, typeB: [{ label: "Calibration certificate (reference chamber)", relPct: 1.0 }] },
+  readings: { values: [], applyAirCorrection: true, typeB: [{ label: STRINGS.defaultTypeB, relPct: 1.0 }] },
 };
 
 /** 공백·쉼표·줄바꿈으로 구분된 숫자 목록 파싱(비숫자는 무시). */
@@ -367,12 +383,23 @@ export function mergeInput(saved: Partial<WorkbenchInput> | null | undefined): W
   return {
     ...DEFAULT_INPUT,
     ...saved,
-    imported: saved.imported ?? null,
     xray: { ...DEFAULT_INPUT.xray, ...(saved.xray ?? {}) },
     gamma: { ...DEFAULT_INPUT.gamma, ...(saved.gamma ?? {}) },
     airReading: { ...DEFAULT_INPUT.airReading, ...(saved.airReading ?? {}) },
-    readings: { ...DEFAULT_INPUT.readings, ...(saved.readings ?? {}) },
+    readings: migrateReadings({ ...DEFAULT_INPUT.readings, ...(saved.readings ?? {}) }),
+    imported: saved.imported ? { ...saved.imported, name: LEGACY_LABELS[saved.imported.name] ?? saved.imported.name } : null,
   };
+}
+
+/** 한글 UI 시절에 저장된 '기본값' 이름만 영어로 옮긴다. 사용자가 직접 쓴 이름은 그대로 둔다. */
+const LEGACY_LABELS: Record<string, string> = {
+  "교정 성적서(기준 전리함)": STRINGS.defaultTypeB,
+  "Type B 성분": STRINGS.newTypeB,
+  "반복성 (Type A)": STRINGS.typeALabel,
+  붙여넣기: STRINGS.pasted,
+};
+function migrateReadings(r: WorkbenchInput["readings"]): WorkbenchInput["readings"] {
+  return { ...r, typeB: r.typeB.map((b) => ({ ...b, label: LEGACY_LABELS[b.label] ?? b.label })) };
 }
 
 export function serializeSession(input: WorkbenchInput): string {

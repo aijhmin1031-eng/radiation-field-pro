@@ -8,6 +8,7 @@ import {
   KVP_MAX,
   KVP_MIN,
   isoPresetNames,
+  matchPreset,
   presetFromIso,
   type FilterRow,
   type SourceKind,
@@ -35,6 +36,8 @@ export function InputPanel({ input, onChange }: Props) {
     setX({ filters: input.xray.filters.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
   const presets = isoPresetNames();
   const isX = input.source === "xray";
+  // 드롭다운은 지금 값과 맞는 프리셋을 보인다(예전에는 value="" 고정이라 고른 뒤에도 안내 문구로 되돌아갔다).
+  const preset = matchPreset(input.xray);
 
   return (
     <div className="stack">
@@ -57,12 +60,14 @@ export function InputPanel({ input, onChange }: Props) {
                 <label htmlFor="preset">{t("isoQuality")}</label>
                 <select
                   id="preset"
-                  value=""
+                  value={preset ?? ""}
                   onChange={(e) => {
                     if (e.target.value) set({ xray: presetFromIso(e.target.value), isoQuality: "auto" });
                   }}
                 >
-                  <option value="">{t("presetPh")}</option>
+                  <option value="" disabled>
+                    {t("presetCustom")}
+                  </option>
                   {(["L", "N", "W", "H"] as const).map((s) => (
                     <optgroup key={s} label={t("series", s)}>
                       {presets
@@ -430,7 +435,15 @@ function ImportBox({ input, onChange }: Props) {
     <>
       <div className="row">
         <label htmlFor="imp-file">{t("file")}</label>
-        <input id="imp-file" type="file" accept=".csv,.txt,.tsv,.dat,text/plain,text/csv" onChange={(e) => onFile(e.target.files?.[0])} />
+        <input
+          id="imp-file"
+          type="file"
+          accept=".csv,.txt,.tsv,.dat,text/plain,text/csv"
+          onChange={(e) => {
+            onFile(e.target.files?.[0]);
+            e.target.value = ""; // 같은 파일을 다시 골라도 change 가 나도록
+          }}
+        />
       </div>
       <div className="row">
         <label htmlFor="imp-unit">{t("energyUnit")}</label>
