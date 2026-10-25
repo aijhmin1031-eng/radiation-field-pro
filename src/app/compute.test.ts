@@ -183,3 +183,15 @@ test("ISO 해당 없음 사유 문구", () => {
   const i = computeIso(withInput({ source: "import", imported: null }), buildSpectrum(withInput({ source: "import", imported: null })));
   assert.match(i.reason ?? "", /불러온 스펙트럼/);
 });
+
+test("세션 저장/불러오기: 왕복 동일, 부분 저장본은 기본값과 병합, 잘못된 파일은 예외", () => {
+  const { serializeSession, deserializeSession, mergeInput } = cmod;
+  const src = withInput({ alphaDeg: 45, tolerancePct: 3, readings: { values: [1, 2, 3], applyAirCorrection: false, typeB: [] } });
+  const back = deserializeSession(serializeSession(src));
+  assert.deepEqual(back, src);
+  const merged = mergeInput({ alphaDeg: 30 } as Partial<cmod.WorkbenchInput>);
+  assert.equal(merged.alphaDeg, 30);
+  assert.equal(merged.xray.kvp, 80);
+  assert.throws(() => deserializeSession(JSON.stringify({ foo: 1 })));
+  assert.throws(() => deserializeSession("not json"));
+});

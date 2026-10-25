@@ -325,3 +325,36 @@ export function fmtDev(pct: number | null): string {
   if (pct == null || !Number.isFinite(pct)) return "—";
   return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)} %`;
 }
+
+// ---- 세션 저장/불러오기 ----
+export const SESSION_FORMAT = "radiation-field-pro/session";
+export const SESSION_VERSION = 1;
+
+/** 저장본·딥링크·세션 파일에서 온 부분 입력을 기본값과 병합(구조 변경에 견딤). */
+export function mergeInput(saved: Partial<WorkbenchInput> | null | undefined): WorkbenchInput {
+  if (!saved || typeof saved !== "object") return DEFAULT_INPUT;
+  return {
+    ...DEFAULT_INPUT,
+    ...saved,
+    imported: saved.imported ?? null,
+    xray: { ...DEFAULT_INPUT.xray, ...(saved.xray ?? {}) },
+    gamma: { ...DEFAULT_INPUT.gamma, ...(saved.gamma ?? {}) },
+    airReading: { ...DEFAULT_INPUT.airReading, ...(saved.airReading ?? {}) },
+    readings: { ...DEFAULT_INPUT.readings, ...(saved.readings ?? {}) },
+  };
+}
+
+export function serializeSession(input: WorkbenchInput): string {
+  return JSON.stringify({ format: SESSION_FORMAT, version: SESSION_VERSION, savedAt: new Date().toISOString(), input }, null, 2);
+}
+
+/** 세션 파일 텍스트 → 입력. 형식이 다르면 예외. */
+export function deserializeSession(text: string): WorkbenchInput {
+  const obj = JSON.parse(text) as { format?: string; version?: number; input?: Partial<WorkbenchInput> };
+  if (obj.format !== SESSION_FORMAT || !obj.input || typeof obj.input !== "object") {
+    throw new Error("radiation-field-pro 세션 파일이 아닙니다.");
+  }
+  const input = mergeInput(obj.input);
+  if (!["xray", "Cs-137", "Co-60", "import"].includes(input.source)) throw new Error("알 수 없는 선원 종류입니다.");
+  return input;
+}

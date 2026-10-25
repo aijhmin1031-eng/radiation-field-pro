@@ -164,3 +164,31 @@ button:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var
   .chart-tools button:hover { border-color: var(--signal); color: var(--signal); }
   .seg button:not([aria-pressed="true"]):hover { background: var(--paper-2); }
 }
+
+/* ---- 세션 툴바 ---- */
+.toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
+.toolbar button { background: #fff; border: 1px solid var(--rule-strong); border-radius: var(--r); padding: 4px 10px; font-size: 12px; cursor: pointer; min-height: 26px; transition: transform 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out); }
+.toolbar button:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) { .toolbar button:hover { border-color: var(--signal); color: var(--signal); } }
+.print-only { display: none; }
+
+/* ---- 인쇄용 리포트 뷰 ---- */
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { background: #fff; font-size: 11pt; }
+  body { background-image: none; }
+  .no-print, .chart-tools, .skip, .stale { display: none !important; }
+  .print-only { display: block; }
+  .print-head { padding: 0 0 6px; border-bottom: 2px solid var(--ink); margin-bottom: 8px; font-size: 10pt; }
+  .hdr { padding: 0 0 6px; border-bottom: 0; }
+  .hdr .std { display: inline; }
+  .bench { display: block; padding: 0; }
+  .panel { box-shadow: none; break-inside: avoid; margin-bottom: 8px; }
+  .stack > .panel + .panel { margin-top: 8px; }
+  .readouts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ro { box-shadow: none; }
+  .ro.tick .v { color: var(--ink); }
+  svg.spec { max-height: 70mm; }
+  .led.ok, .led.bad, .badge, .ro.primary { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .led.ok, .led.bad { box-shadow: none; }
+}
