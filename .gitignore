@@ -6,3 +6,5 @@ dist/
 *.log
 .superpowers/
 dist
+test-results
+playwright-report

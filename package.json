@@ -9,9 +9,11 @@
     "preview": "vite preview",
     "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts src/app/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "report:accuracy": "tsx scripts/gen-accuracy-report.ts"
+    "report:accuracy": "tsx scripts/gen-accuracy-report.ts",
+    "e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/node": "^22.10.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

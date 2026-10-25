@@ -47,3 +47,11 @@
 - URL: https://radiation-field-pro.vercel.app — Vercel Authentication(팀 로그인) 보호, 전체 배포 대상. 비로그인 접근은 거부된다.
 - 로컬: `npm run dev` (개발) / `npm run build && npm run preview` (빌드 확인).
 - 디자인 스킬 5단계(frontend-design → ui-ux-pro-max → hallmark → emil-design-eng → web-design-guidelines) 점검·반영 완료.
+
+## U2 진행 (2026-10-25)
+- U2-1 측정 스펙트럼 불러오기(선원 "불러오기": 파일/붙여넣기, 단위, /keV 밀도, 400 keV 이하 ISO 매칭) ✅
+- U2-2 반복측정 → GUM 불확도 패널(04 입력 / D 출력: Type A, Type B 합성, ν_eff, 보고 형식) ✅
+- U2-3 세션 JSON 저장/불러오기(헤더 툴바, 형식 검증) ✅ · U2-4 인쇄용 리포트 뷰(@media print, A4, 입력 요약) ✅
+- U2-5 커마 가중 곡선 오버레이("커마" 토글) · S-Cs/S-Co 공칭 평균에너지 대조 ✅
+- U2-6 Playwright E2E: `npm run e2e` (e2e/workbench.spec.ts, 4173 preview 서버 재사용)
+- 미구현: Web Worker(현재 불필요 — 매칭 deferred로 충분).
