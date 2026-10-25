@@ -106,6 +106,9 @@ export function isoPresetNames(): { name: string; series: string }[] {
 /** 로컬 날짜 yyyy-mm-dd (toISOString은 UTC라 한국 00~09시에 어제가 됨). */
 const today = () => new Date().toLocaleDateString("sv-SE");
 
+/** 합성 불확도 표의 Type A 성분 이름(화면에서는 i18n 사전의 typeALabel 로 바꿔 보인다). */
+export const TYPE_A_LABEL = "Repeatability (Type A)";
+
 export const DEFAULT_INPUT: WorkbenchInput = {
   source: "xray",
   imported: null,
@@ -116,7 +119,7 @@ export const DEFAULT_INPUT: WorkbenchInput = {
   isoQuality: "auto",
   tolerancePct: 5,
   airReading: { reading: 1, tempC: 20, pressureKPa: 101.325, relHumidityPct: 65 },
-  readings: { values: [], applyAirCorrection: true, typeB: [{ label: "교정 성적서(기준 전리함)", relPct: 1.0 }] },
+  readings: { values: [], applyAirCorrection: true, typeB: [{ label: "Calibration certificate (reference chamber)", relPct: 1.0 }] },
 };
 
 /** 공백·쉼표·줄바꿈으로 구분된 숫자 목록 파싱(비숫자는 무시). */
@@ -257,7 +260,7 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
   if (corrected.length >= 2) {
     typeA = typeAUncertainty(corrected);
     combined = combineRelative(typeA.mean, [
-      { label: "반복성 (Type A)", relativeStandardUncertainty: typeA.relativeStandardUncertainty || 0, degreesOfFreedom: typeA.degreesOfFreedom },
+      { label: TYPE_A_LABEL, relativeStandardUncertainty: typeA.relativeStandardUncertainty || 0, degreesOfFreedom: typeA.degreesOfFreedom },
       ...rd.typeB.filter((b) => b.relPct > 0).map((b) => ({ label: b.label, relativeStandardUncertainty: b.relPct / 100 })),
     ]);
   }
@@ -284,9 +287,12 @@ export interface RadionuclideCheck {
   modelMeanKeV: number;
   deviationPct: number;
 }
+/** ISO 비교 해당 없음 사유 코드(화면 문구는 i18n 사전). */
+export type IsoReason = "radionuclide" | "no-import" | "above-400-kev";
+
 export interface IsoOutput {
   applicable: boolean; // X선·(400 keV 이하) 불러온 스펙트럼
-  reason: string | null; // 해당 없음 사유
+  reason: IsoReason | null; // 해당 없음 사유(화면 문구는 i18n 사전)
   radionuclide: RadionuclideCheck | null; // 핵종이면 공칭 평균에너지 대조
   matched: IsoQuality | null;
   matchHvl1DeviationPct: number | null;
@@ -314,12 +320,12 @@ export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput
     const modelMeanKeV = meanEnergy(spectrum);
     return {
       ...NOT_APPLICABLE,
-      reason: "핵종 기준장은 연속 X선 표(HVL·균질도) 대상이 아니며, ISO 4037-1 §5 공칭 평균에너지로 대조합니다.",
+      reason: "radionuclide",
       radionuclide: { quality: ref.quality, nominalMeanKeV: ref.nominalMeanKeV, modelMeanKeV, deviationPct: ((modelMeanKeV - ref.nominalMeanKeV) / ref.nominalMeanKeV) * 100 },
     };
   }
-  if (input.source === "import" && !input.imported) return { ...NOT_APPLICABLE, reason: "불러온 스펙트럼이 없습니다." };
-  if (input.source === "import" && Math.max(...spectrum.energy) > 400) return { ...NOT_APPLICABLE, reason: "최대 에너지가 400 keV를 넘어 ISO 4037-1 연속 X선 표 범위 밖입니다." };
+  if (input.source === "import" && !input.imported) return { ...NOT_APPLICABLE, reason: "no-import" };
+  if (input.source === "import" && Math.max(...spectrum.energy) > 400) return { ...NOT_APPLICABLE, reason: "above-400-kev" };
   const m = matchQuality(spectrum);
   const selected = input.isoQuality === "auto" ? m.quality.name : input.isoQuality;
   const comparison = compareToQuality(spectrum, selected, input.tolerancePct);
@@ -373,13 +379,21 @@ export function serializeSession(input: WorkbenchInput): string {
   return JSON.stringify({ format: SESSION_FORMAT, version: SESSION_VERSION, savedAt: new Date().toISOString(), input }, null, 2);
 }
 
+/** 세션 파일 오류. 화면 문구는 code 로 i18n 사전에서 고른다. */
+export class SessionError extends Error {
+  constructor(readonly code: "not-session" | "unknown-source") {
+    super(code);
+    this.name = "SessionError";
+  }
+}
+
 /** 세션 파일 텍스트 → 입력. 형식이 다르면 예외. */
 export function deserializeSession(text: string): WorkbenchInput {
   const obj = JSON.parse(text) as { format?: string; version?: number; input?: Partial<WorkbenchInput> };
   if (obj.format !== SESSION_FORMAT || !obj.input || typeof obj.input !== "object") {
-    throw new Error("radiation-field-pro 세션 파일이 아닙니다.");
+    throw new SessionError("not-session");
   }
   const input = mergeInput(obj.input);
-  if (!["xray", "Cs-137", "Co-60", "import"].includes(input.source)) throw new Error("알 수 없는 선원 종류입니다.");
+  if (!["xray", "Cs-137", "Co-60", "import"].includes(input.source)) throw new SessionError("unknown-source");
   return input;
 }
