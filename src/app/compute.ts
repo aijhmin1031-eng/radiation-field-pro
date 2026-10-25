@@ -238,12 +238,14 @@ export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput
 }
 
 // ---- 표기 ----
+/** 고정 유효숫자 표기(끝자리 0 유지 — 계측기 판독창처럼 자릿수가 흔들리지 않게). */
 export function fmt(v: number, sig = 4): string {
   if (!Number.isFinite(v)) return "—";
   if (v === 0) return "0";
   const a = Math.abs(v);
   if (a >= 1e6 || a < 1e-3) return v.toExponential(sig - 1);
-  return Number(v.toPrecision(sig)).toString();
+  if (a >= 10 ** sig) return Math.round(v).toString();
+  return v.toPrecision(sig);
 }
 export function fmtDev(pct: number | null): string {
   if (pct == null || !Number.isFinite(pct)) return "—";

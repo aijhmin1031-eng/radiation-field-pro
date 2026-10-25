@@ -3,7 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { fmt, fmtDev, type Characteristics, type FastOutput, type IsoOutput } from "./compute";
 
 /** 값이 바뀌면 잠깐 주황으로 점등하는 판독창. */
-function Readout({ label, value, unit, note }: { label: string; value: string; unit?: string; note?: string }) {
+function Readout({
+  label,
+  value,
+  unit,
+  note,
+  primary = false,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  note?: string;
+  primary?: boolean; // 핵심량: 더 큰 판독창(위계)
+}) {
   const [tick, setTick] = useState(false);
   const prev = useRef(value);
   useEffect(() => {
@@ -15,7 +27,7 @@ function Readout({ label, value, unit, note }: { label: string; value: string; u
     }
   }, [value]);
   return (
-    <div className={`ro${tick ? " tick" : ""}`}>
+    <div className={`ro${primary ? " primary" : ""}${tick ? " tick" : ""}`}>
       <div className="k">{label}</div>
       <div className="v">
         {value}
@@ -44,7 +56,7 @@ export function CharacteristicsPanel({
       <div className="pb readouts">
         <Readout label="평균 에너지 Ē" value={fmt(c.meanEnergyKeV)} unit="keV" />
         <Readout label="유효 에너지 E_eff" value={fmt(c.effectiveEnergyKeV)} unit="keV" />
-        <Readout label="HVL1" value={fmt(c.hvl1Mm)} unit={`mm ${c.material}`} />
+        <Readout label="HVL1" value={fmt(c.hvl1Mm)} unit={`mm ${c.material}`} primary />
         <Readout label="HVL2" value={fmt(c.hvl2Mm)} unit={`mm ${c.material}`} />
         <Readout label="균질도 h = HVL1/HVL2" value={fmt(c.homogeneity, 3)} />
         <Readout label="부가여과 커마 투과율 (고유여과 기준)" value={fmt(transmission * 100, 3)} unit="%" />
@@ -62,7 +74,7 @@ export function OperationalPanel({ fast }: { fast: FastOutput }) {
         <span className="idx">B</span> 운영선량 변환계수 (ISO 4037-3, 스펙트럼 평균)
       </div>
       <div className="pb readouts">
-        <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note="ICRU 슬랩 팬텀" />
+        <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note="ICRU 슬랩 팬텀" primary />
         <Readout label="H*(10) / Ka" value={fmt(o.hStar10)} unit="Sv/Gy" note="등방" />
         <Readout label={`H′(0.07, ${a}) / Ka`} value={fmt(o.hPrime007)} unit="Sv/Gy" />
         {fast.gamma && (
