@@ -4,7 +4,7 @@
 
 ## 기반
 - 스택: Vite + React + TypeScript 순수 SPA. 같은 저장소 `src/app/`(UI), `src/engine/`(그대로 import).
-- 배포: Vercel 비공개 프로젝트 `radiation-field-pro` ← GitHub `master`, Vercel Authentication(팀 로그인) 보호. 로컬 `npm run dev` 상시 가능.
+- 배포: Vercel 프로젝트 `radiation-field-pro` ← GitHub `master`(공개 저장소, MIT). 프로덕션 공개, 미리보기는 Vercel Authentication(팀 로그인) 보호. 로컬 `npm run dev` 상시 가능.
 - 언어: 한글 UI. 물리량 기호·단위(Hp(10), H*(10), HVL, keV, Sv/Gy, μGy/h)는 원형. 영어 토글 없음.
 - 이름: `Radiation Field Pro` — 부제 "기준 X선·감마장 특성화 및 선량 워크벤치". 탭 제목 동일.
 
@@ -44,7 +44,7 @@
 
 ## 배포 (2026-10-25 완료)
 - Vercel 프로젝트 `radiation-field-pro` (팀 aijhmin1031-3885s-projects, id `prj_T72FIbT6PFQjo7NcXRCVYdTXYchv`) ← GitHub `aijhmin1031-eng/radiation-field-pro` `master` 자동 배포. 프레임워크 vite, 출력 `dist`.
-- URL: https://radiation-field-pro.vercel.app — Vercel Authentication(팀 로그인) 보호, 전체 배포 대상. 비로그인 접근은 거부된다.
+- URL: https://pro.radiation-lab.com/ (정식 주소, canonical) · https://radiation-field-pro.vercel.app — 보호 방식 Standard Protection(`ssoProtection.deploymentType = all_except_custom_domains`, 2026-10-25 변경): 프로덕션 도메인은 누구나 열 수 있고, 미리보기·배포별 URL은 팀 로그인이 필요하다. 자매 프로젝트(radiation-calc·radiation-meter-tester·m-phreefiteq)와 같은 설정.
 - 로컬: `npm run dev` (개발) / `npm run build && npm run preview` (빌드 확인).
 - 디자인 스킬 5단계(frontend-design → ui-ux-pro-max → hallmark → emil-design-eng → web-design-guidelines) 점검·반영 완료.
 
