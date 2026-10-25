@@ -15,12 +15,14 @@ import {
   mergeInput,
   presetFromIso,
   serializeSession,
+  SessionError,
   type FastOutput,
   type WorkbenchInput,
 } from "./compute";
 import { InputPanel } from "./InputPanel";
 import { SpectrumChart } from "./SpectrumChart";
 import { CharacteristicsPanel, IsoPanel, OperationalPanel, UncertaintyPanel, type Deltas } from "./OutputPanels";
+import { LANGS, setLang, useI18n } from "./i18n";
 
 const STORAGE_KEY = "rfp.input.v1";
 const MODE_KEY = "rfp.autoMode.v1";
@@ -92,44 +94,45 @@ function makeDeltas(prev: FastOutput | null, cur: FastOutput): Deltas {
 
 /** 인쇄 리포트에만 나오는 입력 요약(화면에서는 입력 패널이 보이므로 숨김). */
 function PrintSummary({ input }: { input: WorkbenchInput }) {
+  const { t } = useI18n();
   const x = input.xray;
   const g = input.gamma;
   const a = input.airReading;
   return (
     <section className="panel print-only">
-      <h2 className="ph">입력 조건</h2>
+      <h2 className="ph">{t("printInputs")}</h2>
       <div className="pb">
         <table className="cmp">
           <tbody>
             <tr>
-              <td>선원</td>
+              <td>{t("rowSource")}</td>
               <td className="num">
                 {input.source === "xray"
-                  ? `X선관 W 20° · ${x.kvp} kV · 여과 ${x.filters.map((f) => `${f.thicknessMm} mm ${f.material}`).join(" + ")} · 공기 ${x.airMm} mm`
+                  ? t("xraySummary", x.kvp, x.filters.map((f) => `${f.thicknessMm} mm ${f.material}`).join(" + "), x.airMm)
                   : input.source === "import"
-                    ? `불러온 스펙트럼 ${input.imported?.name ?? "(없음)"}`
-                    : `${input.source} · ${g.activity} ${g.activityUnit} (기준 ${g.referenceDate}) · 평가 ${g.evalDate} · ${g.distanceM} m`}
+                    ? t("importSummary", input.imported?.name ?? t("noneParen"))
+                    : t("gammaSummary", input.source, g.activity, g.activityUnit, g.referenceDate, g.evalDate, g.distanceM)}
               </td>
             </tr>
             <tr>
-              <td>입사각 α / HVL 재질 / ISO 비교</td>
+              <td>{t("rowGeom")}</td>
               <td className="num">
-                {input.alphaDeg}° / {input.hvlMaterial === "auto" ? "자동" : input.hvlMaterial} /{" "}
-                {input.isoQuality === "auto" ? "자동 매칭" : input.isoQuality} (±{input.tolerancePct} %)
+                {input.alphaDeg}° / {input.hvlMaterial === "auto" ? t("auto") : input.hvlMaterial} /{" "}
+                {input.isoQuality === "auto" ? t("autoMatch") : input.isoQuality} (±{input.tolerancePct} %)
               </td>
             </tr>
             <tr>
-              <td>판독 보정 조건</td>
+              <td>{t("rowAir")}</td>
               <td className="num">
-                {a.tempC} °C · {a.pressureKPa} kPa · {a.relHumidityPct} % RH (기준 20 °C · 101.325 kPa · 65 %)
+                {a.tempC} °C · {a.pressureKPa} kPa · {a.relHumidityPct} % RH {t("airRef")}
               </td>
             </tr>
             <tr>
-              <td>반복측정</td>
+              <td>{t("rowReadings")}</td>
               <td className="num">
                 n = {input.readings.values.length}
                 {input.readings.values.length ? ` · ${input.readings.values.join(", ")}` : ""} · Type B{" "}
-                {input.readings.typeB.map((b) => `${b.label} ${b.relPct} %`).join(", ") || "없음"}
+                {input.readings.typeB.map((b) => `${b.label} ${b.relPct} %`).join(", ") || t("none")}
               </td>
             </tr>
           </tbody>
@@ -140,6 +143,7 @@ function PrintSummary({ input }: { input: WorkbenchInput }) {
 }
 
 export function App() {
+  const { lang, t } = useI18n();
   const [draft, setDraft] = useState<WorkbenchInput>(loadInput);
   const [committed, setCommitted] = useState<WorkbenchInput>(draft);
   const [autoMode, setAutoMode] = useState<boolean>(loadAutoMode);
@@ -202,28 +206,36 @@ export function App() {
     const pad = (n: number) => String(n).padStart(2, "0");
     const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
     a.href = url;
-    a.download = `${stamp}_radiation-field-pro_세션.json`;
+    a.download = `${stamp}_radiation-field-pro_session.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setToolMsg("세션 파일을 저장했습니다.");
+    setToolMsg(t("saved"));
   };
   const loadSession = (f: File | undefined) => {
     if (!f) return;
     f.text()
-      .then((t) => {
-        const next = deserializeSession(t);
+      .then((text) => {
+        const next = deserializeSession(text);
         setDraft(next);
         setCommitted(next);
-        setToolMsg(`세션을 불러왔습니다: ${f.name}`);
+        setToolMsg(t("loaded", f.name));
       })
-      .catch((e: unknown) => setToolMsg(`불러오기 실패: ${e instanceof Error ? e.message : String(e)}`));
+      .catch((e: unknown) => {
+        const msg =
+          e instanceof SessionError
+            ? t(e.code === "not-session" ? "errNotSession" : "errUnknownSource")
+            : e instanceof Error
+              ? e.message
+              : String(e);
+        setToolMsg(t("loadFailed", msg));
+      });
   };
   const resetAll = () => {
-    if (window.confirm("모든 입력을 기본값(N-80)으로 되돌릴까요? 저장하지 않은 입력은 사라집니다.")) {
+    if (window.confirm(t("resetConfirm"))) {
       setDraft(DEFAULT_INPUT);
       setCommitted(DEFAULT_INPUT);
       setPrevOut(null);
-      setToolMsg("기본값으로 되돌렸습니다.");
+      setToolMsg(t("resetDone"));
     }
   };
 
@@ -234,7 +246,7 @@ export function App() {
   return (
     <>
       <a className="skip" href="#main">
-        본문으로 건너뛰기
+        {t("skip")}
       </a>
       <header className="hdr">
         {/* 공개용(2026-10-25): 좌측 브랜드 = 「Radiation Lab / Field Pro」. 제품명 표기(Field 주황)는 그대로. */}
@@ -247,32 +259,37 @@ export function App() {
           </span>
           <span className="field">Field</span> Pro
         </h1>
-        <span className="sub">기준 X선·감마장 특성화 및 선량 워크벤치</span>
+        <span className="sub">{t("sub")}</span>
         <span className="std">ISO 4037-1/-3/-4 · GUM</span>
-        <p className="en" lang="en">
-          A workbench for ISO 4037 reference X-ray and gamma fields: spectrum, half-value layers, operational dose
-          conversion and uncertainty.
-        </p>
-        <div className="toolbar no-print" role="toolbar" aria-label="세션">
+        {/* ★ 2026-10-26 영어 기본·한국어 선택. 선택은 localStorage 에 남고 <html lang> 을 맞춘다(i18n.ts). */}
+        <div className="seg lang no-print" role="group" aria-label={t("langAria")}>
+          {LANGS.map((l) => (
+            <button key={l} type="button" lang={l} aria-pressed={lang === l} onClick={() => setLang(l)}>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <p className="en">{t("intro")}</p>
+        <div className="toolbar no-print" role="toolbar" aria-label={t("toolbarAria")}>
           <button type="button" className={`calc${dirty ? " dirty" : ""}`} onClick={runCalc} disabled={autoMode}>
-            {dirty ? "계산하기 — 조건 변경됨" : autoMode ? "자동 계산 중" : "계산하기"}
+            {dirty ? t("calcDirty") : autoMode ? t("autoRunning") : t("calc")}
           </button>
           <label className="mode">
-            <input type="checkbox" checked={autoMode} onChange={toggleAuto} /> 자동 계산
+            <input type="checkbox" checked={autoMode} onChange={toggleAuto} /> {t("autoMode")}
           </label>
           <span className="sep" aria-hidden="true" />
           <button type="button" onClick={saveSession}>
-            세션 저장
+            {t("save")}
           </button>
           <button type="button" onClick={() => fileRef.current?.click()}>
-            세션 불러오기
+            {t("load")}
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => loadSession(e.target.files?.[0])} />
           <button type="button" onClick={() => window.print()}>
-            리포트 인쇄
+            {t("print")}
           </button>
           <button type="button" onClick={resetAll}>
-            초기화
+            {t("reset")}
           </button>
           {toolMsg && (
             <span className="hint" style={{ marginTop: 0 }} aria-live="polite">
@@ -281,18 +298,18 @@ export function App() {
           )}
         </div>
         {narrow && (
-          <div className="mtabs no-print" role="tablist" aria-label="화면">
+          <div className="mtabs no-print" role="tablist" aria-label={t("viewAria")}>
             <button type="button" role="tab" aria-selected={mobileTab === "input"} onClick={() => setMobileTab("input")}>
-              입력
+              {t("tabInput")}
             </button>
             <button type="button" role="tab" aria-selected={mobileTab === "result"} onClick={() => setMobileTab("result")}>
-              결과{dirty ? " •" : ""}
+              {t("tabResult")}{dirty ? " •" : ""}
             </button>
           </div>
         )}
       </header>
       <div className="print-only print-head">
-        <strong>Radiation Field Pro</strong> · 기준 X선·감마장 특성화 리포트 · 출력 {new Date().toLocaleString("ko-KR")}
+        <strong>Radiation Field Pro</strong> · {t("printTitle")} · {t("printed")} {new Date().toLocaleString(t("dateLocale"))}
       </div>
       <main id="main" className={`bench${narrow ? " narrow" : ""}`}>
         <div className="no-print" hidden={!showInput}>
@@ -301,29 +318,29 @@ export function App() {
         <div className={`stack results${dirty ? " pending" : ""}`} hidden={!showResult}>
           {dirty && (
             <div className="pending-bar no-print" role="status">
-              조건이 바뀌었습니다. 아래 결과는 이전 조건의 값입니다 —{" "}
+              {t("pending")}{" "}
               <button type="button" className="calc dirty" onClick={runCalc}>
-                계산하기
+                {t("calc")}
               </button>
             </div>
           )}
           {runCount > 0 && !dirty && prevOut && (
             <div className="calc-note no-print" role="status" aria-live="polite">
-              계산 #{runCount} 완료 — 판독창의 ▲▼는 직전 계산 대비 변화량입니다.
+              {t("calcDone", runCount)}
             </div>
           )}
           <PrintSummary input={input} />
           <section className="panel">
             <h2 className="ph">
-              <span className="idx">00</span> 스펙트럼
+              <span className="idx">00</span> {t("spectrum")}
               <span className="hint" style={{ marginTop: 0, marginLeft: "auto" }}>
                 {input.source === "xray"
-                  ? `W 양극 20° · ${input.xray.kvp} kV · 여과 후`
+                  ? t("specXray", input.xray.kvp)
                   : input.source === "import"
                     ? input.imported
-                      ? `불러온 스펙트럼 · ${input.imported.name} · ${input.imported.energy.length} 점`
-                      : "불러온 스펙트럼 없음 — X선 설정으로 표시 중"
-                    : `${input.source} 선 스펙트럼`}
+                      ? t("specImported", input.imported.name, input.imported.energy.length)
+                      : t("specNoImport")
+                    : t("specGamma", input.source)}
               </span>
             </h2>
             <div className="pb">
@@ -352,15 +369,15 @@ export function App() {
           <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>
         </nav>
         <p>
-          계산은 모두 이 브라우저 안에서 이루어지며 입력값은 서버로 보내지 않습니다. 정확도 범위는{" "}
-          <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">정확도 사양</a>에
-          있습니다. 실제 기준장의 값은 그 시설의 측정으로 정합니다.
+          {t("footA")}
+          <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">{t("footLink")}</a>
+          {t("footB")}
         </p>
       </footer>
       {narrow && (
         <div className="mbar no-print">
           <button type="button" className={`calc${dirty ? " dirty" : ""}`} onClick={runCalc} disabled={autoMode && !dirty}>
-            {autoMode ? "자동 계산 중" : dirty ? "계산하기 •" : "계산하기"}
+            {autoMode ? t("autoRunning") : dirty ? t("calcDot") : t("calc")}
           </button>
           <button type="button" className="mono msum" onClick={() => setMobileTab("result")}>
             {summary}

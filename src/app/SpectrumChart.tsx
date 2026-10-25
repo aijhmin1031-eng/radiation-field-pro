@@ -2,6 +2,7 @@
 // 연속 X선은 면+선, 감마 선 스펙트럼은 막대. 모눈(그래프지) 배경.
 import { useMemo, useState } from "react";
 import type { Spectrum } from "../engine/spectrum";
+import { useI18n } from "./i18n";
 
 interface Props {
   spectrum: Spectrum;
@@ -28,6 +29,7 @@ function niceStep(range: number, target = 8): number {
 export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, discrete, kermaWeights, compact = false }: Props) {
   const W = compact ? W_COMPACT : W_FULL;
   const H = compact ? H_COMPACT : H_FULL;
+  const { t } = useI18n();
   const [log, setLog] = useState(false);
   const [showKerma, setShowKerma] = useState(false);
 
@@ -76,12 +78,12 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
           log
         </button>
         {!discrete && (
-          <button type="button" aria-pressed={showKerma} onClick={() => setShowKerma((v) => !v)} title="공기커마 기여 φ·E·(μen/ρ) 오버레이">
-            커마
+          <button type="button" aria-pressed={showKerma} onClick={() => setShowKerma((v) => !v)} title={t("kermaTitle")}>
+            {t("kermaBtn")}
           </button>
         )}
       </div>
-      <svg className="spec" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="스펙트럼: 상대 플루언스 대 에너지">
+      <svg className="spec" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t("chartAria")}>
         {/* 모눈 */}
         {g.xticks.map((t) => (
           <line key={`gx${t}`} className="grid" x1={g.x(t)} x2={g.x(t)} y1={M.t} y2={H - M.b} />
@@ -107,10 +109,10 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
           </text>
         ))}
         <text x={W - M.r} y={H - 4} textAnchor="end">
-          에너지 keV
+          {t("axisE")}
         </text>
         <text x={M.l + 4} y={M.t - 6}>
-          상대 플루언스{log ? " (log)" : ""}
+          {t("axisF")}{log ? " (log)" : ""}
         </text>
         {/* 데이터 */}
         {discrete
@@ -128,7 +130,7 @@ export function SpectrumChart({ spectrum, meanEnergyKeV, effectiveEnergyKeV, dis
           <>
             <path className="kerma" d={g.kermaPath} />
             <text className="kerma-t" x={M.l + 4} y={M.t + 8}>
-              커마 가중 (상대)
+              {t("kermaLegend")}
             </text>
           </>
         )}
