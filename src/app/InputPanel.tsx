@@ -1,7 +1,9 @@
 // 좌측 입력 패널. 상태는 App 이 소유하고 여기서는 patch 콜백만 부른다.
+import { useState } from "react";
 import {
   ALPHA_MAX,
   FILTER_MATERIALS,
+  parseImportedSpectrum,
   KVP_MAX,
   KVP_MIN,
   isoPresetNames,
@@ -39,9 +41,9 @@ export function InputPanel({ input, onChange }: Props) {
         </h2>
         <div className="pb">
           <div className="seg" role="group" aria-label="선원 종류">
-            {(["xray", "Cs-137", "Co-60"] as SourceKind[]).map((s) => (
+            {(["xray", "Cs-137", "Co-60", "import"] as SourceKind[]).map((s) => (
               <button key={s} type="button" aria-pressed={input.source === s} onClick={() => set({ source: s })}>
-                {s === "xray" ? "X선관" : s}
+                {s === "xray" ? "X선관" : s === "import" ? "불러오기" : s}
               </button>
             ))}
           </div>
@@ -155,6 +157,8 @@ export function InputPanel({ input, onChange }: Props) {
                 </button>
               </div>
             </>
+          ) : input.source === "import" ? (
+            <ImportBox input={input} onChange={onChange} />
           ) : (
             <>
               <div className="row">
@@ -323,5 +327,84 @@ export function InputPanel({ input, onChange }: Props) {
         </div>
       </section>
     </div>
+  );
+}
+
+/** 측정 스펙트럼 불러오기: 파일 선택 또는 붙여넣기 → 파싱 → 상태 저장. */
+function ImportBox({ input, onChange }: Props) {
+  const [text, setText] = useState("");
+  const [name, setName] = useState("");
+  const [unit, setUnit] = useState<"keV" | "MeV" | "eV">("keV");
+  const [density, setDensity] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const apply = (raw: string, label: string) => {
+    try {
+      const imported = parseImportedSpectrum(raw, label || "붙여넣기", { energyUnit: unit, fluenceIsDensity: density });
+      setError(null);
+      onChange({ ...input, imported, isoQuality: "auto" });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+  const onFile = (f: File | undefined) => {
+    if (!f) return;
+    f.text().then((t) => {
+      setText(t);
+      setName(f.name);
+      apply(t, f.name);
+    });
+  };
+  const im = input.imported;
+  return (
+    <>
+      <div className="row">
+        <label htmlFor="imp-file">파일</label>
+        <input id="imp-file" type="file" accept=".csv,.txt,.tsv,.dat,text/plain,text/csv" onChange={(e) => onFile(e.target.files?.[0])} />
+      </div>
+      <div className="row">
+        <label htmlFor="imp-unit">에너지 단위</label>
+        <div className="ctl">
+          <select id="imp-unit" value={unit} onChange={(e) => setUnit(e.target.value as "keV" | "MeV" | "eV")} style={{ width: 90 }}>
+            <option>keV</option>
+            <option>MeV</option>
+            <option>eV</option>
+          </select>
+          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}>
+            <input type="checkbox" checked={density} onChange={(e) => setDensity(e.target.checked)} /> 값이 /keV 밀도
+          </label>
+        </div>
+      </div>
+      <div className="row" style={{ alignItems: "start" }}>
+        <label htmlFor="imp-text">붙여넣기</label>
+        <textarea
+          id="imp-text"
+          className="mono"
+          rows={5}
+          placeholder={"에너지, 플루언스\n20, 1.2e3\n30, 4.5e3\n…"}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          spellCheck={false}
+          style={{ width: "100%", border: "1px solid var(--rule-strong)", borderRadius: "var(--r)", padding: 6, fontSize: 12 }}
+        />
+      </div>
+      <div className="ctl" style={{ justifyContent: "flex-end", marginTop: 6 }}>
+        <button type="button" className="add" style={{ marginTop: 0 }} onClick={() => apply(text, name)} disabled={!text.trim()}>
+          스펙트럼 적용
+        </button>
+      </div>
+      {error && (
+        <div className="hint" role="alert" style={{ color: "var(--bad)" }}>
+          불러오기 실패: {error} — 열 순서(에너지, 플루언스)·단위·구분자를 확인하세요.
+        </div>
+      )}
+      {im ? (
+        <div className="hint" aria-live="polite">
+          적용됨: <span className="mono">{im.name}</span> · {im.energy.length} 점 · {im.energy[0]}–{im.energy[im.energy.length - 1]} keV
+        </div>
+      ) : (
+        <div className="hint">불러온 스펙트럼이 없으면 X선 설정으로 표시합니다. CSV/TSV/공백 구분, 헤더·#주석 허용.</div>
+      )}
+    </>
   );
 }

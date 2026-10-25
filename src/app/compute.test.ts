@@ -8,6 +8,7 @@ import {
   provisionalMaterial,
   computeFast,
   computeIso,
+  parseImportedSpectrum,
   fmt,
   fmtDev,
   type WorkbenchInput,
@@ -130,4 +131,26 @@ test("표기: 유효숫자 4자리, 편차 부호 포함 소수 2자리", () => 
   assert.equal(fmtDev(-0.8), "-0.80 %");
   assert.equal(fmtDev(1.234), "+1.23 %");
   assert.equal(fmtDev(null), "—");
+});
+
+test("불러오기 선원: 텍스트 파싱 → 상태 → 스펙트럼/특성/ISO 매칭(400 keV 이하)", () => {
+  const imported = parseImportedSpectrum("E,phi\n40,1\n60,3\n80,2", "test.csv");
+  assert.equal(imported.energy.length, 3);
+  const out = computeFast(withInput({ source: "import", imported }));
+  assert.deepEqual(out.spectrum.energy, [40, 60, 80]);
+  assert.equal(out.gamma, null);
+  assert.equal(out.kermaTransmission, 1);
+  assert.equal(out.characteristics.material, "Cu"); // 평균 ≥ 50 keV
+  const iso = computeIso(withInput({ source: "import", imported }), out.spectrum);
+  assert.equal(iso.applicable, true);
+});
+
+test("불러오기 선원: 스펙트럼이 없으면 X선 설정으로 대체, 400 keV 초과면 ISO 해당 없음", () => {
+  const fallback = computeFast(withInput({ source: "import", imported: null }));
+  const xray = computeFast(DEFAULT_INPUT);
+  assert.deepEqual(fallback.spectrum.fluence, xray.spectrum.fluence);
+  const hi = { name: "hi", energy: [500, 700], fluence: [1, 1] };
+  const iso = computeIso(withInput({ source: "import", imported: hi }), buildSpectrum(withInput({ source: "import", imported: hi })));
+  assert.equal(iso.applicable, false);
+  assert.equal(provisionalMaterial(withInput({ source: "import", imported: hi })), "Pb");
 });

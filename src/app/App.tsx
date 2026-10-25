@@ -2,7 +2,7 @@
 // 빠른 경로(computeFast)는 입력마다 동기, 느린 경로(computeIso)는 useDeferredValue 로 분리.
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import "./styles.css";
-import { DEFAULT_INPUT, buildSpectrum, computeFast, computeIso, presetFromIso, type WorkbenchInput } from "./compute";
+import { DEFAULT_INPUT, buildSpectrum, computeFast, computeIso, isGamma, presetFromIso, type WorkbenchInput } from "./compute";
 import { InputPanel } from "./InputPanel";
 import { SpectrumChart } from "./SpectrumChart";
 import { CharacteristicsPanel, IsoPanel, OperationalPanel } from "./OutputPanels";
@@ -17,7 +17,7 @@ function applyDeepLink(base: WorkbenchInput): WorkbenchInput {
     const preset = q.get("preset");
     if (preset) next = { ...next, source: "xray", xray: presetFromIso(preset), isoQuality: "auto" };
     const source = q.get("source");
-    if (source === "xray" || source === "Cs-137" || source === "Co-60") next = { ...next, source };
+    if (source === "xray" || source === "Cs-137" || source === "Co-60" || source === "import") next = { ...next, source };
     return next;
   } catch {
     return base;
@@ -34,7 +34,8 @@ function loadInput(): WorkbenchInput {
       base = {
         ...DEFAULT_INPUT,
         ...saved,
-        xray: { ...DEFAULT_INPUT.xray, ...(saved.xray ?? {}) },
+        imported: saved.imported ?? null,
+      xray: { ...DEFAULT_INPUT.xray, ...(saved.xray ?? {}) },
         gamma: { ...DEFAULT_INPUT.gamma, ...(saved.gamma ?? {}) },
         airReading: { ...DEFAULT_INPUT.airReading, ...(saved.airReading ?? {}) },
       };
@@ -63,7 +64,7 @@ export function App() {
   // auto 재질이면 ISO 매칭 재질로 계산한 특성을 쓴다(도착 전엔 잠정 재질 값).
   const useIsoChars = input.hvlMaterial === "auto" && iso.applicable && iso.characteristics != null && !isoStale;
   const chars = useIsoChars ? iso.characteristics! : fast.characteristics;
-  const provisional = input.hvlMaterial === "auto" && input.source === "xray" && !useIsoChars;
+  const provisional = input.hvlMaterial === "auto" && !isGamma(input.source) && iso.applicable && !useIsoChars;
 
   return (
     <>
@@ -82,7 +83,13 @@ export function App() {
             <h2 className="ph">
               <span className="idx">00</span> 스펙트럼
               <span className="hint" style={{ marginTop: 0, marginLeft: "auto" }}>
-                {input.source === "xray" ? `W 양극 20° · ${input.xray.kvp} kV · 여과 후` : `${input.source} 선 스펙트럼`}
+                {input.source === "xray"
+                  ? `W 양극 20° · ${input.xray.kvp} kV · 여과 후`
+                  : input.source === "import"
+                    ? input.imported
+                      ? `불러온 스펙트럼 · ${input.imported.name} · ${input.imported.energy.length} 점`
+                      : "불러온 스펙트럼 없음 — X선 설정으로 표시 중"
+                    : `${input.source} 선 스펙트럼`}
               </span>
             </h2>
             <div className="pb">
@@ -90,7 +97,7 @@ export function App() {
                 spectrum={fast.spectrum}
                 meanEnergyKeV={chars.meanEnergyKeV}
                 effectiveEnergyKeV={chars.effectiveEnergyKeV}
-                discrete={input.source !== "xray"}
+                discrete={isGamma(input.source)}
               />
             </div>
           </section>

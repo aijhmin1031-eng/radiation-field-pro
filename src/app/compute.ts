@@ -18,8 +18,17 @@ import {
 } from "../engine/iso-comparison";
 import { activityAt, daysBetween, airKermaRate } from "../engine/decay";
 import { densityCorrectionFactor } from "../engine/air-density";
+import { parseSpectrumText, type ParseOptions } from "../engine/spectrum-import";
 
-export type SourceKind = "xray" | "Cs-137" | "Co-60";
+export type SourceKind = "xray" | "Cs-137" | "Co-60" | "import";
+export const isGamma = (s: SourceKind) => s === "Cs-137" || s === "Co-60";
+
+/** 불러온 측정 스펙트럼(상태에 저장). */
+export interface ImportedSpectrum {
+  name: string;
+  energy: number[];
+  fluence: number[];
+}
 export type HvlMaterial = "auto" | "Al" | "Cu" | "Pb";
 export const FILTER_MATERIALS = ["Be", "Al", "Cu", "Sn", "Ta", "W", "Pb"] as const;
 
@@ -47,6 +56,7 @@ export interface AirReadingInput {
 }
 export interface WorkbenchInput {
   source: SourceKind;
+  imported: ImportedSpectrum | null;
   xray: XrayInput;
   gamma: GammaInput;
   alphaDeg: number;
@@ -85,6 +95,7 @@ const today = () => new Date().toLocaleDateString("sv-SE");
 
 export const DEFAULT_INPUT: WorkbenchInput = {
   source: "xray",
+  imported: null,
   xray: presetFromIso("N-80"),
   gamma: { activity: 1, activityUnit: "GBq", referenceDate: today(), evalDate: today(), distanceM: 1 },
   alphaDeg: 0,
@@ -104,13 +115,28 @@ export function buildSpectrum(input: WorkbenchInput): Spectrum {
     ];
     return filterSpectrum(xraySpectrum(clamp(input.xray.kvp, KVP_MIN, KVP_MAX)), filters);
   }
+  if (input.source === "import") {
+    // 불러온 스펙트럼이 없으면 화면이 죽지 않게 X선 설정으로 대체한다(UI가 안내 문구를 띄움).
+    if (!input.imported || input.imported.energy.length === 0) return buildSpectrum({ ...input, source: "xray" });
+    return { energy: input.imported.energy.slice(), fluence: input.imported.fluence.slice() };
+  }
   return gammaSpectrum(input.source);
+}
+
+/** 텍스트(CSV/TSV/공백) → 불러온 스펙트럼. 파싱 오류는 예외로 올라온다. */
+export function parseImportedSpectrum(text: string, name: string, opts: ParseOptions = {}): ImportedSpectrum {
+  const s = parseSpectrumText(text, opts);
+  return { name, energy: s.energy, fluence: s.fluence };
 }
 
 /** auto 재질의 잠정값: 감마 Pb, X선은 ISO 관례(저관전압 Al, 그 외 Cu). ISO 매칭이 오면 그 재질로 바뀐다. */
 export function provisionalMaterial(input: WorkbenchInput): "Al" | "Cu" | "Pb" {
   if (input.hvlMaterial !== "auto") return input.hvlMaterial;
-  if (input.source !== "xray") return "Pb";
+  if (isGamma(input.source)) return "Pb";
+  if (input.source === "import" && input.imported) {
+    const e = meanEnergy(buildSpectrum(input));
+    return e > 400 ? "Pb" : e >= 50 ? "Cu" : "Al";
+  }
   return input.xray.kvp < 50 ? "Al" : "Cu";
 }
 
@@ -178,7 +204,7 @@ export function computeFast(input: WorkbenchInput, material = provisionalMateria
     hPrime007: meanConversionCoefficient(spectrum, "H'(0.07)", alpha),
   };
   let gamma: GammaOutput | null = null;
-  if (input.source !== "xray") {
+  if (isGamma(input.source)) {
     const g = input.gamma;
     const a0 = g.activity * (g.activityUnit === "GBq" ? 1e9 : 1e6);
     const elapsed = daysBetween(g.referenceDate, g.evalDate);
@@ -223,7 +249,9 @@ const NOT_APPLICABLE: IsoOutput = {
 
 /** ISO 자동매칭 + 비교(느린 경로). spectrum 은 computeFast 결과를 재사용한다. */
 export function computeIso(input: WorkbenchInput, spectrum: Spectrum): IsoOutput {
-  if (input.source !== "xray") return NOT_APPLICABLE;
+  // ISO 4037-1 연속 X선 표는 X선과 (400 keV 이하) 불러온 스펙트럼에만 적용한다.
+  if (isGamma(input.source)) return NOT_APPLICABLE;
+  if (input.source === "import" && (!input.imported || Math.max(...spectrum.energy) > 400)) return NOT_APPLICABLE;
   const m = matchQuality(spectrum);
   const selected = input.isoQuality === "auto" ? m.quality.name : input.isoQuality;
   const comparison = compareToQuality(spectrum, selected, input.tolerancePct);
