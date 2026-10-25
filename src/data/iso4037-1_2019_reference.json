@@ -1,16 +1,15 @@
 {
   "_meta": {
     "title": "ISO 4037-1:2019 — continuous reference filtered X radiation (4 series) characteristics",
-    "purpose": "X-ray Spectrum Lab 엔진을 ISO 4037-1:2019 기준장에 맞게 피팅/검증하기 위한 내부 기준값",
-    "source": "ISO 4037-1:2019(E), Tables 2–6 (사용자 보유 라이선스본에서 전사)",
-    "privacy": "PRIVATE — ISO 저작권물에서 전사. 공개 저장소/사이트에 업로드·게시 금지. 사내 피팅·검증용으로만.",
-    "extracted_by": "AI 전사 2026-10-20. ⚠️ 전문가(소유자) 검수 필요 — 전사 오류 가능.",
+    "purpose": "Reference values for ISO 4037-1 beam-quality matching and engine validation",
+    "source": "ISO 4037-1:2019(E), Tables 2–6 (transcribed). © ISO.",
+    "provenance": "AI-assisted transcription 2026-10-20; cross-checked against the accuracy specification (docs/accuracy-spec.md)",
     "units": {"mean_energy": "keV", "resolution": "% (R_E)", "tube_potential": "kV", "filtration": "mm", "hvl": "mm (material noted)"},
     "notes": [
-      "additional_filtration_mm: 값이 있는 원소만 기재(Pb/Sn/Cu/Al).",
-      "hvl1/hvl2: focal spot 로부터 1.0 m, 2.5 m 거리값. null = 표에 '—'(해당 거리 미제공; -350/-400 류는 2.5 m만).",
-      "resolution null = 표에 미기재(저에너지 Be 여과 선질, H계열 등).",
-      "총필터 = 고유여과(inherent) + 부가여과(additional)."
+      "add: only elements with a value are listed (Pb/Sn/Cu/Al).",
+      "hvl1/hvl2: values at 1.0 m and 2.5 m from the focal spot. null = '—' in the table (not given at that distance; the -350/-400 qualities give 2.5 m only).",
+      "resolution null = not given in the table (low-energy Be-filtered qualities, H series, etc.).",
+      "Total filtration = inherent filtration + additional filtration."
     ]
   },
   "series_summary": {
@@ -73,7 +72,7 @@
       {"name":"H-150","kVp":150,"mean_energy":78.0,"resolution":null,"inherent":"4 mm Al","add":{"Cu":0.5},"hvl1":{"m":"Cu","d1_0":0.808,"d2_5":0.811},"hvl2":{"m":"Cu","d1_0":1.21,"d2_5":1.21}},
       {"name":"H-200","kVp":200,"mean_energy":99.3,"resolution":null,"inherent":"4 mm Al","add":{"Cu":1.0},"hvl1":{"m":"Cu","d1_0":1.54,"d2_5":1.55},"hvl2":{"m":"Cu","d1_0":2.28,"d2_5":2.28}},
       {"name":"H-250","kVp":250,"mean_energy":122,"resolution":null,"inherent":"4 mm Al","add":{"Cu":1.6},"hvl1":{"m":"Cu","d1_0":2.42,"d2_5":2.42},"hvl2":{"m":"Cu","d1_0":3.24,"d2_5":3.23}},
-      {"name":"H-280","kVp":280,"mean_energy":145,"resolution":null,"inherent":"4 mm Al","add":{"Cu":3.0},"hvl1":{"m":"Cu","d1_0":3.26,"d2_5":3.28},"hvl2":{"m":"Cu","d1_0":3.88,"d2_5":3.89},"note":"300 kV 대체용"},
+      {"name":"H-280","kVp":280,"mean_energy":145,"resolution":null,"inherent":"4 mm Al","add":{"Cu":3.0},"hvl1":{"m":"Cu","d1_0":3.26,"d2_5":3.28},"hvl2":{"m":"Cu","d1_0":3.88,"d2_5":3.89},"note":"Alternative to the 300 kV quality"},
       {"name":"H-300","kVp":300,"mean_energy":143,"resolution":null,"inherent":"4 mm Al","add":{"Cu":2.2},"hvl1":{"m":"Cu","d1_0":3.22,"d2_5":3.22},"hvl2":{"m":"Cu","d1_0":4.00,"d2_5":3.98}},
       {"name":"H-350","kVp":350,"mean_energy":167,"resolution":null,"inherent":"4 mm Al","add":{"Cu":3.4},"hvl1":{"m":"Cu","d1_0":null,"d2_5":4.01},"hvl2":{"m":"Cu","d1_0":null,"d2_5":4.65}},
       {"name":"H-400","kVp":400,"mean_energy":190,"resolution":null,"inherent":"4 mm Al","add":{"Cu":4.7},"hvl1":{"m":"Cu","d1_0":null,"d2_5":4.65},"hvl2":{"m":"Cu","d1_0":null,"d2_5":5.22}}

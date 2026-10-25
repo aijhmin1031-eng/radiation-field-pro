@@ -392,7 +392,7 @@ export function mergeInput(saved: Partial<WorkbenchInput> | null | undefined): W
 }
 
 /** 한글 UI 시절에 저장된 '기본값' 이름만 영어로 옮긴다. 사용자가 직접 쓴 이름은 그대로 둔다. */
-const LEGACY_LABELS: Record<string, string> = {
+export const LEGACY_LABELS: Record<string, string> = {
   "교정 성적서(기준 전리함)": STRINGS.defaultTypeB,
   "Type B 성분": STRINGS.newTypeB,
   "반복성 (Type A)": STRINGS.typeALabel,
