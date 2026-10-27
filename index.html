@@ -26,6 +26,59 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- A static description outside the app root (2026-10-27): crawlers and visitors without JavaScript
+         read what the workbench does; with JavaScript it sits below the app's footer and never overlaps it.
+         One h1 stays the app's own, so this section starts at h2. Accuracy figures come from docs/accuracy-spec.md. -->
+    <section class="fp-about" aria-labelledby="fp-about-h">
+      <h2 id="fp-about-h">About this workbench</h2>
+      <p>Radiation Field Pro is a browser workbench for characterising the reference X-ray and gamma radiation
+        fields defined in ISO 4037. It is written for calibration laboratories, dosimetry services and instrument
+        test houses that set up reference beams, check them against the standard and report the result with an
+        uncertainty. Every calculation runs in your browser; nothing you enter is sent to a server.</p>
+      <h3>What it computes</h3>
+      <ul>
+        <li>The tungsten-anode X-ray tube spectrum for a chosen tube voltage, inherent and added filtration and air
+          path, with the mean energy and the effective energy of the beam.</li>
+        <li>First and second half-value layers in aluminium or copper, and the homogeneity coefficient
+          h&nbsp;=&nbsp;HVL1&nbsp;/&nbsp;HVL2.</li>
+        <li>Matching of the beam against the 50 radiation qualities of ISO&nbsp;4037-1 (the L, N, W and H series),
+          with the deviation from the tabulated values and a tolerance band.</li>
+        <li>The radionuclide gamma fields of caesium-137 and cobalt-60, including the air kerma rate from a point
+          source.</li>
+        <li>Spectrum-averaged conversion coefficients from air kerma to the operational quantities
+          <span class="nw">Hp(10)</span>, <span class="nw">H*(10)</span> and <span class="nw">H&prime;(0.07)</span>,
+          following ISO&nbsp;4037-3.</li>
+        <li>Readout correction for air density from temperature and pressure, as described in ISO&nbsp;4037-4.</li>
+        <li>An uncertainty budget in the manner of the GUM: repeat readings give the Type A component, certificates
+          and other entries give Type B, and the expanded uncertainty is reported with its coverage factor.</li>
+      </ul>
+      <h3>How accurate it is</h3>
+      <p>The model's first half-value layer is compared with the ISO&nbsp;4037-1 table for all 50 qualities: every
+        deviation is within 4% below 40&nbsp;keV mean energy and within 2% above it. The conversion coefficients for
+        caesium-137 and cobalt-60 agree with the ISO&nbsp;4037-3 recommended values within 2%. These figures are
+        generated from the engine code and enforced by its test suite; the full table is in the
+        <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">accuracy
+        specification</a> (a generated report, written in Korean). The workbench supports the measurements and
+        quality procedures of a laboratory; it does not replace them.</p>
+      <p>Radiation Field Pro is one of the pro workbenches of <a href="https://radiation-lab.com/">Radiation Lab</a>,
+        alongside RadiMeter for survey-meter type testing and M-Phreefiteq for radionuclide speciation and
+        transport.</p>
+    </section>
+    <style>
+      /* Same left edge as the app's panels and footer (20px gutter), not a centred column. */
+      .fp-about { margin: 0; padding: 26px 20px 44px; border-top: 1px solid var(--rule, #d6d0c2);
+                  color: var(--ink, #1b2233); font-size: 14px; line-height: 1.6; }
+      .fp-about h2 { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
+      .fp-about h3 { margin: 20px 0 6px; font-size: 14px; font-weight: 600; }
+      .fp-about p, .fp-about ul { max-width: 78ch; margin: 0 0 10px; }
+      .fp-about ul { padding-left: 20px; }
+      .fp-about li { margin: 0 0 4px; }
+      .fp-about a { color: inherit; text-underline-offset: 3px; }
+      .fp-about .nw { white-space: nowrap; }
+      /* Narrow screens carry the app's fixed calculate bar at the bottom: the last line must clear it. */
+      @media (max-width: 980px) { .fp-about { padding: 22px 16px 104px; } }
+      @media print { .fp-about { display: none; } }
+    </style>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>
