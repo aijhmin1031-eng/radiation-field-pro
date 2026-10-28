@@ -1,0 +1,20 @@
+# 공통 셸 v3 게이트를 포함한 검사 체인 (2026-10-28, T3). Vercel 이 배포를 맡으므로 여기서는 검사만 한다.
+name: ci
+on:
+  push:
+    branches: [master]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run gate            # build(public/404.html + dist) → gate/check-shell.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e             # 셸 자산은 shell/ 사본으로(e2e/shell-assets.ts) — 네트워크 불필요
