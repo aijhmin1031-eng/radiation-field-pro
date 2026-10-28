@@ -40,6 +40,7 @@
          One h1 stays the app's own, so this section starts at h2. Accuracy figures come from docs/accuracy-spec.md. -->
     <section class="fp-about" aria-labelledby="fp-about-h">
       <h2 id="fp-about-h">About this workbench</h2>
+      <div class="cols"><div>
       <p>Radiation Field Pro is a browser workbench for characterising the reference X-ray and gamma radiation
         fields defined in ISO 4037. It is written for calibration laboratories, dosimetry services and instrument
         test houses that set up reference beams, check them against the standard and report the result with an
@@ -61,6 +62,7 @@
         <li>An uncertainty budget in the manner of the GUM: repeat readings give the Type A component, certificates
           and other entries give Type B, and the expanded uncertainty is reported with its coverage factor.</li>
       </ul>
+      </div><div>
       <h3>How accurate it is</h3>
       <p>The model's first half-value layer is compared with the ISO&nbsp;4037-1 table for all 50 qualities: every
         deviation is within 4% below 40&nbsp;keV mean energy and within 2% above it. The conversion coefficients for
@@ -74,20 +76,27 @@
         alongside RadiMeter for survey-meter type testing and M-Phreefiteq for radionuclide speciation and
         transport. The source code is on GitHub under the MIT licence:
         <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>.</p>
+      </div></div>
     </section>
     <style>
       /* Same left edge as the app's panels (20px gutter), not a centred column. Colours and type are the shell's tokens. */
-      .fp-about { margin: 0; padding: 26px 20px 44px; border-top: 1px solid rgb(var(--c-line));
+      /* The section sits on the same 1048px band as the header and footer (gutter token from shell.css) and, from 940px, reads in two
+         columns — on a wide screen a single 78ch column hugged the left edge and looked like a phone layout (owner, 2026-10-28). */
+      .fp-about { margin: 0; padding: 30px var(--rl-gutter, 20px) 44px; border-top: 1px solid rgb(var(--c-line));
                   color: rgb(var(--c-ink)); font-family: var(--body); font-size: 14px; line-height: 1.6; }
-      .fp-about h2 { margin: 0 0 10px; font-family: var(--display); font-size: 16px; font-weight: 600; }
+      .fp-about h2, .fp-about .cols { max-width: 984px; margin-left: auto; margin-right: auto; }
+      .fp-about .cols { display: grid; grid-template-columns: 1fr; gap: 0 48px; }
+      @media (min-width: 940px) { .fp-about .cols { grid-template-columns: 1fr 1fr; } .fp-about .cols h3:first-child { margin-top: 0; } }
+      .fp-about h2 { margin: 0 auto 10px; font-family: var(--display); font-size: 16px; font-weight: 600; }
       .fp-about h3 { margin: 20px 0 6px; font-family: var(--display); font-size: 14px; font-weight: 600; }
       .fp-about p, .fp-about ul { max-width: 78ch; margin: 0 0 10px; }
+      .fp-about .cols > div:last-child > h3:first-child { margin-top: 0; }
       .fp-about ul { padding-left: 20px; }
       .fp-about li { margin: 0 0 4px; }
       .fp-about a { color: inherit; text-underline-offset: 3px; }
       .fp-about .nw { white-space: nowrap; }
       /* Narrow screens carry the app's fixed calculate bar at the bottom: the last line must clear it. */
-      @media (max-width: 980px) { .fp-about { padding: 22px 16px 104px; } }
+      @media (max-width: 980px) { .fp-about { padding-bottom: 104px; } }
       @media print { .fp-about { display: none; } }
     </style>
     <!-- rl-shell:footer -->
