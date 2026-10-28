@@ -1,0 +1,47 @@
+<p class="lede">The workbench takes a reference field from its source settings to a number you can put in a calibration record. This page follows the screen in the order you fill it.</p>
+
+<h2 id="layout">How the screen is laid out</h2>
+<p>On a wide screen the inputs sit on the left (panels 01–04) and the results on the right (the spectrum chart and panels A–D). Below 980&nbsp;px the two columns become an <em>Input</em> tab and a <em>Results</em> tab, with the calculate bar fixed to the bottom edge. Every panel title is also an address: <code>#source</code>, <code>#geometry</code>, <code>#readout</code> and <code>#repeatability</code> for the inputs, <code>#spectrum</code>, <code>#characteristics</code>, <code>#operational</code>, <code>#iso</code> and <code>#uncertainty</code> for the results. Such a link opens the right tab at that panel, and Back steps through the panels you visited.</p>
+
+<h2 id="inputs">Filling in the four input panels</h2>
+<h3>01 Source</h3>
+<p>Pick <em>X-ray tube</em>, <em>Cs-137</em>, <em>Co-60</em> or <em>Import</em>. For a tube, the <em>ISO beam quality</em> list holds all 50 qualities of ISO&nbsp;4037-1; choosing one fills in the tube voltage, the filter stack and a 2500&nbsp;mm air path. Edit any of them and the list shows <em>Custom (edited)</em>, so a modified beam never carries a standard name. Tube voltage runs from 10 to 400&nbsp;kV; filter layers can be Be, Al, Cu, Sn, Ta, W or Pb, and the first row is tagged <em>Inherent</em>. For a nuclide, enter the certificate activity in MBq or GBq, the certificate's reference date, the date of the measurement and the distance in metres. <em>Import</em> takes a spectrum as two columns, energy and fluence, separated by commas, tabs or spaces.</p>
+<h3>02 Geometry and evaluation</h3>
+<p>The angle of incidence α (0–75°) applies to Hp(10) and H′(0.07); H*(10) is isotropic and ignores it. Leave <em>HVL material</em> on <em>Auto</em>: the half-value layer is then given in the material of the matched ISO quality. The <em>ISO comparison</em> target is auto-matched by default, and the tolerance band starts at ±5%.</p>
+<h3>03 Readout correction</h3>
+<p>Enter one chamber reading with the temperature, pressure and relative humidity at the time. The workbench returns k<sub>ρ</sub>, the factor that refers a vented chamber to 20&nbsp;°C, 101.325&nbsp;kPa and 65% relative humidity.</p>
+<h3>04 Repeatability uncertainty</h3>
+<p>Paste repeat readings separated by spaces, commas or line breaks. With <em>Apply k<sub>ρ</sub></em> ticked, each reading is multiplied by the panel&nbsp;03 factor first. Type&nbsp;B components below them are relative standard uncertainties in percent; the first is a 1.0% entry for the reference chamber's certificate.</p>
+
+<h2 id="calculate">Calculate or auto-calculate</h2>
+<p>The workbench starts in manual mode. When an input changes, the button turns into <em>Calculate — inputs changed</em> and the result panels keep showing the previous calculation under a notice, so you never read a half-updated set of numbers. After you press it, each readout shows the change from the previous calculation with ▲ or ▼. Switch on <em>Auto-calculate</em> to update while typing; that choice and the inputs themselves are kept in this browser for your next visit.</p>
+
+<h2 id="results">Reading the results</h2>
+<ul>
+  <li><strong>Spectrum.</strong> Relative fluence against energy. The <em>Kerma</em> button overlays φ·E·(μ<sub>en</sub>/ρ), the share of air kerma per energy.</li>
+  <li><strong>A Beam-quality characteristics.</strong> Mean energy Ē, effective energy E<sub>eff</sub>, HVL1, HVL2, the homogeneity coefficient h&nbsp;=&nbsp;HVL1/HVL2 and the air-kerma transmission of the added filtration. With the default N-80 inputs HVL1 reads 0.5753&nbsp;mm&nbsp;Cu.</li>
+  <li><strong>B Operational dose conversion coefficients.</strong> Hp(10,&nbsp;α) on the ICRU slab, H*(10) and H′(0.07,&nbsp;α) in Sv/Gy. Multiply the air kerma you measured by these to get the conventional dose equivalent. For a nuclide this panel also gives the point-source air kerma rate, and it shows k<sub>ρ</sub>.</li>
+  <li><strong>C ISO 4037-1 comparison.</strong> The matched quality with its tabulated HVL1, HVL2, homogeneity coefficient and mean energy, the calculated values, the deviation and a <em>Within band</em> or <em>Outside band</em> verdict for each.</li>
+  <li><strong>D Measurement uncertainty.</strong> From two readings up: the Type&nbsp;A evaluation, the combined budget and the <em>Reported result</em>, value&nbsp;±&nbsp;U with its coverage factor.</li>
+</ul>
+
+<h2 id="files">Saving, loading and printing</h2>
+<p><em>Save session</em> downloads a JSON file holding every input; <em>Load session</em> restores it on any computer. <em>Print report</em> lays out the input conditions and all result panels on paper with the print date. <em>Reset</em> returns every field to the N-80 defaults after a confirmation. Two address parameters open the workbench in a given state: <code>?preset=N-80</code> (any quality name) and <code>?source=Cs-137</code>.</p>
+
+<h2 id="mistakes">Mistakes that change the answer</h2>
+<ul>
+  <li><strong>Fixing the HVL material by habit.</strong> H-60 is tabulated in aluminium although it runs above 50&nbsp;kV; a copper HVL cannot be compared with it. <em>Auto</em> follows the table.</li>
+  <li><strong>Judging a quality at the wrong distance.</strong> Panel&nbsp;C always uses the table's 2.5&nbsp;m column, so keep the air path at 2500&nbsp;mm when you judge a quality. At N-80 the distance hardly matters (0.578 against 0.580&nbsp;mm&nbsp;Cu at 1.0 and 2.5&nbsp;m), but H-10 is tabulated at 0.044 and 0.059&nbsp;mm&nbsp;Al: the air in between is the main filter.</li>
+  <li><strong>Carrying the Type&nbsp;A factor into the combined result.</strong> Five readings give k&nbsp;=&nbsp;2.776 for repeatability alone; once a 1% certificate component joins, the effective degrees of freedom rise to about 821 and k falls to 1.96. The <a href="/examples/repeat-readings-uncertainty/">uncertainty example</a> shows the numbers.</li>
+  <li><strong>Correcting twice.</strong> If your readings are already temperature- and pressure-corrected, untick <em>Apply k<sub>ρ</sub></em>.</li>
+  <li><strong>Leaving the evaluation date on the certificate date.</strong> A Cs-137 source loses 2.3% of its activity per year; the <a href="/examples/cs-137-field-at-2-5-m/">Cs-137 example</a> works through ten years of decay.</li>
+</ul>
+<p>The <a href="/examples/n-80-survey-meter-type-test/">N-80 example</a> runs a complete X-ray field from these panels, and <a href="/methods/">Methods</a> explains what each number is computed from.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>ISO 4037-1:2019, Part 1: Radiation characteristics and production methods — quality list, HVL material of H-60, HVL1 of N-80 and H-10 at 1.0 m and 2.5 m.</li>
+  <li>JCGM 100:2008, <a href="https://www.bipm.org/en/committees/jc/jcgm/publications">Guide to the expression of uncertainty in measurement</a>, G.3 and G.4 (coverage factor and effective degrees of freedom).</li>
+  <li>IAEA Nuclear Data Section, <a href="https://www-nds.iaea.org/relnsd/vcharthtml/VChartHTML.html">Live Chart of Nuclides</a>: Cs-137 half-life 30.08 a.</li>
+  <li>Screen behaviour as implemented in the <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/app">workbench source</a>.</li>
+</ol>

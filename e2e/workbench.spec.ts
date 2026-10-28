@@ -250,19 +250,44 @@ test.describe("워크벤치 U1/U2/U3", () => {
       const html = await res.text();
       expect(html, h).toContain('<header class="site"');
       if (h !== "https://pro.radiation-lab.com/") {
-        expect(html, h).toContain('<meta name="robots" content="noindex,follow" />'); // T6 전까지 색인 제외
+        expect(html, h).not.toContain("noindex"); // T6 — 본문을 채워 색인 대상
+        expect(html, h).toContain('"@type":"TechArticle"');
         expect(html, h).toContain(`<a class="hd-item" href="${h}" aria-current="page">`); // 구역 칸 「현재」
         expect(html, h).toContain('<nav class="crumbs"');
       }
     }
-    // 임시 쪽 하나를 실제로 열어 셸 · 빵부스러기 · 본문 · 한글 0 · 넘침 0
+    // 설명 쪽 하나를 실제로 열어 셸 · 빵부스러기 · 본문 · 한글 0 · 넘침 0
     await page.goto("/validation/");
     await expect(page.locator("header.site[data-shell]")).toHaveCount(1);
     await expect(page.locator("nav.crumbs li")).toHaveText(["Radiation Lab", "Field Pro", "Validation"]);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Validation");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Validation: the engine against the ISO 4037 tables");
     await expect(page.locator("main#main a.open")).toHaveAttribute("href", "https://pro.radiation-lab.com/");
     expect((await page.locator("body").innerText()).match(/[가-힣]/g)).toBeNull();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+
+  test("설명 쪽 일곱(T6): 셸 · h1 하나 · 표가 있어도 가로 넘침 0 · 한글 0 · 앱으로 가는 링크", async ({ page }) => {
+    const paths = ["/guide/", "/methods/", "/validation/", "/about/", "/examples/n-80-survey-meter-type-test/", "/examples/cs-137-field-at-2-5-m/", "/examples/repeat-readings-uncertainty/"];
+    for (const p of paths) {
+      await page.goto(p);
+      await expect(page.locator("header.site[data-shell]"), p).toHaveCount(1);
+      await expect(page.locator("main#main h1"), p).toHaveCount(1);
+      await expect(page.locator("main#main a.open"), p).toHaveAttribute("href", "https://pro.radiation-lab.com/");
+      expect((await page.locator("body").innerText()).match(/[가-힣]/g), p).toBeNull();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), p).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test("예제(T6): 빵부스러기는 Guide 를 거치고, 「the N-80 preset」 링크가 워크벤치를 N-80 으로 연다", async ({ page }) => {
+    await page.goto("/examples/n-80-survey-meter-type-test/");
+    await expect(page.locator("nav.crumbs li")).toHaveText(["Radiation Lab", "Field Pro", "Guide", "N-80 field example"]);
+    await expect(page.locator('header.site a.hd-item[aria-current="page"]')).toHaveAttribute("href", "https://pro.radiation-lab.com/guide/");
+    await page.getByRole("link", { name: "the N-80 preset" }).click();
+    await expect(page).toHaveURL(/\/\?preset=N-80$/);
+    await showInputs(page);
+    await expect(page.getByLabel("ISO beam quality").locator("option:checked")).toHaveText("N-80");
+    await showResults(page);
+    await expect(page.locator(".ro.primary .v").first()).toContainText("0.5753"); // 예제 쪽 표의 HVL1 과 같은 값
   });
 
   test("모바일 스크린샷(확인용)", async ({ page, isMobile }) => {

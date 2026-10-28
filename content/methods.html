@@ -1,0 +1,43 @@
+<p class="lede">Everything the workbench reports comes from a small set of committed data tables and a few explicit formulas. This page states each one, so that a result can be checked by hand or with other software.</p>
+
+<h2 id="spectrum">X-ray spectrum</h2>
+<p>The tube model is the total emission of a tungsten anode at a 20° target angle, bremsstrahlung plus characteristic lines, before any filtration. It was generated once with SpekPy 2.5.4 (physics model <code>casim</code>, characteristic lines on) and stored with the source code; the browser never runs SpekPy. Rows exist for every 5&nbsp;kV from 10 to 150&nbsp;kV and every 10&nbsp;kV from 160 to 400&nbsp;kV, in 1&nbsp;keV bins. Between two stored voltages the engine interpolates the rows linearly. All 50 ISO&nbsp;4037-1 tube voltages fall exactly on a stored row, so the validation runs on unblended data.</p>
+<p>Instead of the model you can import a spectrum; every later step treats it the same way, and radionuclide sources are handled as lists of discrete lines.</p>
+
+<h2 id="attenuation">Filtration and air</h2>
+<p>Each filter layer, and then the air path, multiplies every energy bin by exp(−μt). This is narrow-beam attenuation: no build-up, no scatter from the filters, collimator or room. Mass attenuation coefficients for Be, Al, Cu, Sn, Ta, W, Pb, air and water, and the mass energy-absorption coefficient of air, come from the NIST tables as packaged in SpekPy, on a grid from 1 to 1400&nbsp;keV, and are interpolated log–log. Air is NIST dry air (mass fractions C&nbsp;0.000124, N&nbsp;0.755267, O&nbsp;0.231781, Ar&nbsp;0.012827).</p>
+
+<h2 id="hvl">Air kerma, half-value layers and energies</h2>
+<p>Relative air kerma is the sum over bins of φ(E)·E·(μ<sub>en</sub>/ρ)<sub>air</sub>(E). HVL1 is the thickness of the chosen material that halves it, found by bisection to well below 0.1% of its value; HVL2 is the further thickness from one half to one quarter, and h&nbsp;=&nbsp;HVL1/HVL2. The mean energy Ē is fluence-weighted. The effective energy is the photon energy whose linear attenuation coefficient in the HVL material equals ln&nbsp;2&nbsp;/&nbsp;HVL1.</p>
+<p>With <em>Auto</em>, the first estimate uses aluminium below 50&nbsp;kV, copper from 50&nbsp;kV and lead for Cs-137 and Co-60; once the field is matched to an ISO quality, the half-value layers are re-evaluated in that quality's tabulated material.</p>
+
+<h2 id="matching">Matching an ISO 4037-1 quality</h2>
+<p>The reference table holds the 50 qualities of ISO&nbsp;4037-1:2019, Tables 2–6: 11 in the L series, 16 in N, 9 in W and 14 in H, each with tube voltage, filtration, mean energy and HVL1 and HVL2 at 1.0&nbsp;m and 2.5&nbsp;m from the focal spot. For each candidate the engine computes the field's HVL1 in that candidate's material and keeps the candidate with the smallest absolute deviation, using the 2.5&nbsp;m column where the table gives one. The comparison then lists HVL1, HVL2, h and Ē against the band you set. Cs-137 and Co-60 fields are compared instead with the nominal mean energies of S-Cs (661.6&nbsp;keV) and S-Co (1252.9&nbsp;keV).</p>
+
+<h2 id="conversion">Conversion to operational quantities</h2>
+<p>Monoenergetic conversion coefficients from air kerma come from ISO&nbsp;4037-3:2019: h′<sub>K</sub>(0.07;&nbsp;E,&nbsp;α) from Table&nbsp;1, h*<sub>K</sub>(10;&nbsp;E) from Table&nbsp;14 and h<sub>pK</sub>(10;&nbsp;E,&nbsp;α) on the ICRU slab from Table&nbsp;46. Each angle column is interpolated log–log in energy, then between tabulated angles. The value reported for a spectrum is the air-kerma-weighted mean:</p>
+<p class="eq">h̄ = Σ φ(E)·E·(μ<sub>en</sub>/ρ)<sub>air</sub>(E)·h(E,&nbsp;α) &nbsp;/&nbsp; Σ φ(E)·E·(μ<sub>en</sub>/ρ)<sub>air</sub>(E)</p>
+<p>Reading the table at the mean energy instead is a common shortcut and it is not neutral. For N-80, h<sub>pK</sub>(10;&nbsp;0°) at Ē&nbsp;=&nbsp;64.96&nbsp;keV is 1.893&nbsp;Sv/Gy, while the spectrum average is 1.876: the shortcut reads 0.9% high, and 0.7% high for H*(10).</p>
+<p>One printed value is stored corrected. Table&nbsp;46 gives 0,005&nbsp;53 at 13&nbsp;keV and 45°, which would make that row non-monotonic in angle (0.0948 at 30°, 0.0169 at 60°). It is stored as 0.0553, consistent with the neighbouring energies at 45° (0.0258 at 12&nbsp;keV, 0.0997 at 14&nbsp;keV).</p>
+
+<h2 id="nuclides">Radionuclide fields</h2>
+<p>Cs-137 is one line at 661.657&nbsp;keV with emission probability 0.851; Co-60 is two lines, 1173.228&nbsp;keV (0.9985) and 1332.492&nbsp;keV (0.9998). Half-lives are 30.08&nbsp;a and 5.2711&nbsp;a, with a year of 365.25&nbsp;days. Activity on the evaluation date is A<sub>0</sub>·exp(−λt), and the air kerma rate of a point source at distance d is A/(4πd²)·Σ p<sub>i</sub>E<sub>i</sub>(μ<sub>en</sub>/ρ)<sub>air</sub>(E<sub>i</sub>), with no air attenuation and no scatter.</p>
+
+<h2 id="density">Air-density correction</h2>
+<p>k<sub>ρ</sub>&nbsp;=&nbsp;ρ<sub>0</sub>/ρ(T,&nbsp;P,&nbsp;h). Moist air is treated as an ideal-gas mixture, ρ&nbsp;=&nbsp;[P·M<sub>d</sub>&nbsp;−&nbsp;p<sub>v</sub>(M<sub>d</sub>&nbsp;−&nbsp;M<sub>w</sub>)]/(R·T), with water-vapour pressure p<sub>v</sub> from relative humidity and the Magnus saturation formula of Alduchov and Eskridge. The reference state, 20&nbsp;°C, 101.325&nbsp;kPa and 65% relative humidity, gives ρ<sub>0</sub>&nbsp;≈&nbsp;1.197&nbsp;kg/m³.</p>
+
+<h2 id="uncertainty">Uncertainty</h2>
+<p>Following the GUM, n repeat readings give the mean, the experimental standard deviation s, u&nbsp;=&nbsp;s/√n and ν&nbsp;=&nbsp;n&nbsp;−&nbsp;1, with k&nbsp;=&nbsp;t<sub>0.975,&nbsp;ν</sub> from a Student-t table (exact for ν&nbsp;=&nbsp;1–30 and a few larger tabulated values, interpolated in 1/ν between them). Relative components are combined in quadrature, as for a product model; Type&nbsp;B entries carry infinite degrees of freedom. The effective degrees of freedom follow Welch–Satterthwaite, ν<sub>eff</sub>&nbsp;=&nbsp;u<sub>c</sub><sup>4</sup>&nbsp;/&nbsp;Σ(u<sub>i</sub><sup>4</sup>/ν<sub>i</sub>), and set the coverage factor of the expanded uncertainty U&nbsp;=&nbsp;k·u<sub>c</sub>.</p>
+<p>How well these methods reproduce the standards is on the <a href="/validation/">Validation</a> page; how to drive them from the screen is in the <a href="/guide/">Guide</a>.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>ISO 4037-1:2019, X and gamma reference radiation for calibrating dosemeters and doserate meters and for determining their response as a function of photon energy — Part 1: Radiation characteristics and production methods. Tables 2–6.</li>
+  <li>ISO 4037-3:2019, Part 3: Calibration of area and personal dosemeters and the measurement of their response as a function of energy and angle of incidence. Tables 1, 14 and 46.</li>
+  <li>G. Poludniowski, A. Omar, R. Bujila, P. Andreo, Technical Note: SpekPy v2.0 — a software toolkit for modeling x-ray tube spectra, Medical Physics 48 (2021) 3630–3637. <a href="https://pypi.org/project/spekpy/">SpekPy on PyPI</a>.</li>
+  <li>J. H. Hubbell, S. M. Seltzer, <a href="https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients">X-Ray Mass Attenuation Coefficients</a>, NIST Standard Reference Database 126.</li>
+  <li>IAEA Nuclear Data Section, <a href="https://www-nds.iaea.org/relnsd/vcharthtml/VChartHTML.html">Live Chart of Nuclides</a> (ENSDF evaluations for Cs-137 and Co-60).</li>
+  <li>O. A. Alduchov, R. E. Eskridge, Improved Magnus form approximation of saturation vapor pressure, Journal of Applied Meteorology 35 (1996) 601–609.</li>
+  <li>JCGM 100:2008, <a href="https://www.bipm.org/en/committees/jc/jcgm/publications">Evaluation of measurement data — Guide to the expression of uncertainty in measurement</a> (GUM), 4.2, 5.1.2 and G.4.</li>
+  <li>Engine source: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/engine">src/engine</a> and the data generators in <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/scripts">scripts</a>.</li>
+</ol>

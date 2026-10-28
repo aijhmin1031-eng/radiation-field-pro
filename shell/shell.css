@@ -1,4 +1,4 @@
-/* Radiation Lab — common shell, HEADER-SPEC v3 · file version 3 (2026-10-28; v2 = --rl-gutter token · v3 = phone sheet for wrapping section bars). The ONE stylesheet every origin loads:
+/* Radiation Lab — common shell, HEADER-SPEC v3 · file version 4 (2026-10-28; v2 = --rl-gutter token · v3 = phone sheet · v4 = section bars always two rows). The ONE stylesheet every origin loads:
    https://radiation-lab.com/shell/shell.css?v=<version>  (version: shell.json). Served with CORS (cf/_headers).
    1) Fonts (Saira, SIL OFL 1.1, self-hosted next to this file — url() is relative to the stylesheet, so the
       subdomains fetch it from the apex too, and the local gate servers from themselves).
@@ -187,21 +187,14 @@
             color:rgb(var(--c-ink)); text-decoration:none; flex:none; }
   .hd-sec:hover { text-decoration:underline; }
   .hd-sec:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
-  /* ── Section bars (v3). The apex bar is 2 menus + 3 items and keeps the 1024px rule above. A section with
-     5 items (2 + 5 = 7) drops its bar to a second row below 1240px, with 6 or more (2 + 7 = 9, M-Phreefiteq)
-     below 1340px — measured: 1280px could not hold 2 + 7 beside the brand, the section name and the controls.
-     The controls never wrap; the bar does. render.mjs sets data-wrap from the count. */
-  @media (max-width:1339.98px) {
-    .hd:has(> .hd-nav[data-wrap="1340"]) { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
-    .hd:has(> .hd-nav[data-wrap="1340"]) .hd-ctl { flex:1 1 0; justify-content:flex-end; }
-    .hd-nav[data-wrap="1340"] { order:3; flex:1 0 100%; margin-left:-7px; flex-wrap:wrap; row-gap:2px; }
-  }
-  @media (max-width:1239.98px) {
-    .hd:has(> .hd-nav[data-wrap="1240"]) { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
-    .hd:has(> .hd-nav[data-wrap="1240"]) .hd-ctl { flex:1 1 0; justify-content:flex-end; }
-    .hd-nav[data-wrap="1240"] { order:3; flex:1 0 100%; margin-left:-7px; flex-wrap:wrap; row-gap:2px; }
-  }
-  @media (max-width:1023.98px) { .hd-nav[data-wrap] { flex-wrap:wrap; row-gap:2px; } }
+  /* ── Section bars (v4, 2026-10-28). A section with its own items (data-wrap: pro · radimeter · disposal) is ALWAYS two
+     rows: row 1 brand + section name + controls, row 2 the two global menus + the section items. The band is 1048px
+     (984px usable) and brand + 2 menus + 5 items + controls measured ~1,035px — RadiMeter overlapped at every width
+     from 1240px up under the v2/v3 one-row rule, caught by its check-platform. The apex (home · /calc, no data-wrap)
+     keeps its one row from 1024px. Below 640px the phone rules further down apply (☰ sheet). */
+  .hd:has(> .hd-nav[data-wrap]) { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
+  .hd:has(> .hd-nav[data-wrap]) .hd-ctl { flex:1 1 0; justify-content:flex-end; }
+  .hd-nav[data-wrap] { order:3; flex:1 0 100%; margin-left:-7px; flex-wrap:wrap; row-gap:2px; }
 
   /* ── Phone sheet (v3) — a section whose bar wraps (2 menus + 5–7 items, data-wrap) could not hold the two global menus
      and its own items in one 390px row: Field Pro measured 125px (3 rows). Below 640px the two global menus leave the row

@@ -1,33 +1,51 @@
-/** public/ 의 정적 쪽 다섯을 만든다 — 404.html 과 구역 메뉴 임시 쪽 넷(guide · methods · validation · about) (2026-10-28, T3).
- *  `npm run build` 의 첫 단계(`npm run build:pages`)다. 모두 공통 셸 v3 머리글 · 꼬리말 + (404) renderNotFound / (넷) 빵부스러기 + 짧은 본문.
+/** public/ 의 정적 쪽과 사이트맵을 만든다 — 404.html, 구역 메뉴 쪽 넷(guide · methods · validation · about), 예제 셋(examples/<slug>),
+ *  sitemap.xml (2026-10-28, T3 → T6). `npm run build` 의 첫 단계(`npm run build:pages`)다.
  *
  *  ★ 왜 public/ 에 두나: Vite 가 public/ 을 dist/ 에 그대로 복사한다. Vercel 은 산출물 뿌리의 404.html 을 HTTP 404 응답에 자동으로 쓰고
  *    (그전에는 text/plain "NOT_FOUND" 78 바이트 — 링크 0), `/guide/` 는 `guide/index.html` 로 받는다. Cloudflare Workers 로 옮길 때도
  *    정적 자산 그대로다(`not_found_handling: "404-page"`, 설계안 §3.5).
- *  ★ 커밋한다 — dev 서버(`vite`)도 public/ 을 그대로 내주므로 바로 볼 수 있다. 사본(shell/)이 바뀌면 빌드가 다시 만들고,
- *    gate/check-shell 이 public · dist 둘 다 render.mjs 출력과 바이트 동일한지 잰다. 손으로 고치지 않는다.
- *  ★ 임시 쪽 넷(감독 지시 2026-10-28): 구역 메뉴 주소가 T6 전까지 404 로 떨어지지 않게. 본문은 사실 2~4문장 + 「Open the workbench」,
- *    `noindex,follow`(T6 에서 본문이 채워지면 뗀다). 글은 `scripts/shell-page.mjs` 의 PAGES 에 있다. */
+ *  ★ 커밋한다 — dev 서버(`vite`)도 public/ 을 그대로 내주므로 바로 볼 수 있다. 사본(shell/)이나 본문(content/)이 바뀌면 빌드가 다시 만들고,
+ *    gate/check-shell 이 public · dist 둘 다 render.mjs 출력과 바이트 동일한지, 본문 규칙(단어 수 · 출처 · 겹치는 문장 · 사이트맵)을 잰다.
+ *    산출물은 손으로 고치지 않는다 — 글은 `content/`, 쪽 정보는 `scripts/shell-page.mjs` 의 PAGES.
+ *  ★ 설명 층(T6): 본문 조각을 공통 셸 + 빵부스러기 + h1 + 갱신일 + 본문 + 「Open the workbench」 + 쪽 사이 링크로 두르고, head 에
+ *    canonical · OG(article) · TechArticle JSON-LD 를 단다. 그전의 임시 쪽(noindex)은 이것으로 바뀌었다. */
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ROOT, SECTION, HOME, PAGES, SECTION_PAGES, loadShell, fragmentsFor } from "./shell-page.mjs";
+import { ROOT, SECTION, HOME, PAGES, CONTENT_PAGES, loadShell, fragmentsFor, esc } from "./shell-page.mjs";
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const STYLE = `<style>
   * { box-sizing: border-box; }
   html, body { margin: 0; background: rgb(var(--c-paper)); color: rgb(var(--c-ink)); font-family: var(--body); font-size: 15px; line-height: 1.7; }
   body { word-break: keep-all; overflow-wrap: break-word; }
   a { color: rgb(var(--c-accent)); }
   .pg { max-width: 760px; margin: 0 auto; padding: 18px 20px 56px; }
-  .pg h1 { font-family: var(--display); font-size: 32px; line-height: 1.15; margin: 8px 0 12px; }
-  .pg p { margin: 0 0 12px; color: rgb(var(--c-ink-muted)); }
-  .pg p a { color: inherit; }
+  .pg h1 { font-family: var(--display); font-size: 32px; line-height: 1.15; margin: 8px 0 6px; }
+  .pg h2 { font-family: var(--display); font-size: 21px; line-height: 1.25; margin: 30px 0 8px; }
+  .pg h3 { font-family: var(--display); font-size: 16px; line-height: 1.3; margin: 18px 0 4px; }
+  .pg p, .pg li { margin: 0 0 12px; }
+  .pg ul, .pg ol { padding-left: 22px; margin: 0 0 12px; }
+  .pg li { margin-bottom: 6px; }
+  .pg .upd { font-size: 13px; color: rgb(var(--c-ink-faint)); margin-bottom: 18px; }
+  .pg .lede { font-size: 16.5px; }
+  .pg code, .pg .eq, .pg td.n { font-family: var(--mono); font-size: 0.92em; }
+  .pg code { background: rgb(var(--c-panel)); padding: 0 4px; border-radius: 3px; }
+  .pg .eq { background: rgb(var(--c-panel)); border-left: 3px solid rgb(var(--c-accent)); padding: 10px 14px; overflow-x: auto; }
+  .pg .tbl { overflow-x: auto; margin: 0 0 14px; }
+  .pg table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .pg th, .pg td { text-align: left; vertical-align: top; padding: 6px 10px; border-bottom: 1px solid rgb(var(--c-line)); }
+  .pg th { font-weight: 600; border-bottom-color: rgb(var(--c-line-strong)); }
+  @media (max-width: 520px) { .pg table { font-size: 13px; } .pg th, .pg td { padding: 5px 6px; } }
+  .pg .src li { font-size: 13.5px; color: rgb(var(--c-ink-muted)); }
+  .pg .src a { color: inherit; }
   .pg .open { display: inline-block; margin-top: 8px; font-family: var(--display); font-weight: 600; color: rgb(var(--c-accent)); text-decoration: none; }
   .pg .open:hover { text-decoration: underline; }
+  .pg .more { margin-top: 26px; padding-top: 14px; border-top: 1px solid rgb(var(--c-line)); font-size: 14px; }
+  .pg .more h2 { font-size: 15px; margin: 0 0 6px; }
+  .pg .more ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; }
 </style>`;
 
-function doc({ spec, head, title, description, canonical, robots, body }) {
+function doc({ spec, head, title, description, canonical, robots, ogType = "website", ld = "", body }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -37,15 +55,20 @@ function doc({ spec, head, title, description, canonical, robots, body }) {
 <meta name="theme-color" content="#121517" media="(prefers-color-scheme: dark)" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}" />
-<meta name="robots" content="${robots}" />
-${canonical ? `<link rel="canonical" href="${esc(canonical)}" />
-<meta property="og:type" content="website" />
+${robots ? `<meta name="robots" content="${robots}" />
+` : ""}${canonical ? `<link rel="canonical" href="${esc(canonical)}" />
+<meta property="og:type" content="${ogType}" />
 <meta property="og:site_name" content="Radiation Lab" />
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(canonical)}" />
 <meta property="og:image" content="${HOME}og.png" />
-` : ""}<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="${HOME}og.png" />
+` : ""}${ld}<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <!-- rl-shell v${spec.version} — generated by scripts/build-pages.mjs from shell/shell.json and scripts/shell-page.mjs. Do not edit by hand; run npm run build:pages. -->
 ${head}
 ${STYLE}
@@ -55,6 +78,41 @@ ${STYLE}
 ${body}
 </body>
 </html>
+`;
+}
+
+/** 「갱신」 날짜를 사람이 읽는 꼴로(2026-10-28 → 28 October 2026). */
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const longDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+
+/** TechArticle JSON-LD — headline 은 h1, url 은 canonical, dateModified 는 PAGES.updated(사이트맵 lastmod 와 같은 값). */
+export function articleLd(p) {
+  const org = { "@type": "Organization", name: "Radiation Lab", url: "https://radiation-lab.com/" };
+  const ld = { "@context": "https://schema.org", "@type": "TechArticle", headline: p.h1, description: p.description, url: p.url,
+    inLanguage: "en", dateModified: p.updated, author: org, publisher: org,
+    isPartOf: { "@type": "WebSite", name: "Field Pro · Radiation Lab", url: HOME } };
+  return `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>\n`;
+}
+
+/** 본문 둘레 — h1 · 갱신일 · 본문 조각 · 「Open the workbench」 · 다른 설명 쪽 링크(앱 → 설명 쪽은 index.html 소개 절이 든다). */
+export function articleMain(p, body) {
+  const more = CONTENT_PAGES.filter((k) => k !== p.key).map((k) => `<li><a href="/${PAGES[k].path}/">${esc(PAGES[k].crumb)}</a></li>`).join("");
+  return `<main id="main"><article class="pg">
+  <h1>${esc(p.h1)}</h1>
+  <p class="upd">Field Pro · updated ${longDate(p.updated)}</p>
+${body}
+  <p><a class="open" href="${HOME}">Open the workbench &rarr;</a></p>
+  <nav class="more" aria-label="More Field Pro pages"><h2>More on Field Pro</h2><ul>${more}</ul></nav>
+</article></main>`;
+}
+
+/** sitemap.xml — 앱(홈)과 설명 쪽 일곱. 404 는 넣지 않는다. lastmod 는 PAGES.updated. */
+export function sitemap() {
+  const urls = [{ loc: HOME, lastmod: PAGES.home.updated }, ...CONTENT_PAGES.map((k) => ({ loc: PAGES[k].url, lastmod: PAGES[k].updated }))];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n  </url>`).join("\n")}
+</urlset>
 `;
 }
 
@@ -68,19 +126,16 @@ export async function renderAll() {
     description: "This address has no page. The Field Pro workbench and the rest of Radiation Lab are linked here.",
     body: `${nf.header}\n${R.renderNotFound(spec, { section: SECTION })}\n${nf.footer}`,
   }));
-  for (const k of SECTION_PAGES) {
+  for (const k of CONTENT_PAGES) {
     const p = PAGES[k];
     const f = fragmentsFor(shell, k);
-    const main = `<main id="main"><div class="pg">
-  <h1>${esc(p.h1)}</h1>
-  ${p.body.map((t) => `<p>${t}</p>`).join("\n  ")}
-  <p><a class="open" href="${HOME}">Open the workbench &rarr;</a></p>
-</div></main>`;
+    const body = readFileSync(join(ROOT, p.content), "utf8").trim();
     out.set(`${p.path}/index.html`, doc({
-      spec, head: f.head, title: p.title, description: p.description, canonical: p.url, robots: "noindex,follow",
-      body: `${f.header}\n${f.crumbs}\n${main}\n${f.footer}`,
+      spec, head: f.head, title: p.title, description: p.description, canonical: p.url, ogType: "article", ld: articleLd(p),
+      body: `${f.header}\n${f.crumbs}\n${articleMain(p, body)}\n${f.footer}`,
     }));
   }
+  out.set("sitemap.xml", sitemap());
   return { out, version: spec.version };
 }
 
@@ -92,7 +147,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     mkdirSync(dirname(file), { recursive: true });
     const same = existsSync(file) && readFileSync(file, "utf8") === html;
     if (!same) { writeFileSync(file, html); changed++; }
-    console.log(`${same ? "＝ " : "✏️ "} public/${rel.padEnd(22)} ${String(html.length).padStart(6)}자`);
+    console.log(`${same ? "＝ " : "✏️ "} public/${rel.padEnd(56)} ${String(html.length).padStart(6)}자`);
   }
   console.log(changed ? `✅ 정적 쪽 ${out.size} — ${changed}개를 새로 썼다(공통 셸 v${version})` : `✅ 정적 쪽 ${out.size} — 모두 이미 공통 셸 v${version} 이다`);
 }

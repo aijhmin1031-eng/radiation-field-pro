@@ -41,7 +41,7 @@ E2E · 실측은 Playwright route 로 apex 요청을 사본으로 돌려 세운�
 | CLS | 0.955 — 앱이 마운트되며 `.fp-about` 이 통째로 밀림 | `#root { min-height: 100vh }` 자리 예약(무JS 는 `<noscript>` 로 0) — 소개 절이 처음부터 접힘 아래라 밀려도 보이지 않는다 |
 | 구획 해시(D8) | 없음 — 뒤로가기가 앱 밖으로 | `src/app/hash.ts`: 모바일 탭 `#input` · `#results`, 패널 제목 id 아홉(`#source` · `#geometry` · `#readout` · `#repeatability` · `#spectrum` · `#characteristics` · `#operational` · `#iso` · `#uncertainty`, 번호가 그 주소의 링크). 탭을 옮기면 `history.pushState`, `popstate` · `hashchange` 로 복원, 접속 때 해시로 탭 열고 패널로 내려감 |
 | 404 | 없음 | `public/404.html` — `scripts/build-pages.mjs`(빌드 첫 단계)가 `renderHeader` + `renderNotFound(section:"pro")` + `renderFooter` 로 **정적** 생성 · 커밋. Vercel 이 산출물 뿌리의 404.html 을 자동으로 쓴다(Workers 이전 때는 `not_found_handling: "404-page"`) |
-| 구역 메뉴 임시 쪽 | 없음(Guide · Methods · Validation · About 이 404) | `public/{guide,methods,validation,about}/index.html` — 같은 스크립트가 공통 셸 + `renderBreadcrumb`(Radiation Lab / Field Pro / 쪽) + 사실만 담은 2~4문장 + 「Open the workbench」로 **정적** 생성 · 커밋(감독 지시 2026-10-28). 본문은 T6 에서 채우고, 그때까지 `noindex,follow` · canonical · OG 최소. 구역 칸 「현재」는 그 쪽. about 의 `#limits` 는 shell.json pro disclaimer 의 목적지. 글은 `scripts/shell-page.mjs` PAGES 한 곳 |
+| 구역 메뉴 쪽 | 없음(Guide · Methods · Validation · About 이 404) | `public/{guide,methods,validation,about}/index.html` — 같은 스크립트가 공통 셸 + `renderBreadcrumb`(Radiation Lab / Field Pro / 쪽) + 사실만 담은 2~4문장 + 「Open the workbench」로 **정적** 생성 · 커밋(감독 지시 2026-10-28). 본문은 T6 에서 채웠다(위 「설명 층」 절 — noindex 해제). 구역 칸 「현재」는 그 쪽. about 의 `#limits` 는 shell.json pro disclaimer 의 목적지. 글은 `scripts/shell-page.mjs` PAGES 한 곳 |
 | 건너뛰기 링크 | React 가 그림(머리글 뒤 포커스) | `index.html` 의 정적 `<a class="skip">`(body 첫 요소, 모양은 shell.css) |
 
 **실측**(Playwright, dist + 사본 shell/ v3, 4쪽(/ · /404.html · /guide/ · /about/) × 1280/390 × 라이트/다크 = 16, `D:\Files\_작업\20261028_radiation-lab 사이트 개편\T3_캡처\실측.md`):
@@ -59,6 +59,26 @@ Google Fonts · IBM Plex · Pretendard · `@font-face` 0 · 옛 토큰 이름 0 
 **E2E**(`e2e/workbench.spec.ts`, 데스크톱 1440 · Pixel 7): 기존 11건 유지(h1 「Radiation」 · 한글 0 · 0.57 · N-80 · k = 2.776 · 넘침 0) + 셸 6건 —
 머리글 · 꼬리말 정적 · shell.css 적용(`--c-paper` 232 234 230, h1 Saira) · 외부 요청이 apex 뿐 · 테마 단추로 다크(`18 21 23`) 전환과 새로 고침 뒤 유지 ·
 탭/패널 두 번 옮긴 뒤 뒤로가기 두 번이 앱 안에서 멈춤 · `#uncertainty` 접속 · 404.html · 구역 메뉴 다섯 링크 전부 200(로컬 서버) + `/validation/` 빵부스러기 · h1.
+
+## ★★ 설명 층 — Guide · Methods · Validation · About + 예제 셋 (2026-10-28, T6)
+
+**계기.** 애드센스 재심사(10-06 「가치가 별로 없는 콘텐츠」 거절)를 통과할 **고유한 설명**이 필요했다. 구역 메뉴 네 주소는 T3 에서 noindex 임시 쪽(사실 2~4문장)이었다.
+
+| 쪽 | 주소 | 무엇 |
+|---|---|---|
+| Guide | `/guide/` | 입력 패널 01–04 · 수동/자동 계산 · 결과 A–D 읽기 · 저장 · 인쇄 · 딥링크 · 답을 바꾸는 실수 다섯 |
+| Methods | `/methods/` | SpekPy 스펙트럼 · NIST 감쇠 · HVL · ISO 4037-1 매칭 규칙 · ISO 4037-3 스펙트럼 평균(평균에너지 지름길과의 차) · 핵종 · 공기밀도 · GUM |
+| Validation | `/validation/` | HVL1 50선질 밴드 · N-80 상세 · 핵종 변환계수 · 커마율 상수 · 편차의 이유 · 검증 안 된 것 |
+| About | `/about/` | 용도 · 저자 · 구성 · 브라우저에 남는 것 · `#limits`(shell.json pro disclaimer 목적지) · 연락 |
+| 예제 셋 | `/examples/<slug>/` | N-80 측정기 시험 · Cs-137 2.5 m · 반복 판독 → 보고 불확도. 빵부스러기는 Guide 를 거치고 「현재」 칸은 Guide |
+
+- **글은 `content/*.html`(예제는 `content/examples/`)**, 쪽 정보(제목 · h1 · 설명문 · 갱신일)는 `scripts/shell-page.mjs` 의 PAGES. `scripts/build-pages.mjs` 가
+  공통 셸 · 빵부스러기 · h1 · 갱신일 · 「Open the workbench」 · 쪽 사이 링크로 두르고, head 에 canonical · OG(article) · TechArticle JSON-LD 를 단다.
+  `public/sitemap.xml` 도 같은 스크립트가 만든다(앱 + 설명 쪽 일곱, lastmod = PAGES.updated). 앱 → 설명 쪽 링크는 `index.html` 소개 절 「Read more」.
+- **숫자는 엔진을 같은 입력으로 돌려 얻었다**(작업 폴더 `D:\Files\_작업61028_radiation-lab 사이트 개편\T6_원고\_script`). 엔진 · 데이터를 고치면 쪽의 숫자도
+  다시 확인한다 — 예제 표의 HVL1 0.5753 은 E2E 가 앱 화면과 대조한다. 핵종 자료는 IAEA Live Chart(ENSDF)와 대조했다.
+- **게이트(`gate/check-shell.mjs` ⑨)**: 본문 400~900어 · 출처(ol.src) 2개 이상 · 여덟 단어 이상 문장이 두 쪽(+ 소개 절)에 겹치지 않음 · 사이트 안 링크와 `#id` 가
+  닿음 · 사이트맵 · noindex 없음 · description 160자 이하. **E2E**: 일곱 쪽 넘침 0 · 한글 0 · 예제 → `/?preset=N-80` 딥링크가 같은 HVL1 을 띄움.
 
 ## 무엇을 계산하는가
 
@@ -92,7 +112,7 @@ npm ci
 npm run dev          # 개발 서버
 npm test             # 엔진·검증·화면 어댑터 단위 테스트
 npm run typecheck    # 타입 검사
-npm run build        # public/404.html + 임시 쪽 넷 생성 → dist/ 에 정적 파일 생성(공통 셸 삽입)
+npm run build        # public/404.html + 설명 쪽 일곱 + sitemap.xml 생성 → dist/ 에 정적 파일 생성(공통 셸 삽입)
 npm run e2e          # Playwright E2E (데스크톱·모바일, 빌드 뒤 4173 미리보기 서버; 셸 자산은 shell/ 사본으로)
 npm run sync-shell   # 공통 셸 사본 shell/ 을 apex 에서 다시 받기(--from=<dir> 로 로컬 체크아웃)
 npm run gate         # build + check-shell(공통 셸이 정본 그대로인가)
@@ -106,8 +126,9 @@ npm run report:accuracy   # docs/accuracy-spec.md 재생성
 - `src/data/` — 감쇠계수, 텅스텐 방출 스펙트럼, ISO 4037-1 선질 표, ISO 4037-3 변환계수.
 - `src/validation/` — ISO 표값과 대조하는 검증 테스트.
 - `src/app/` — React 화면. `hash.ts` 가 구획 해시(탭 · 패널 주소)를 맡는다.
-- `shell/` — 공통 셸 v3 사본(우산 `radiation-lab/public/shell` 정본, `npm run sync-shell`). 손으로 고치지 않는다.
-- `scripts/` — `sync-shell.mjs` · `shell-page.mjs`(쪽별 셸 값) · `vite-plugin-shell.mjs`(index.html 삽입) · `build-pages.mjs`(public/404.html + guide/methods/validation/about) · 정확도 보고서 · 데이터 생성.
+- `shell/` — 공통 셸 사본(지금 파일 v4, 우산 `radiation-lab/public/shell` 정본, `npm run sync-shell`). 손으로 고치지 않는다.
+- `content/` — 설명 쪽 일곱의 본문 조각(영어 HTML).
+- `scripts/` — `sync-shell.mjs` · `shell-page.mjs`(쪽별 셸 값 · PAGES) · `vite-plugin-shell.mjs`(index.html 삽입) · `build-pages.mjs`(public/404.html + 설명 쪽 일곱 + sitemap.xml) · 정확도 보고서 · 데이터 생성.
 - `gate/` — `check-shell.mjs`(공통 셸 게이트).
 - `docs/` — 정확도 사양, 화면 설계 기록.
 

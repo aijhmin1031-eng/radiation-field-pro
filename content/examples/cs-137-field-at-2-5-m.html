@@ -1,0 +1,48 @@
+<p class="lede">A caesium-137 irradiator is the workhorse of a radiation-protection calibration room: one line at 661.657&nbsp;keV, a half-life long enough to plan around and short enough to matter. This example takes a source certified ten years ago, brings its activity to today, and gives the air kerma rate, the dose-equivalent rates and the lead half-value layer at a 2.5&nbsp;m test point.</p>
+
+<h2 id="inputs">Inputs</h2>
+<p>Open the workbench with <a href="/?source=Cs-137">Cs-137 selected</a> and enter the values below. The activity and dates are illustrative; use your own certificate.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Panel</th><th>Field</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>01 Source</td><td>Source</td><td>Cs-137</td></tr>
+    <tr><td>01 Source</td><td>Activity</td><td class="n">10 GBq</td></tr>
+    <tr><td>01 Source</td><td>Reference date (certificate)</td><td class="n">2016-01-01</td></tr>
+    <tr><td>01 Source</td><td>Evaluation date</td><td class="n">2026-10-28</td></tr>
+    <tr><td>01 Source</td><td>Distance</td><td class="n">2.5 m</td></tr>
+    <tr><td>02 Geometry</td><td>α / HVL material</td><td>0° / Auto (lead)</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="results">Results</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Elapsed time</td><td class="n">3953 d (10.82 a)</td></tr>
+    <tr><td>Activity on the evaluation date</td><td class="n">7.793 GBq (decay factor 0.7793)</td></tr>
+    <tr><td>Air kerma rate at 2.5 m</td><td class="n">94.53 µGy/h</td></tr>
+    <tr><td>Hp(10, 0°)/K<sub>a</sub>, slab</td><td class="n">1.216 Sv/Gy → 115.0 µSv/h</td></tr>
+    <tr><td>H*(10)/K<sub>a</sub></td><td class="n">1.203 Sv/Gy → 113.7 µSv/h</td></tr>
+    <tr><td>H′(0.07, 0°)/K<sub>a</sub></td><td class="n">1.200 Sv/Gy → 113.4 µSv/h</td></tr>
+    <tr><td>HVL1 in lead (narrow beam)</td><td class="n">5.600 mm Pb</td></tr>
+    <tr><td>Homogeneity coefficient</td><td class="n">1 (single line)</td></tr>
+    <tr><td>Radionuclide check against S-Cs</td><td class="n">661.657 keV vs 661.6 keV nominal</td></tr>
+  </tbody>
+</table></div>
+<p>Panel&nbsp;C does not search the X-ray table for a nuclide; it compares the field with the S-Cs quality of ISO&nbsp;4037 instead.</p>
+
+<h2 id="interpretation">What the numbers say</h2>
+<p><strong>Dates are part of the calibration.</strong> Over 10.82 years the source has lost 22% of its activity, and it keeps losing 2.3% a year. A rate table written at commissioning and never re-dated is 2.3% wrong after one year and 11% wrong after five. Entering the evaluation date each time costs nothing.</p>
+<p><strong>The rate scales with the inverse square of distance, and only that.</strong> At 1&nbsp;m the same source gives 590.8&nbsp;µGy/h, 6.25 times the 2.5&nbsp;m value. The point-source formula ignores the air in between; with the engine's own attenuation data, 2.5&nbsp;m of air would remove 2.3% of the primary kerma, while scatter from the air, the collimator and the room adds some back. Those effects are why a laboratory fixes its rates by measurement with a calibrated chamber and uses a calculation like this one to plan and to check.</p>
+<p><strong>The calculated rate constant sits slightly low.</strong> Dividing the rate by activity and multiplying by d² gives 0.0758&nbsp;µGy·m²·MBq⁻¹·h⁻¹, 1.7% below the literature value of 0.0771 used in the test suite. The engine models only the gamma line; the barium K X-rays near 32&nbsp;keV are absent, and with them a small low-energy share of the kerma.</p>
+<p><strong>Lead attenuators.</strong> In the narrow-beam model each 5.6&nbsp;mm of lead halves the air kerma rate, and 22.4&nbsp;mm (four half-value layers) leaves 6.25%, about 5.9&nbsp;µGy/h at 2.5&nbsp;m. Real attenuators in a collimated beam add forward scatter, so the measured reduction is smaller; the narrow-beam value is the right one for describing beam quality and the wrong one for shielding a room.</p>
+<p><strong>Choose the quantity before the coefficient.</strong> At this energy Hp(10) on the slab exceeds H*(10) by only 1.1%, so mixing them up hides easily; it is still a different quantity with a different phantom, and a personal dosemeter must be compared with Hp(10).</p>
+<p>The X-ray counterpart of this example is the <a href="/examples/n-80-survey-meter-type-test/">N-80 field</a>; how the decay and kerma formulas are built is on the <a href="/methods/#nuclides">Methods</a> page.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>IAEA Nuclear Data Section, <a href="https://www-nds.iaea.org/relnsd/vcharthtml/VChartHTML.html">Live Chart of Nuclides</a>: Cs-137 half-life 30.08 a, 661.657 keV line at 85.1% per decay, Ba K X-rays.</li>
+  <li>ISO 4037-3:2019, recommended conversion coefficients for S-Cs: Hp(10) 1.21, H*(10) 1.20, H′(0.07) 1.21 Sv/Gy.</li>
+  <li>J. H. Hubbell, S. M. Seltzer, <a href="https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients">X-Ray Mass Attenuation Coefficients</a>, NIST Standard Reference Database 126 (lead and air).</li>
+  <li>Literature rate constant as used in the engine's <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/src/engine/decay.test.ts">decay tests</a>.</li>
+</ol>

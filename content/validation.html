@@ -1,0 +1,65 @@
+<p class="lede">A reference-field calculator is only useful if you know how far to trust it. This page lists what the engine is compared against, the deviations it produces, the reasons we can identify for them, and what has not been checked.</p>
+
+<h2 id="how">How the checks run</h2>
+<p>The comparisons are code, not a one-off spreadsheet. The unit-test suite (153 tests) recomputes the first half-value layer of every ISO&nbsp;4037-1 quality and fails if any deviation leaves its envelope, and a report script writes the same numbers into the <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">accuracy specification</a> from the engine itself rather than by hand. Browser tests on a 1440&nbsp;px desktop and a Pixel&nbsp;7 profile then open the built site and read the screen: with the default inputs the HVL1 readout must show 0.57&nbsp;mm&nbsp;Cu and the auto-match must name N-80, and five sample readings must produce a Type&nbsp;A coverage factor of 2.776.</p>
+
+<h2 id="hvl1">First half-value layer, all 50 qualities</h2>
+<p>Each quality is built from its tabulated tube voltage, inherent and added filtration and a 2.5&nbsp;m air path, and its HVL1 is compared with the 2.5&nbsp;m column of ISO&nbsp;4037-1:2019.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Mean energy</th><th>Qualities</th><th>Mean |deviation|</th><th>Largest deviation</th><th>Envelope</th></tr></thead>
+  <tbody>
+    <tr><td>below 40 keV</td><td class="n">17</td><td class="n">1.26%</td><td>H-10, −3.91%</td><td class="n">≤ 4%</td></tr>
+    <tr><td>40–150 keV</td><td class="n">22</td><td class="n">0.67%</td><td>H-280, +1.45%</td><td class="n">≤ 2%</td></tr>
+    <tr><td>150 keV and above</td><td class="n">11</td><td class="n">1.02%</td><td>N-300, +1.69%</td><td class="n">≤ 2%</td></tr>
+  </tbody>
+</table></div>
+<p>For N-80, the default field, the full comparison reads:</p>
+<div class="tbl"><table>
+  <thead><tr><th>Characteristic</th><th>ISO 4037-1</th><th>Engine</th><th>Deviation</th></tr></thead>
+  <tbody>
+    <tr><td>HVL1 (mm Cu)</td><td class="n">0.580</td><td class="n">0.5753</td><td class="n">−0.80%</td></tr>
+    <tr><td>HVL2 (mm Cu)</td><td class="n">0.623</td><td class="n">0.6185</td><td class="n">−0.72%</td></tr>
+    <tr><td>Homogeneity coefficient</td><td class="n">0.9310</td><td class="n">0.9302</td><td class="n">−0.08%</td></tr>
+    <tr><td>Mean energy (keV)</td><td class="n">65.2</td><td class="n">64.96</td><td class="n">−0.37%</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="gamma">Radionuclide fields</h2>
+<p>Spectrum-averaged conversion coefficients at normal incidence, in Sv/Gy, against the values ISO&nbsp;4037-3:2019 recommends for the two nuclide qualities:</p>
+<div class="tbl"><table>
+  <thead><tr><th>Nuclide</th><th>Quantity</th><th>ISO 4037-3</th><th>Engine</th><th>Deviation</th></tr></thead>
+  <tbody>
+    <tr><td>Cs-137</td><td>Hp(10)</td><td class="n">1.210</td><td class="n">1.216</td><td class="n">+0.52%</td></tr>
+    <tr><td>Cs-137</td><td>H*(10)</td><td class="n">1.200</td><td class="n">1.203</td><td class="n">+0.26%</td></tr>
+    <tr><td>Cs-137</td><td>H′(0.07)</td><td class="n">1.210</td><td class="n">1.200</td><td class="n">−0.82%</td></tr>
+    <tr><td>Co-60</td><td>Hp(10)</td><td class="n">1.150</td><td class="n">1.153</td><td class="n">+0.27%</td></tr>
+    <tr><td>Co-60</td><td>H*(10)</td><td class="n">1.160</td><td class="n">1.159</td><td class="n">−0.10%</td></tr>
+    <tr><td>Co-60</td><td>H′(0.07)</td><td class="n">1.150</td><td class="n">1.162</td><td class="n">+1.03%</td></tr>
+  </tbody>
+</table></div>
+<p>The nuclide data agree with the ENSDF evaluations shown in the IAEA Live Chart of Nuclides: 30.08&nbsp;a and 661.657&nbsp;keV at 85.1% for Cs-137; 1925.28&nbsp;d (5.2711&nbsp;a), 1173.228&nbsp;keV at 99.85% and 1332.492&nbsp;keV at 99.98% for Co-60. Carried through to the air-kerma rate constant, the engine gives 0.0758 and 0.3054&nbsp;µGy·m²·MBq⁻¹·h⁻¹; the test suite holds them within 4% of the literature values 0.0771 and 0.3085, and they sit 1.7% and 1.0% below.</p>
+
+<h2 id="why">Where the deviations come from</h2>
+<ul>
+  <li><strong>Rounding in the table.</strong> H-10 is printed as 0.059&nbsp;mm&nbsp;Al. Half a unit in the last digit is ±0.85%, so about a fifth of the −3.91% at H-10 can be the printed value alone.</li>
+  <li><strong>The air path dominates at the lowest energies.</strong> In the engine, 2.5&nbsp;m of air passes 0.04% of the unfiltered air kerma at 10&nbsp;kV, against 3.5% for the 1&nbsp;mm beryllium window. A low-energy HVL is therefore mostly a statement about the air and the low-energy tail of the attenuation data, where small differences weigh most.</li>
+  <li><strong>An ideal beam.</strong> The model has no heel effect, no target roughening, no scatter from filters, monitor chamber or collimator, and a nominal 20° anode. A real tube that meets the table does so with its own geometry.</li>
+  <li><strong>Missing low-energy lines in Cs-137.</strong> Only the 661.657&nbsp;keV gamma line is modelled; the barium K X-rays near 32&nbsp;keV (about 8% per decay together) are not, which removes a small low-energy share from the kerma rate.</li>
+</ul>
+<p>No factor is fitted to make the engine meet the table: the emission data come straight from SpekPy and the attenuation data from NIST, and the positive deviations at N-300 and H-280 are reported as they are.</p>
+
+<h2 id="limits">What is not validated</h2>
+<ul>
+  <li>The 1.0&nbsp;m column. At 1000&nbsp;mm of air the engine gives 0.0404&nbsp;mm&nbsp;Al for H-10 against a tabulated 0.044 (−8.3%), although L-10 still agrees within 0.4%.</li>
+  <li>Spectrum-averaged coefficients for the X-ray qualities. Only the monoenergetic tables are stored; the averages are not compared with tabulated quality coefficients.</li>
+  <li>Angles other than 0° for the nuclide fields, imported spectra, and any comparison with measurements in a real laboratory beam.</li>
+  <li>The transcription of the printed tables, which is checked only for internal consistency (one value was corrected, see <a href="/methods/#conversion">Methods</a>).</li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>ISO 4037-1:2019, Part 1: Radiation characteristics and production methods, Tables 2–6 (HVL1, HVL2 and mean energy at 1.0 m and 2.5 m).</li>
+  <li>ISO 4037-3:2019, Part 3: Calibration of area and personal dosemeters and the measurement of their response as a function of energy and angle of incidence.</li>
+  <li>IAEA Nuclear Data Section, <a href="https://www-nds.iaea.org/relnsd/vcharthtml/VChartHTML.html">Live Chart of Nuclides</a>, Cs-137 and Co-60 ground states and decay radiation.</li>
+  <li>Generated report: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">docs/accuracy-spec.md</a>; tests: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/validation">src/validation</a> and <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/src/engine/decay.test.ts">decay.test.ts</a> (air-kerma rate constants).</li>
+</ol>
