@@ -1,4 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
+import { routeShellAssets } from "./shell-assets";
+
+// 공통 셸 v3 의 apex 자산(https://radiation-lab.com/shell/*)은 vendored 사본 shell/ 로 대신 내준다 — 네트워크 없이, 빌드와 같은 판으로.
+test.beforeEach(async ({ page }) => {
+  await routeShellAssets(page);
+});
 
 /** 모바일(≤980px)에서는 [결과] 탭을 눌러야 결과가 보인다. */
 async function showResults(page: Page) {
@@ -124,6 +130,108 @@ test.describe("워크벤치 U1/U2/U3", () => {
     await expect(page.getByLabel("HVL material")).toHaveValue("Cu");
     await page.getByLabel("ISO comparison").selectOption("N-100");
     await expect(page.getByLabel("ISO comparison")).toHaveValue("N-100");
+  });
+
+  test("공통 셸 v3: 머리글 · 꼬리말이 정적으로 있고 shell.css 가 적용되며 제3자(Google Fonts) 요청이 없다", async ({ page }) => {
+    const external: string[] = [];
+    page.on("request", (r) => {
+      const u = new URL(r.url());
+      if (u.hostname !== "localhost" && u.hostname !== "127.0.0.1") external.push(u.hostname);
+    });
+    await page.goto("/");
+    const header = page.locator("header.site[data-shell][data-section='pro']");
+    await expect(header).toHaveCount(1);
+    await expect(header.locator(".hd-sec")).toHaveText("Field Pro");
+    await expect(header.locator('a.hd-item[aria-current="page"]')).toHaveText("Workbench"); // 구역 메뉴의 현재 칸
+    await expect(header.locator('.tm-i[aria-current="page"] b')).toContainText("Field Pro"); // Pro workbenches 패널 안(닫혀 있어 보이지 않음)
+    await expect(page.locator("footer.site[data-shell]")).toHaveCount(1);
+    await expect(page.locator("footer.site .fcol")).toHaveCount(3);
+    // 머리글은 React 가 아니라 HTML 에 있다 — 앱 뿌리(#root) 밖에서 body 의 첫 요소(건너뛰기 링크 다음)
+    expect(await page.evaluate(() => document.body.children[1]?.matches("header.site") && !document.getElementById("root")?.contains(document.querySelector("header.site")))).toBe(true);
+    await page.waitForLoadState("networkidle");
+    const applied = await page.evaluate(() => ({
+      sheet: [...document.styleSheets].some((s) => s.href?.includes("radiation-lab.com/shell/shell.css")),
+      paper: getComputedStyle(document.documentElement).getPropertyValue("--c-paper").trim(),
+      bodyBg: getComputedStyle(document.body).backgroundColor,
+      bodyFont: getComputedStyle(document.body).fontFamily,
+      h1Font: getComputedStyle(document.querySelector("h1")!).fontFamily,
+      theme: document.documentElement.dataset.theme,
+      pressed: document.getElementById("thm")?.getAttribute("aria-pressed"),
+    }));
+    expect(applied.sheet).toBe(true);
+    expect(applied.paper).toBe("232 234 230");
+    expect(applied.bodyBg).toBe("rgb(232, 234, 230)");
+    expect(applied.bodyFont).not.toMatch(/IBM Plex/);
+    expect(applied.h1Font).toMatch(/Saira/);
+    expect(applied.theme).toBe("light");
+    expect(applied.pressed).toBe("false"); // shell.js 가 돌았다
+    expect([...new Set(external)]).toEqual(["radiation-lab.com"]); // apex 뿐 — fonts.googleapis · gstatic 0
+  });
+
+  test("공통 셸 v3: 테마 단추로 다크가 켜지고 토큰이 뒤집힌다", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const thm = page.locator("#thm");
+    if (!(await thm.isVisible())) test.skip(true, "이 폭에서는 테마 단추가 보이지 않는다");
+    await thm.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    const dark = await page.evaluate(() => ({
+      paper: getComputedStyle(document.documentElement).getPropertyValue("--c-paper").trim(),
+      bodyBg: getComputedStyle(document.body).backgroundColor,
+      panelBg: getComputedStyle(document.querySelector("section.panel")!).backgroundColor,
+      ink: getComputedStyle(document.body).color,
+    }));
+    expect(dark.paper).toBe("18 21 23");
+    expect(dark.bodyBg).toBe("rgb(18, 21, 23)");
+    expect(dark.panelBg).toBe("rgb(26, 30, 33)");
+    expect(dark.ink).toBe("rgb(230, 233, 234)");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); // 저장된 선택이 그리기 전에 적용된다
+  });
+
+  test("구획 해시(D8): 탭 · 패널을 옮기면 주소가 바뀌고, 뒤로가기 두 번이 앱 안에서 멈춘다", async ({ page, isMobile }) => {
+    await page.goto("/");
+    const path = async () => page.evaluate(() => location.pathname + location.hash);
+    if (isMobile) {
+      await page.getByRole("tab", { name: /^Results/ }).click();
+      expect(await path()).toBe("/#results");
+      await expect(page.getByText("HVL1", { exact: true })).toBeVisible();
+      await page.getByRole("tab", { name: "Input" }).click();
+      expect(await path()).toBe("/#input");
+      await page.goBack();
+      expect(await path()).toBe("/#results");
+      await expect(page.getByRole("tab", { name: /^Results/ })).toHaveAttribute("aria-selected", "true");
+      await page.goBack();
+      expect(await path()).toBe("/");
+      await expect(page.getByRole("tab", { name: "Input" })).toHaveAttribute("aria-selected", "true");
+    } else {
+      await page.locator('a.idx[href="#characteristics"]').click();
+      expect(await path()).toBe("/#characteristics");
+      await page.locator('a.idx[href="#iso"]').click();
+      expect(await path()).toBe("/#iso");
+      await page.goBack();
+      expect(await path()).toBe("/#characteristics");
+      await page.goBack();
+      expect(await path()).toBe("/");
+    }
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Radiation"); // 아직 앱 안이다
+  });
+
+  test("구획 해시(D8): #uncertainty 로 접속하면 그 탭이 열리고 패널이 보인다", async ({ page }) => {
+    await page.goto("/#uncertainty");
+    const h = page.locator("h2#uncertainty");
+    await expect(h).toBeVisible();
+    await expect(h).toBeInViewport();
+  });
+
+  test("404.html: 공통 셸 + Page not found 본문", async ({ page }) => {
+    await page.goto("/404.html");
+    await expect(page.locator("header.site[data-shell]")).toHaveCount(1);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("There is no page at this address");
+    await expect(page.locator("main#main .nf a", { hasText: "Field Pro home" })).toHaveAttribute("href", "https://pro.radiation-lab.com/");
+    await expect(page.locator("footer.site[data-shell]")).toHaveCount(1);
+    expect((await page.locator("body").innerText()).match(/[가-힣]/g)).toBeNull();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   });
 
   test("모바일 스크린샷(확인용)", async ({ page, isMobile }) => {

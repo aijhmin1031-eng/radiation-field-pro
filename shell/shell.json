@@ -1,0 +1,125 @@
+{
+  "$comment": "Radiation Lab common shell — HEADER-SPEC v3 (2026-10-28). The one source for the header, footer, 404 and theme of every origin (radiation-lab.com, /calc/, pro., radimeter., disposal.). Served at https://radiation-lab.com/shell/shell.json; every repo vendors a copy at shell/shell.json and renders it with render.mjs at build time. hrefs are absolute; render.mjs makes them root-relative on the apex. Bump `version` when anything here or in shell.css/shell.js changes.",
+  "version": 2,
+  "brand": {
+    "name": "Radiation Lab",
+    "home": "https://radiation-lab.com/",
+    "label": "Radiation Lab — home"
+  },
+  "assets": {
+    "css": "https://radiation-lab.com/shell/shell.css",
+    "js": "https://radiation-lab.com/shell/shell.js"
+  },
+  "theme": { "storageKey": "radmeter-v2-theme", "toggleLabel": "Toggle light and dark theme" },
+  "menus": [
+    {
+      "id": "hd-pro", "long": "Pro workbenches", "short": "Pro", "chip": true, "panelClass": "tm tm-pro", "maxWidth": 560,
+      "groups": [
+        { "id": "tm-pro", "name": "Pro workbenches", "external": true, "items": [
+          { "href": "https://pro.radiation-lab.com/", "name": "Field Pro", "line": "ISO 4037 reference X-ray and gamma fields: HVL, Hp(10), uncertainty", "section": "pro",
+            "icon": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"22\" x2=\"18\" y1=\"12\" y2=\"12\"/><line x1=\"6\" x2=\"2\" y1=\"12\" y2=\"12\"/><line x1=\"12\" x2=\"12\" y1=\"6\" y2=\"2\"/><line x1=\"12\" x2=\"12\" y1=\"22\" y2=\"18\"/>" },
+          { "href": "https://radimeter.radiation-lab.com/", "name": "RadiMeter", "line": "Survey-meter type testing to IEC 60846-1", "section": "radimeter",
+            "icon": "<path d=\"m12 14 4-4\"/><path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>" },
+          { "href": "https://disposal.radiation-lab.com/", "name": "M-Phreefiteq", "line": "Radionuclide speciation, sorption fitting (SCM) and transport", "section": "disposal",
+            "icon": "<path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\"/><path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\"/><path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\"/>" }
+        ] }
+      ]
+    },
+    {
+      "id": "hd-tools", "long": "Calculators", "short": "Calc", "panelClass": "tm", "maxWidth": 820, "columns": true,
+      "groups": [
+        { "id": "tm-dose", "name": "Dose & shielding", "items": [
+          { "href": "https://radiation-lab.com/calc/gamma-shielding/", "name": "Gamma dose rate & shielding", "line": "Dose rate from the emission spectrum; shield thickness solved backwards.",
+            "icon": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/>" },
+          { "href": "https://radiation-lab.com/calc/beta/", "name": "Beta dose rate & shielding", "line": "Range, transmission and bremsstrahlung by absorber.",
+            "icon": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"M12 22V2\"/>" },
+          { "href": "https://radiation-lab.com/calc/alara/", "name": "ALARA & job planning", "line": "Stay time, dose budget and collective dose across tasks.",
+            "icon": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"/><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"/><circle cx=\"12\" cy=\"14\" r=\"8\"/>" }
+        ] },
+        { "id": "tm-count", "name": "Activity & counting", "items": [
+          { "href": "https://radiation-lab.com/calc/units/", "name": "Unit converter", "line": "Activity, dose, exposure and contamination units.",
+            "icon": "<path d=\"M8 3 4 7l4 4\"/><path d=\"M4 7h16\"/><path d=\"m16 21 4-4-4-4\"/><path d=\"M20 17H4\"/>" },
+          { "href": "https://radiation-lab.com/calc/decay/", "name": "Decay & half-life", "line": "Activity after time, time to target, decay chains.",
+            "icon": "<path d=\"M5 22h14\"/><path d=\"M5 2h14\"/><path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\"/><path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\"/>" },
+          { "href": "https://radiation-lab.com/calc/specific-activity/", "name": "Mass & activity", "line": "Grams to becquerels and back for 147 nuclides.",
+            "icon": "<circle cx=\"12\" cy=\"12\" r=\"1\"/><path d=\"M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z\"/><path d=\"M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z\"/>" },
+          { "href": "https://radiation-lab.com/calc/mda/", "name": "Detection limits (MDA / MDC)", "line": "Critical level, detection limit and scan MDC.",
+            "icon": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"m16 16-1.9-1.9\"/>" }
+        ] },
+        { "id": "tm-spectrum", "name": "X-ray spectra", "items": [
+          { "href": "https://radiation-lab.com/calc/xray-spectrum/", "name": "X-ray tube spectrum", "line": "Raw tungsten bremsstrahlung spectrum and mean photon energy for a chosen tube voltage.",
+            "icon": "<path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\"/>" }
+        ] }
+      ],
+      "$comment": "On the pro/radimeter/disposal origins render.mjs appends a fourth group (`extraGroupOffApex`) so Nuclide data · Methods · Validation stay one click away there too; on the apex those three are items in the bar."
+    }
+  ],
+  "extraGroupOffApex": { "id": "tm-ref", "name": "Reference pages", "items": [
+    { "href": "https://radiation-lab.com/calc/nuclides/", "name": "Nuclide data", "line": "147 nuclides: half-life, emissions, dose-rate constants, progeny.",
+      "icon": "<path d=\"M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20\"/>" },
+    { "href": "https://radiation-lab.com/calc/methods/", "name": "Methods and data", "line": "How every constant is computed and from which open data.",
+      "icon": "<path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4\"/><path d=\"M2 15h10\"/><path d=\"m9 18 3-3-3-3\"/>" },
+    { "href": "https://radiation-lab.com/calc/validation/", "name": "Validation", "line": "Each calculator against independent calculations.",
+      "icon": "<path d=\"M20 6 9 17l-5-5\"/>" }
+  ] },
+  "sections": {
+    "home":      { "name": null,           "home": "https://radiation-lab.com/",
+                   "nav": [ { "href": "https://radiation-lab.com/calc/nuclides/", "long": "Nuclide data", "short": "Nuclides" },
+                            { "href": "https://radiation-lab.com/calc/methods/", "long": "Methods", "short": "Methods" },
+                            { "href": "https://radiation-lab.com/calc/validation/", "long": "Validation", "short": "Validation" } ],
+                   "account": "https://radiation-lab.com/calc/saved/",
+                   "footerColumn": { "title": "About the site", "links": [
+                     { "href": "https://radiation-lab.com/about", "label": "About" }, { "href": "https://radiation-lab.com/contact", "label": "Contact" },
+                     { "href": "https://radiation-lab.com/calc/methods/", "label": "Methods and data" }, { "href": "https://radiation-lab.com/calc/validation/", "label": "Validation" } ] },
+                   "disclaimer": "https://radiation-lab.com/calc/disclaimer/" },
+    "calc":      { "name": null,           "home": "https://radiation-lab.com/",
+                   "nav": "home", "account": "https://radiation-lab.com/calc/saved/", "footerColumn": "home",
+                   "disclaimer": "https://radiation-lab.com/calc/disclaimer/",
+                   "$comment": "RadCalc shares the apex: same bar as the umbrella (no section name), its own current-page marks." },
+    "pro":       { "name": "Field Pro",    "home": "https://pro.radiation-lab.com/",
+                   "nav": [ { "href": "https://pro.radiation-lab.com/", "long": "Workbench", "short": "Workbench" },
+                            { "href": "https://pro.radiation-lab.com/guide/", "long": "Guide", "short": "Guide" },
+                            { "href": "https://pro.radiation-lab.com/methods/", "long": "Methods", "short": "Methods" },
+                            { "href": "https://pro.radiation-lab.com/validation/", "long": "Validation", "short": "Validation" },
+                            { "href": "https://pro.radiation-lab.com/about/", "long": "About", "short": "About" } ],
+                   "account": null, "disclaimer": "https://pro.radiation-lab.com/about/#limits",
+                   "$comment": "No account system in Field Pro: no chip rather than a fake one. Guide/Methods/Validation/About are new pages (T6)." },
+    "radimeter": { "name": "RadiMeter",    "home": "https://radimeter.radiation-lab.com/",
+                   "nav": [ { "href": "https://radimeter.radiation-lab.com/standards/", "long": "Standards", "short": "Standards" },
+                            { "href": "https://radimeter.radiation-lab.com/instruments/", "long": "Instruments", "short": "Instruments" },
+                            { "href": "https://radimeter.radiation-lab.com/tools/", "long": "Tools", "short": "Tools" },
+                            { "href": "https://radimeter.radiation-lab.com/guides/", "long": "Guides", "short": "Guides" },
+                            { "href": "https://radimeter.radiation-lab.com/about/", "long": "About", "short": "About" } ],
+                   "account": "https://radimeter.radiation-lab.com/account/", "disclaimer": "https://radimeter.radiation-lab.com/disclaimer/" },
+    "disposal":  { "name": "M-Phreefiteq", "home": "https://disposal.radiation-lab.com/",
+                   "nav": [ { "href": "https://disposal.radiation-lab.com/", "long": "Calculator", "short": "Calc" },
+                            { "href": "https://disposal.radiation-lab.com/scenarios", "long": "Scenarios", "short": "Scenarios" },
+                            { "href": "https://disposal.radiation-lab.com/fit", "long": "Fit", "short": "Fit" },
+                            { "href": "https://disposal.radiation-lab.com/fit/compare", "long": "Compare", "short": "Compare" },
+                            { "href": "https://disposal.radiation-lab.com/kinetics", "long": "Kinetics", "short": "Kinetics" },
+                            { "href": "https://disposal.radiation-lab.com/transport", "long": "Transport", "short": "Transport" },
+                            { "href": "https://disposal.radiation-lab.com/notes", "long": "Notes", "short": "Notes" } ],
+                   "account": "https://disposal.radiation-lab.com/login", "disclaimer": "https://disposal.radiation-lab.com/disclaimer",
+                   "badge": null, "$comment": "Beta chip removed (owner decision 2026-10-28, round 3 Q6); the limits are a sentence on About." }
+  },
+  "footer": {
+    "platform": { "title": "Radiation Lab", "links": [
+      { "href": "https://radiation-lab.com/", "label": "Home" },
+      { "href": "https://pro.radiation-lab.com/", "label": "Field Pro" },
+      { "href": "https://radimeter.radiation-lab.com/", "label": "RadiMeter" },
+      { "href": "https://disposal.radiation-lab.com/", "label": "M-Phreefiteq" },
+      { "href": "https://radiation-lab.com/#tools", "label": "Calculators" },
+      { "href": "https://radiation-lab.com/calc/nuclides/", "label": "Nuclide data" } ] },
+    "legal": { "title": "Legal", "links": [
+      { "href": "https://radiation-lab.com/contact", "label": "Contact" },
+      { "href": "https://radiation-lab.com/privacy", "label": "Privacy" },
+      { "href": "https://radiation-lab.com/terms", "label": "Terms" },
+      { "href": "{disclaimer}", "label": "Disclaimer" } ] },
+    "line": "Radiation Lab · computational tools for radiation science and engineering · contact@radiation-lab.com · An independent project, not affiliated with IEC, IAEA, NIST or any standards body.",
+    "partOf": "{section} is part of Radiation Lab."
+  },
+  "notFound": {
+    "title": "There is no page at this address",
+    "body": "Either the link is old, or a letter is off. Nothing has been lost — every tool and every document is reachable from the list below."
+  }
+}

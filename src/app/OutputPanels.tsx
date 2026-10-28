@@ -95,8 +95,8 @@ export function CharacteristicsPanel({
   const { t } = useI18n();
   return (
     <section className="panel">
-      <h2 className="ph">
-        <span className="idx">A</span> {t("pA")}
+      <h2 className="ph" id="characteristics">
+        <a className="idx" href="#characteristics">A</a> {t("pA")}
         {provisional && <span className="stale" aria-live="polite">{t("settling")}</span>}
       </h2>
       <div className="pb readouts">
@@ -117,8 +117,8 @@ export function OperationalPanel({ fast, deltas = {} }: { fast: FastOutput; delt
   const a = `${o.alphaDeg}°`;
   return (
     <section className="panel">
-      <h2 className="ph">
-        <span className="idx">B</span> {t("pB")}
+      <h2 className="ph" id="operational">
+        <a className="idx" href="#operational">B</a> {t("pB")}
       </h2>
       <div className="pb readouts">
         <Readout label={`Hp(10, ${a}) / Ka`} value={fmt(o.hp10)} unit="Sv/Gy" note={t("slab")} primary delta={deltas.hp10} />
@@ -145,8 +145,8 @@ export function IsoPanel({ iso, stale }: { iso: IsoOutput; stale: boolean }) {
   const { t } = useI18n();
   return (
     <section className="panel">
-      <h2 className="ph">
-        <span className="idx">C</span> {t("pC")}
+      <h2 className="ph" id="iso">
+        <a className="idx" href="#iso">C</a> {t("pC")}
         {stale && <span className="stale" aria-live="polite">{t("matching")}</span>}
       </h2>
       <div className="pb">
@@ -224,8 +224,8 @@ export function UncertaintyPanel({ u }: { u: UncertaintyOutput }) {
   const c = u.combined;
   return (
     <section className="panel">
-      <h2 className="ph">
-        <span className="idx">D</span> {t("pD")}
+      <h2 className="ph" id="uncertainty">
+        <a className="idx" href="#uncertainty">D</a> {t("pD")}
       </h2>
       <div className="pb">
         {!a || !c ? (

@@ -42,8 +42,8 @@ export function InputPanel({ input, onChange }: Props) {
   return (
     <div className="stack">
       <section className="panel">
-        <h2 className="ph">
-          <span className="idx">01</span> {t("p01")}
+        <h2 className="ph" id="source">
+          <a className="idx" href="#source">01</a> {t("p01")}
         </h2>
         <div className="pb">
           <div className="seg" role="group" aria-label={t("segAria")}>
@@ -223,8 +223,8 @@ export function InputPanel({ input, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <h2 className="ph">
-          <span className="idx">02</span> {t("p02")}
+        <h2 className="ph" id="geometry">
+          <a className="idx" href="#geometry">02</a> {t("p02")}
         </h2>
         <div className="pb">
           <div className="row">
@@ -294,8 +294,8 @@ export function InputPanel({ input, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <h2 className="ph">
-          <span className="idx">03</span> {t("p03")}
+        <h2 className="ph" id="readout">
+          <a className="idx" href="#readout">03</a> {t("p03")}
         </h2>
         <div className="pb">
           <div className="row">
@@ -336,8 +336,8 @@ export function InputPanel({ input, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <h2 className="ph">
-          <span className="idx">04</span> {t("p04")}
+        <h2 className="ph" id="repeatability">
+          <a className="idx" href="#repeatability">04</a> {t("p04")}
         </h2>
         <div className="pb">
           <div className="row" style={{ alignItems: "start" }}>

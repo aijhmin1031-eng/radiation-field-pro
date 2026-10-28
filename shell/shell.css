@@ -1,0 +1,261 @@
+/* Radiation Lab — common shell, HEADER-SPEC v3 · file version 2 (2026-10-28; v2 = --rl-gutter token). The ONE stylesheet every origin loads:
+   https://radiation-lab.com/shell/shell.css?v=<version>  (version: shell.json). Served with CORS (cf/_headers).
+   1) Fonts (Saira, SIL OFL 1.1, self-hosted next to this file — url() is relative to the stylesheet, so the
+      subdomains fetch it from the apex too, and the local gate servers from themselves).
+   2) Tokens: the --c-* palette the umbrella, RadCalc and RadiMeter already shared by copy (README 2026-09-16
+      「껍데기는 플랫폼 정본 한 벌」). This file is now the single source; the copies in the pages are gone.
+   3) The one-row bar (.hd / .tm / .thm / .acct, 2026-10-06 ④) exactly as the umbrella home carried it inline.
+   4) v3 additions: the section slot after the brand ("/ RadiMeter"), section bars that drop to their own row,
+      the three-column footer, breadcrumb, back line and 404 body.
+   Markup contract: render.mjs. Behaviour: shell.js. Page styles never live here. */
+
+/* ── 1. Fonts ──────────────────────────────────────────────────────────── */
+@font-face { font-family:"Saira"; src:url(fonts/saira-400.woff2) format("woff2"); font-weight:400; font-display:swap; font-style:normal; }
+@font-face { font-family:"Saira"; src:url(fonts/saira-600.woff2) format("woff2"); font-weight:600; font-display:swap; font-style:normal; }
+@font-face { font-family:"Saira"; src:url(fonts/saira-700.woff2) format("woff2"); font-weight:700; font-display:swap; font-style:normal; }
+
+/* ── 2. Tokens (light · dark by preference · dark by choice) ───────────── */
+  :root {
+    color-scheme: light;
+    --c-paper: 232 234 230; --c-surface: 252 252 250; --c-panel: 241 242 238;
+    --c-line: 216 218 211; --c-line-strong: 188 191 182;
+    --c-ink: 25 27 28; --c-ink-muted: 82 87 90; --c-ink-faint: 101 105 114;
+    /* 143 78 0, previously 168 94 4 (2026-10-03, platform-wide). The old amber-brown measured
+       4.06:1 on paper — under WCAG AA's 4.5:1 for body-size text — and axe flagged it on 300+
+       nodes across the four sites. Same hue, lower lightness: 5.3:1 on paper, 6.3 on surface.
+       The dark theme's 242 163 60 is 8.8:1 and is unchanged. check-platform pins the value. */
+    --c-accent: 143 78 0; --c-accent-soft: 244 232 212;
+    --c-rail: 24 27 30; --c-rail-ink: 231 233 234; --c-rail-muted: 155 161 166; --c-rail-line: 51 56 61;
+    --amber: 242 163 60;
+    --mark-core-a: 60 66 72; --mark-core-b: 11 14 17;
+    --display: "Saira", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Depth under a printed plate. Kept as a token because the two themes need
+       very different weights: on paper a shadow reads, on graphite it vanishes. */
+    --plate-shadow: 0 1px 2px rgb(25 27 28 / .05), 0 12px 34px -14px rgb(25 27 28 / .28);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --c-paper: 18 21 23; --c-surface: 26 30 33; --c-panel: 32 37 42;
+    --c-line: 51 58 65; --c-line-strong: 73 82 90;
+    --c-ink: 230 233 234; --c-ink-muted: 169 176 181; --c-ink-faint: 144 148 156;
+    --c-accent: 242 163 60; --c-accent-soft: 58 46 26;
+    --mark-core-a: 242 244 245; --mark-core-b: 154 161 168;
+    --plate-shadow: 0 1px 2px rgb(0 0 0 / .5), 0 18px 48px -18px rgb(0 0 0 / .8);
+  } }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --c-paper: 18 21 23; --c-surface: 26 30 33; --c-panel: 32 37 42;
+    --c-line: 51 58 65; --c-line-strong: 73 82 90;
+    --c-ink: 230 233 234; --c-ink-muted: 169 176 181; --c-ink-faint: 144 148 156;
+    --c-accent: 242 163 60; --c-accent-soft: 58 46 26;
+    --mark-core-a: 242 244 245; --mark-core-b: 154 161 168;
+    --plate-shadow: 0 1px 2px rgb(0 0 0 / .5), 0 18px 48px -18px rgb(0 0 0 / .8);
+  }
+
+  :root { --c-warn: 179 38 30; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  /* v2 (2026-10-28): the side gutter of every shell band (.hd · .tm · .ft · .crumbs · .back) is one token, so a page whose
+     text column narrows at a different width than the umbrella (RadCalc: Tailwind sm = 640px, umbrella: 600px) can set it
+     and keep the bar on the same vertical line as its text. Default = the umbrella: 32px, 20px at 600px and below. */
+  :root { --rl-gutter: 32px; }
+  @media (max-width:600px) { :root { --rl-gutter: 20px; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-warn: 242 137 127; } }
+  :root[data-theme="dark"] { --c-warn: 242 137 127; }
+
+/* ── 3. The bar ────────────────────────────────────────────────────────── */
+  /* ── Header: one bar (2026-10-06 ④) ─────────────────────────────────────
+     Brand, the Pro workbenches and Calculators menus, Nuclide data · Methods · Validation, then the theme switch and the
+     account chip. Identical on every page of this origin; the numbers are the shared spec
+     (C:\dev\rl\HEADER-SPEC.md) that check-platform pins: 14px items with 7px 12px padding and
+     6px corners (13px and 8px 8px below 640px, 8px 6px below 360px), one row from 1024px, two
+     rows below (brand and controls, then the menu), panel 820px at most.
+     ★ The bar sits on --c-panel with a --c-line-strong rule: the tone, not the line, separates
+       chrome from the page (2026-09-16).
+     ★ 1048 = 984 of content + 32 each side, so the brand starts at x=148 at 1280px, on the same
+       line as the page text. The Tools panel hangs from the same box, so it starts there too.
+     ★ No amber: open and current are ink, a 1px --c-line-strong rule and the surface tone. */
+  header.site { background:rgb(var(--c-panel)); border-bottom:1px solid rgb(var(--c-line-strong));
+                position:relative; z-index:40; }
+  .hd { position:relative; max-width:1048px; margin:0 auto; padding:9px var(--rl-gutter); display:flex;
+        align-items:center; gap:12px 28px; line-height:1.5; }
+  .hd-brand { display:inline-flex; align-items:center; gap:8px; flex:none; min-height:24px;
+              color:rgb(var(--c-ink)); text-decoration:none; }
+  .hd-brand:hover .hd-nm { text-decoration:underline; }
+  .hd-brand:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  .hd-mark { width:24px; height:24px; flex:none; }
+  .hd-nm { font-family:var(--body); font-size:16px; font-weight:650; letter-spacing:-.012em;
+           white-space:nowrap; }
+  .hd-nav { display:flex; align-items:center; gap:4px; min-width:0; }
+  .hd-item { display:inline-flex; align-items:center; gap:5px; font:inherit; font-family:var(--body);
+             font-size:14px; font-weight:400; line-height:1.5; padding:7px 12px; border:1px solid transparent;
+             border-radius:6px; color:rgb(var(--c-ink-muted)); text-decoration:none; white-space:nowrap;
+             cursor:pointer; list-style:none; background:none; user-select:none; }
+  .hd-item::-webkit-details-marker { display:none; }
+  .hd-item:hover { color:rgb(var(--c-ink)); }
+  .hd-item[aria-current="page"] { color:rgb(var(--c-ink)); font-weight:600;
+                                  border-color:rgb(var(--c-line-strong)); background:rgb(var(--c-surface)); }
+  .hd-tools[open] > .hd-item { color:rgb(var(--c-ink)); border-color:rgb(var(--c-line-strong));
+                               background:rgb(var(--c-surface)); }
+  /* The Pro workbenches menu wears a standing chip (2026-10-27, owner: "good tools, they should be seen"):
+     ink, 600 and a line-strong frame on a clear ground, so it reads apart from the current page (which
+     also takes the surface ground). No amber — amber stays for active, focus and reference lines. */
+  .hd-item.hd-chip { color:rgb(var(--c-ink)); font-weight:600; border-color:rgb(var(--c-line-strong)); }
+  .hd-item.hd-chip:hover { background:rgb(var(--c-surface)); }
+  .hd-item:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  .hd-item .chev { width:14px; height:14px; flex:none; transition:transform .2s ease; }
+  .hd-tools[open] .chev { transform:rotate(180deg); }
+  .hd-s { display:none; }
+  .hd-ctl { margin-left:auto; display:flex; align-items:center; gap:10px; min-width:0; }
+  /* The Tools panel. It hangs from .hd (not from the summary), so it lines up with the page text
+     and never runs past the right edge on a phone. */
+  .tm { position:absolute; top:calc(100% + 8px); left:var(--rl-gutter); width:min(820px, calc(100% - 2 * var(--rl-gutter)));
+        background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line-strong)); border-radius:10px;
+        box-shadow:0 18px 40px rgba(0,0,0,.12); padding:22px 24px 14px; z-index:50; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .tm { box-shadow:0 18px 40px rgba(0,0,0,.45); } }
+  :root[data-theme="dark"] .tm { box-shadow:0 18px 40px rgba(0,0,0,.45); }
+  .tm-cols { display:grid; grid-template-columns:1fr 1fr; gap:6px 28px; }
+  .tm-h { font-family:var(--display); font-size:11px; font-weight:600; text-transform:uppercase;
+          letter-spacing:.14em; color:rgb(var(--c-ink-faint)); margin:0 0 8px 10px; }
+  .tm ul { list-style:none; margin:0; padding:0; }
+  .tm-i { display:flex; gap:12px; padding:9px 10px; border-radius:8px; color:rgb(var(--c-ink));
+          text-decoration:none; }
+  .tm-i:hover, .tm-i:focus-visible { background:rgb(var(--c-panel)); }
+  .tm-i:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:0; }
+  .tm-i[aria-current="page"] { background:rgb(var(--c-accent-soft)); }
+  .tm-i svg { width:20px; height:20px; flex:none; margin-top:2px; color:rgb(var(--c-ink-muted)); }
+  .tm-i b { display:block; font-size:14px; font-weight:600; line-height:1.4; color:rgb(var(--c-ink)); }
+  .tm-i em { display:block; font-style:normal; font-size:12.5px; line-height:1.45; color:rgb(var(--c-ink-muted)); }
+  /* Pro workbenches panel (2026-10-27): one column, three external workbenches. Same item shape as
+     the Calculators panel; the arrow after the name says the link leaves this site. */
+  .tm-pro { width:min(560px, calc(100% - 2 * var(--rl-gutter))); }
+  .tm-i b svg.ext { display:inline; width:13px; height:13px; margin:0 0 0 5px; vertical-align:-1px;
+                    color:rgb(var(--c-ink-faint)); }
+  .thm { display:inline-flex; align-items:center; justify-content:center; gap:6px; font:inherit;
+         font-size:11px; font-weight:500; letter-spacing:.02em; color:rgb(var(--c-ink-muted));
+         cursor:pointer; background:none; border:1px solid rgb(var(--c-line)); border-radius:6px;
+         padding:5px 9px; min-height:26px; white-space:nowrap; flex:none; }
+  .thm:hover { color:rgb(var(--c-ink)); }
+  .thm:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  /* A sun and a moon, showing the CURRENT state: sun in light, moon in dark. Stroked in
+     currentColor, so it inherits hover and focus and needs no colour of its own. */
+  .thm svg { width:15px; height:15px; flex:none; }
+  .thm-moon { display:none; }
+  html[data-theme="dark"] .thm-sun { display:none; }
+  html[data-theme="dark"] .thm-moon { display:inline; }
+  .acct { display:inline-flex; align-items:center; gap:6px; min-width:0; color:rgb(var(--c-ink-muted));
+          font-size:13px; white-space:nowrap; text-decoration:none; padding:6px 0; }
+  .acct:hover { color:rgb(var(--c-ink)); }
+  .acct:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  .acct svg { flex:none; }
+  /* 13ch — the truncation width the labs share. min-width:0 lets a long name give way to the
+     brand on a narrow phone instead of pushing the row wider than the screen. */
+  .acct b { font-weight:500; min-width:0; max-width:13ch; overflow:hidden; text-overflow:ellipsis; }
+  /* Which word the chip shows is a CSS decision, so a signed-in visitor never reads "Sign in"
+     for a frame while script catches up. */
+  html[data-acct="in"] [data-acct-out] { display:none; }
+  html:not([data-acct="in"]) [data-acct-in] { display:none; }
+  @media print { .thm, .acct { display:none !important; } }
+  /* A finger gets a taller chip; the bar's height is measured with a mouse pointer. */
+  @media (pointer:coarse) { .acct { padding-block:12px; } }
+  /* Two rows below 1024px: brand and controls, then the menu on a row of its own. Below 640px the
+     items take the short labels and the narrow padding; below 360px their side padding drops to 6px. */
+  @media (max-width:1023.98px) {
+    .hd { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
+    .hd-ctl { flex:1 1 0; justify-content:flex-end; }
+    .hd-nav { order:3; flex:1 0 100%; margin-left:-7px; }
+    /* Two rows, long labels (640–1023px): 8px side padding — CI (DejaVu Sans) draws these labels wider than a desktop font: at 640/360/320px the row ended 19/13/11px past the text column. */
+    .hd-item { padding:7px; }   /* 7px since the Pro chip (600) and a bold current tab together ran 3px past at 640 in CI */
+  }
+  @media (max-width:639.98px) {
+    /* Five items since 2026-10-27 (two menus): 4px side padding and a 12px chevron keep them on one
+       line inside the text column at 360px; under 360px it is 2px and 10px. */
+    .hd-nav { gap:2px; margin-left:-4px; }
+    .hd-item { font-size:13px; padding:8px 4px; gap:3px; }
+    .hd-item .chev { width:12px; height:12px; }
+    .hd-l { display:none; }
+    .hd-s { display:inline; }
+    .tm-cols { grid-template-columns:1fr; }
+  }
+  @media (max-width:359.98px) { .hd-item { font-size:12px; padding:8px 2px; gap:2px; } .hd-item .chev { width:10px; height:10px; } .hd-nav { margin-left:-2px; } }
+  @media (max-width:600px) { .tm { padding:16px 14px 10px; } }
+  @media (prefers-reduced-motion:reduce) { .hd-item .chev { transition:none; } }
+
+  /* ── Section slot (v3) — "/ RadiMeter" after the brand on the subdomains. Same type as the brand name,
+     the slash faint. Nothing on the apex (the apex is the platform itself). */
+  .hd-sep { color:rgb(var(--c-ink-faint)); font-size:16px; margin:0 -20px; flex:none; }
+  .hd-sec { font-family:var(--body); font-size:16px; font-weight:650; letter-spacing:-.012em; white-space:nowrap;
+            color:rgb(var(--c-ink)); text-decoration:none; flex:none; }
+  .hd-sec:hover { text-decoration:underline; }
+  .hd-sec:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  /* ── Section bars (v3). The apex bar is 2 menus + 3 items and keeps the 1024px rule above. A section with
+     5 items (2 + 5 = 7) drops its bar to a second row below 1240px, with 6 or more (2 + 7 = 9, M-Phreefiteq)
+     below 1340px — measured: 1280px could not hold 2 + 7 beside the brand, the section name and the controls.
+     The controls never wrap; the bar does. render.mjs sets data-wrap from the count. */
+  @media (max-width:1339.98px) {
+    .hd:has(> .hd-nav[data-wrap="1340"]) { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
+    .hd:has(> .hd-nav[data-wrap="1340"]) .hd-ctl { flex:1 1 0; justify-content:flex-end; }
+    .hd-nav[data-wrap="1340"] { order:3; flex:1 0 100%; margin-left:-7px; flex-wrap:wrap; row-gap:2px; }
+  }
+  @media (max-width:1239.98px) {
+    .hd:has(> .hd-nav[data-wrap="1240"]) { flex-wrap:wrap; row-gap:4px; padding-block:8px; }
+    .hd:has(> .hd-nav[data-wrap="1240"]) .hd-ctl { flex:1 1 0; justify-content:flex-end; }
+    .hd-nav[data-wrap="1240"] { order:3; flex:1 0 100%; margin-left:-7px; flex-wrap:wrap; row-gap:2px; }
+  }
+  @media (max-width:1023.98px) { .hd-nav[data-wrap] { flex-wrap:wrap; row-gap:2px; } }
+
+/* ── 4. Skip link ──────────────────────────────────────────────────────── */
+  /* ── Skip link — the first focusable thing on the page ──────────────────
+     Off-canvas until focused: a keyboard user tabs once and lands on it, a pointer user
+     never sees it. It is positioned, not display:none, so it keeps its accessible name. */
+  .skip { position:absolute; left:16px; top:-48px; z-index:70; padding:8px 12px;
+          font-family:var(--display); font-weight:600; font-size:13px; color:rgb(var(--c-ink));
+          background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line-strong));
+          border-radius:6px; text-decoration:none; transition:top .15s; }
+  .skip:focus { top:12px; outline:2px solid rgb(var(--amber)); outline-offset:2px; }
+
+/* ── 5. Footer (v3): share row · three columns · one line. The same on every origin. ─────────────────────
+   Full-bleed panel tone with a line-strong rule, like the header (2026-10-03 「세 층은 면으로 가른다」).
+   .ft mirrors .hd (1048 / 32) so the footer ends where the header ends, whatever the page's text column is. */
+  footer.site { background:rgb(var(--c-panel)); border-top:1px solid rgb(var(--c-line-strong)); }
+  .ft { max-width:1048px; margin:0 auto; padding:24px var(--rl-gutter) 48px; font-size:13px; color:rgb(var(--c-ink-faint)); }
+  /* `footer a`, not `footer.site a`: the share buttons (.share-b) set their own padding and must out-rank this. */
+  footer a { color:rgb(var(--c-ink-muted)); display:inline-block; padding:6px 0; text-decoration:none; }
+  footer a:hover { color:rgb(var(--c-accent)); text-decoration:underline; }
+  /* Coarse pointers get a 44px target; 6px of padding gives about 26px. */
+  @media (pointer:coarse){ footer a { padding-block:12px; } }
+  .share { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding-bottom:22px;
+           margin-bottom:22px; border-bottom:1px solid rgb(var(--c-line)); }
+  .share-l { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+             color:rgb(var(--c-ink-faint)); margin-right:4px; }
+  .share-b { display:inline-flex; align-items:center; min-height:28px; padding:4px 10px;
+             font:inherit; font-size:13px; color:rgb(var(--c-ink-muted)); text-decoration:none;
+             border:1px solid rgb(var(--c-line)); border-radius:6px; background:none; cursor:pointer; }
+  .share-b:hover { color:rgb(var(--c-ink)); }
+  .share-b:focus-visible { outline:2px solid rgb(var(--c-accent)); outline-offset:2px; }
+  .share-s { font-size:12px; color:rgb(var(--c-ink-faint)); }
+  @media print { .share { display:none !important; } }
+  .links { display:flex; flex-wrap:wrap; gap:2px 20px; margin-bottom:10px; }
+  .fcols { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px 28px; margin-bottom:18px; }
+  @media (max-width:640px){ .fcols { grid-template-columns:1fr 1fr; } }
+  .fh { margin:0 0 4px; font-family:var(--display); font-size:11px; font-weight:600; letter-spacing:.12em;
+        text-transform:uppercase; color:rgb(var(--c-ink-faint)); }
+  .fcol .links { flex-direction:column; align-items:flex-start; gap:0; margin:0; }
+  .fline { border-top:1px solid rgb(var(--c-line)); padding-top:14px; }
+  .fver { font-family:var(--mono); font-size:12px; margin-left:8px; }
+
+/* ── 6. Breadcrumb · back line · 404 (v3) — the subdomains; the apex pages carry their own .crumb ── */
+  .crumbs { max-width:1048px; margin:0 auto; padding:12px var(--rl-gutter) 0; font-size:13px; color:rgb(var(--c-ink-faint)); }
+  .crumbs ol { display:flex; flex-wrap:wrap; gap:4px 0; margin:0; padding:0; list-style:none; }
+  .crumbs li + li::before { content:"/"; margin:0 8px; }
+  .crumbs a { color:rgb(var(--c-ink-muted)); text-decoration:none; display:inline-block; padding-block:4px; }
+  .crumbs a:hover { color:rgb(var(--c-accent)); text-decoration:underline; }
+  .crumbs [aria-current="page"] { color:rgb(var(--c-ink)); }
+  .back { max-width:1048px; margin:0 auto; padding:4px var(--rl-gutter) 0; font-size:13px; }
+  .back a { color:rgb(var(--c-accent)); text-decoration:none; font-weight:600; display:inline-block; padding-block:4px; }
+  .back a:hover { text-decoration:underline; }
+  .nf { max-width:760px; margin:0 auto; padding:34px 20px 56px; }
+  .nf .crumb { font-size:13px; color:rgb(var(--c-ink-faint)); }
+  .nf .crumb a { color:rgb(var(--c-ink-muted)); padding-block:4px; display:inline-block; }
+  .nf h1 { font-family:var(--display); font-size:32px; line-height:1.15; margin:8px 0 12px; }
+  .nf .lede { color:rgb(var(--c-ink-muted)); }
+  .nf li a { padding-block:4px; display:inline-block; }

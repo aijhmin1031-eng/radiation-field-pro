@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f4f1ea" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#e8eae6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121517" media="(prefers-color-scheme: dark)" />
     <title>Radiation Field Pro — ISO 4037 reference X-ray and gamma field workbench</title>
     <meta name="description" content="A browser workbench for ISO 4037 reference X-ray and gamma fields: tungsten-tube spectrum, mean and effective energy, HVL1, HVL2 and homogeneity coefficient, Hp(10), H*(10) and H′(0.07) conversion coefficients, comparison with the 50 ISO 4037-1 beam qualities, Cs-137 and Co-60 fields, air-density readout correction and a GUM uncertainty budget. English-language interface." />
     <link rel="canonical" href="https://pro.radiation-lab.com/" />
@@ -20,14 +20,23 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://pro.radiation-lab.com/og.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+    <!-- Common shell v3 (radiation-lab/public/shell, vendored copy in shell/): the before-paint theme script and the
+         apex-hosted shell.css / shell.js (?v=version) are written here at build time by scripts/vite-plugin-shell.mjs.
+         No Google Fonts: Saira comes with shell.css from the apex, the body is system-ui, numbers are ui-monospace. -->
+    <!-- rl-shell:head -->
+    <style>
+      /* The app mounts into #root after its script runs. Reserving one viewport keeps the static section below the fold
+         until then, so nothing visible is pushed when React renders (Lighthouse CLS was 0.955 with the section at y≈0). */
+      #root { min-height: 100vh; }
+    </style>
+    <noscript><style>#root { min-height: 0; }</style></noscript>
   </head>
   <body>
+    <a class="skip" href="#main">Skip to main content</a>
+    <!-- rl-shell:header -->
     <div id="root"></div>
     <!-- A static description outside the app root (2026-10-27): crawlers and visitors without JavaScript
-         read what the workbench does; with JavaScript it sits below the app's footer and never overlaps it.
+         read what the workbench does; with JavaScript it sits below the app and never overlaps it.
          One h1 stays the app's own, so this section starts at h2. Accuracy figures come from docs/accuracy-spec.md. -->
     <section class="fp-about" aria-labelledby="fp-about-h">
       <h2 id="fp-about-h">About this workbench</h2>
@@ -59,17 +68,19 @@
         generated from the engine code and enforced by its test suite; the full table is in the
         <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">accuracy
         specification</a> (a generated report, written in Korean). The workbench supports the measurements and
-        quality procedures of a laboratory; it does not replace them.</p>
+        quality procedures of a laboratory; it does not replace them: values for a real reference field are fixed by
+        that facility's own measurements.</p>
       <p>Radiation Field Pro is one of the pro workbenches of <a href="https://radiation-lab.com/">Radiation Lab</a>,
         alongside RadiMeter for survey-meter type testing and M-Phreefiteq for radionuclide speciation and
-        transport.</p>
+        transport. The source code is on GitHub under the MIT licence:
+        <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>.</p>
     </section>
     <style>
-      /* Same left edge as the app's panels and footer (20px gutter), not a centred column. */
-      .fp-about { margin: 0; padding: 26px 20px 44px; border-top: 1px solid var(--rule, #d6d0c2);
-                  color: var(--ink, #1b2233); font-size: 14px; line-height: 1.6; }
-      .fp-about h2 { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
-      .fp-about h3 { margin: 20px 0 6px; font-size: 14px; font-weight: 600; }
+      /* Same left edge as the app's panels (20px gutter), not a centred column. Colours and type are the shell's tokens. */
+      .fp-about { margin: 0; padding: 26px 20px 44px; border-top: 1px solid rgb(var(--c-line));
+                  color: rgb(var(--c-ink)); font-family: var(--body); font-size: 14px; line-height: 1.6; }
+      .fp-about h2 { margin: 0 0 10px; font-family: var(--display); font-size: 16px; font-weight: 600; }
+      .fp-about h3 { margin: 20px 0 6px; font-family: var(--display); font-size: 14px; font-weight: 600; }
       .fp-about p, .fp-about ul { max-width: 78ch; margin: 0 0 10px; }
       .fp-about ul { padding-left: 20px; }
       .fp-about li { margin: 0 0 4px; }
@@ -79,6 +90,7 @@
       @media (max-width: 980px) { .fp-about { padding: 22px 16px 104px; } }
       @media print { .fp-about { display: none; } }
     </style>
+    <!-- rl-shell:footer -->
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

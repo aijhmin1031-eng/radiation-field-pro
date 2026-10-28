@@ -5,12 +5,17 @@
   "description": "Professional X-ray/gamma reference-field characterization and dosimetry (ISO 4037).",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/build-404.mjs && vite build",
+    "build:404": "node scripts/build-404.mjs",
     "preview": "vite preview",
+    "sync-shell": "node scripts/sync-shell.mjs",
+    "check-shell": "node gate/check-shell.mjs",
+    "gate": "npm run build && npm run check-shell",
     "test": "tsx --test src/engine/*.test.ts src/validation/*.test.ts src/app/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "report:accuracy": "tsx scripts/gen-accuracy-report.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "ci": "npm run typecheck && npm test && npm run gate && npm run e2e"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

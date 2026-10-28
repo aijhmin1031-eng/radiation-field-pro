@@ -4,8 +4,7 @@
 //  - 문구를 한곳에 모아 두는 까닭: 화면·인쇄 리포트·기본값이 같은 말을 쓰게 하고, 나중에 다른 언어를 붙일 자리를 남긴다.
 
 const en = {
-  // 머리글·도구 막대
-  skip: "Skip to main content",
+  // 앱 머리 블록·도구 막대(사이트 머리글·꼬리말·건너뛰기 링크는 공통 셸 — index.html)
   sub: "Reference X-ray and gamma field characterisation and dose workbench",
   intro: "Spectrum, half-value layers, ISO 4037 beam-quality matching, operational dose conversion and uncertainty — all computed in this browser.",
   toolbarAria: "Session",
@@ -53,9 +52,6 @@ const en = {
   specImported: (name: string, n: number) => `Imported spectrum · ${name} · ${n} points`,
   specNoImport: "No imported spectrum — showing the X-ray settings",
   specGamma: (nuc: string) => `${nuc} line spectrum`,
-  footA: "All calculations run in this browser; inputs are never sent to a server. Accuracy ranges are given in the ",
-  footLink: "accuracy specification",
-  footB: ". Values for a real reference field are fixed by that facility's own measurements.",
   // 입력 01 선원
   p01: "Source",
   segAria: "Source type",

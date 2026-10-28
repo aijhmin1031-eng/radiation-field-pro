@@ -79,3 +79,10 @@
 ## 드롭다운 표시 (2026-10-26 사용자 지적)
 - ISO 선질 프리셋 드롭다운은 지금 입력과 똑같은 프리셋 이름을 보인다(`matchPreset`: 관전압·여과층·공기 경로 일치). 손으로 바꾸면 "Custom (edited)"가 보인다. 예전에는 `value=""`로 고정돼 고른 뒤에도 안내 문구로 되돌아갔다.
 - HVL 재질·ISO 비교 대상·방사능 단위·여과 재질 드롭다운은 상태값에 묶여 있어 같은 문제가 없다. 파일 고르기(세션 불러오기·스펙트럼 파일)는 고른 뒤 값을 비워 같은 파일을 다시 골라도 반영되게 했다.
+
+## 공통 셸 v3 (2026-10-28, 브랜치 feat/shell-v1, T3)
+- 사이트 머리글 · 꼬리말 · 색 토큰 · 글꼴은 우산 `radiation-lab/public/shell` 정본(사본 `shell/`)을 따른다. 「라이트 테마(다크는 후순위)」 결정은 대체 — `data-theme` 로 다크가 돈다(테마 단추는 셸).
+- 앱 머리글(h1 「Radiation Lab / Field Pro」 · 도구막대)은 사이트 머리글 아래 본문 첫 블록 `div.hdr` 로, h1 은 「Radiation Field Pro」. 앱 꼬리말은 제거(공통 꼬리말; Source (MIT) · accuracy specification 링크는 `.fp-about`).
+- IBM Plex(Google Fonts) 제거 — 본문 system-ui, 제목 Saira, 숫자 ui-monospace. hex 토큰 → `rgb(var(--c-*))`; 셸에 없는 ok · down · warn-soft 만 `--fp-*` 삼중항.
+- 구획 해시(설계 D8): 모바일 탭 `#input` · `#results`, 패널 제목 id 아홉(`#source` … `#uncertainty`), `history.pushState` / `popstate` — 뒤로가기가 앱 안에서 멈추고 구획 링크를 공유할 수 있다(`src/app/hash.ts`).
+- `public/404.html` 신설(공통 셸 + Page not found), `#root` 자리 예약으로 CLS 0.955 → 0, 대비 미달 두 곳(idx · unit) 토큰으로 해소. 게이트 `gate/check-shell.mjs`. 상세는 README 「공통 셸 v3」 절.
