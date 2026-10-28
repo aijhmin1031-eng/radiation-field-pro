@@ -7,7 +7,7 @@
   "use strict";
   var doc = document, root = doc.documentElement;
 
-  var ds = doc.querySelectorAll("header.site details.hd-tools");
+  var ds = doc.querySelectorAll("header.site details.hd-tools, header.site details.hd-sheet");
   if (ds.length) {
     ds.forEach(function (d) {
       d.addEventListener("toggle", function () {
@@ -24,16 +24,17 @@
   }
 
   var KEY = "radmeter-v2-theme";
-  var btn = doc.getElementById("thm");
-  if (btn) {
-    btn.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+  var btns = doc.querySelectorAll("header.site .thm");   // #thm in the bar, #thm-sheet in the phone sheet (v3)
+  var pressed = function () { btns.forEach(function (b) { b.setAttribute("aria-pressed", String(root.dataset.theme === "dark")); }); };
+  pressed();
+  btns.forEach(function (btn) {
     btn.addEventListener("click", function () {
       var next = root.dataset.theme === "dark" ? "light" : "dark";
       root.dataset.theme = next;
       try { localStorage.setItem(KEY, JSON.stringify({ state: { mode: next, resolved: next }, version: 0 })); } catch (e) {}
-      btn.setAttribute("aria-pressed", String(next === "dark"));
+      pressed();
     });
-  }
+  });
 
   var cp = doc.getElementById("share-copy"), st = doc.getElementById("share-status");
   if (cp) cp.addEventListener("click", function () {

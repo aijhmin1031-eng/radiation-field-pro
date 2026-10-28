@@ -5,8 +5,8 @@
   "description": "Professional X-ray/gamma reference-field characterization and dosimetry (ISO 4037).",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-404.mjs && vite build",
-    "build:404": "node scripts/build-404.mjs",
+    "build": "node scripts/build-pages.mjs && vite build",
+    "build:pages": "node scripts/build-pages.mjs",
     "preview": "vite preview",
     "sync-shell": "node scripts/sync-shell.mjs",
     "check-shell": "node gate/check-shell.mjs",

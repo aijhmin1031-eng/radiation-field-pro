@@ -1,6 +1,6 @@
 {
   "$comment": "Radiation Lab common shell — HEADER-SPEC v3 (2026-10-28). The one source for the header, footer, 404 and theme of every origin (radiation-lab.com, /calc/, pro., radimeter., disposal.). Served at https://radiation-lab.com/shell/shell.json; every repo vendors a copy at shell/shell.json and renders it with render.mjs at build time. hrefs are absolute; render.mjs makes them root-relative on the apex. Bump `version` when anything here or in shell.css/shell.js changes.",
-  "version": 2,
+  "version": 3,
   "brand": {
     "name": "Radiation Lab",
     "home": "https://radiation-lab.com/",

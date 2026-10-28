@@ -117,6 +117,22 @@ export function renderHeader(spec, { section = "home", currentHref = "", apex = 
       ${USER}<b data-acct-out>Sign in</b><b data-acct-in id="acct-who"></b>
     </a>`
     : "";
+  // v3: a section whose bar wraps (2 menus + 5–7 items) gets a phone sheet — below 640px the two global menus leave
+  // the row and open behind a ☰ button, so the row keeps the section's own items on one line (shell.css). Never on the apex.
+  const sheet = wrap
+    ? `
+    <details class="hd-sheet" id="hd-sheet">
+      <summary class="hd-burger" aria-label="Menu" title="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+      <div class="sheet">
+        ${spec.menus.map((m) => {
+          const groups = m.columns ? [...m.groups, spec.extraGroupOffApex] : m.groups;
+          const items = groups.flatMap((g) => g.items).map((i) => `<li><a href="${esc(hrefFor(i.href, apex))}">${esc(i.name)}</a></li>`).join("");
+          return `<p class="sheet-h">${esc(m.long)}</p>\n        <ul class="sheet-l">${items}</ul>`;
+        }).join("\n        ")}
+        <button type="button" class="thm" id="thm-sheet" aria-label="${esc(spec.theme.toggleLabel)}">${SUN_MOON}<span>Light / dark</span></button>
+      </div>
+    </details>`
+    : "";
   return `<header class="site" data-shell="${spec.version}" data-section="${esc(section)}"><div class="hd">
   <a class="hd-brand" href="${esc(spec.brand.home)}" aria-label="${esc(spec.brand.label)}">
     ${MARK}
@@ -126,7 +142,7 @@ export function renderHeader(spec, { section = "home", currentHref = "", apex = 
     ${spec.menus.map((m) => menu(m, { apex, currentHref, extraGroup: offApex && m.columns ? spec.extraGroupOffApex : null })).join("\n    ")}
     ${items.join("\n    ")}
   </nav>
-  <div class="hd-ctl">
+  <div class="hd-ctl">${sheet}
     <button type="button" class="thm" id="thm" aria-label="${esc(spec.theme.toggleLabel)}"
             title="Light / dark theme">
       ${SUN_MOON}

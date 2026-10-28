@@ -171,9 +171,14 @@ test.describe("워크벤치 U1/U2/U3", () => {
   test("공통 셸 v3: 테마 단추로 다크가 켜지고 토큰이 뒤집힌다", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
+    // 셸 파일 v3: 640px 미만의 data-wrap 구역에서는 막대의 #thm 이 숨고 ☰ 시트 안의 #thm-sheet 가 테마 단추다
     const thm = page.locator("#thm");
-    if (!(await thm.isVisible())) test.skip(true, "이 폭에서는 테마 단추가 보이지 않는다");
-    await thm.click();
+    if (await thm.isVisible()) await thm.click();
+    else {
+      await page.locator("summary.hd-burger").click();
+      await expect(page.locator("#thm-sheet")).toBeVisible();
+      await page.locator("#thm-sheet").click();
+    }
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     const dark = await page.evaluate(() => ({
       paper: getComputedStyle(document.documentElement).getPropertyValue("--c-paper").trim(),
@@ -230,6 +235,32 @@ test.describe("워크벤치 U1/U2/U3", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("There is no page at this address");
     await expect(page.locator("main#main .nf a", { hasText: "Field Pro home" })).toHaveAttribute("href", "https://pro.radiation-lab.com/");
     await expect(page.locator("footer.site[data-shell]")).toHaveCount(1);
+    expect((await page.locator("body").innerText()).match(/[가-힣]/g)).toBeNull();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+
+  test("공통 셸 v3: 구역 메뉴 다섯 링크(Workbench · Guide · Methods · Validation · About)가 모두 200 — 로컬 서버 기준", async ({ page, baseURL }) => {
+    await page.goto("/");
+    const hrefs = await page.locator("header.site nav.hd-nav > a.hd-item").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
+    expect(hrefs).toEqual(["https://pro.radiation-lab.com/", "https://pro.radiation-lab.com/guide/", "https://pro.radiation-lab.com/methods/", "https://pro.radiation-lab.com/validation/", "https://pro.radiation-lab.com/about/"]);
+    for (const h of hrefs) {
+      const local = new URL(new URL(h).pathname, baseURL!).href; // 절대 주소(pro.radiation-lab.com)의 경로를 이 서버에서
+      const res = await page.request.get(local);
+      expect(res.status(), h).toBe(200);
+      const html = await res.text();
+      expect(html, h).toContain('<header class="site"');
+      if (h !== "https://pro.radiation-lab.com/") {
+        expect(html, h).toContain('<meta name="robots" content="noindex,follow" />'); // T6 전까지 색인 제외
+        expect(html, h).toContain(`<a class="hd-item" href="${h}" aria-current="page">`); // 구역 칸 「현재」
+        expect(html, h).toContain('<nav class="crumbs"');
+      }
+    }
+    // 임시 쪽 하나를 실제로 열어 셸 · 빵부스러기 · 본문 · 한글 0 · 넘침 0
+    await page.goto("/validation/");
+    await expect(page.locator("header.site[data-shell]")).toHaveCount(1);
+    await expect(page.locator("nav.crumbs li")).toHaveText(["Radiation Lab", "Field Pro", "Validation"]);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Validation");
+    await expect(page.locator("main#main a.open")).toHaveAttribute("href", "https://pro.radiation-lab.com/");
     expect((await page.locator("body").innerText()).match(/[가-힣]/g)).toBeNull();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   });

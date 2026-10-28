@@ -22,12 +22,12 @@ readings into a GUM uncertainty budget. Everything runs in the browser; nothing 
 앱 도구막대가 머리글이었고(휴대폰 191px), Google Fonts IBM Plex Sans KR · Mono 를 받았고(우산 원칙 「제3자 요청 0」과 충돌), 바탕 `#f4f1ea` ·
 글자 `#1b2233` · 주황 `#e8641b` 의 hex 토큰이 `color-scheme: light` 로 고정돼 다크가 없었고, 404 는 Vercel 의 text/plain `NOT_FOUND` 78 바이트(링크 0)였고,
 구획을 옮겨도 주소가 같아 뒤로가기가 앱 밖으로 나갔다(Lighthouse 모바일 82 · 데스크톱 71, CLS 0.955, 대비 미달 `span.idx` 3.2 · `span.unit` 2.98).
-설계 · 결정 기록: `D:\Files\_작업61028_radiation-lab 사이트 개편61028_1240_…_공통 셸 명세·결정 기록·작업 분해_설계안.md` §3.9 · §4 C행 · D8.
+설계 · 결정 기록: `D:\Files\_작업\20261028_radiation-lab 사이트 개편\20261028_1240_…_공통 셸 명세·결정 기록·작업 분해_설계안.md` §3.9 · §4 C행 · D8.
 
-**정본은 우산 `public/shell/`** (shell.json · render.mjs · shell.css · shell.js · fonts/ — https://radiation-lab.com/shell/, version 2).
+**정본은 우산 `public/shell/`** (shell.json · render.mjs · shell.css · shell.js · fonts/ — https://radiation-lab.com/shell/, 파일 version 3 — v3 = data-wrap 구역의 휴대폰 ☰ 시트, 이 저장소의 390px 실측 125px 에 대응해 우산 #85 로 올라갔다).
 이 저장소는 그 **사본 `shell/`** 을 든다 — `npm run sync-shell`(`scripts/sync-shell.mjs`)이 apex 에서 받아 온다(받은 것이 셸인지 검사한 뒤 쓴다 ·
 네트워크가 안 되면 사본을 두고 경고 · `--from=<dir>` 로 로컬 체크아웃 복사, 글자 파일은 LF 로 맞춰 라이브와 바이트 동일). **사본은 손으로 고치지 않는다** —
-고칠 것은 우산에 고치고 다시 받는다. 빌드는 shell.json · render.mjs 만 쓴다; shell.css · shell.js · Saira 글꼴은 라이브에서 apex 가 내주고(`?v=2`),
+고칠 것은 우산에 고치고 다시 받는다. 빌드는 shell.json · render.mjs 만 쓴다; shell.css · shell.js · Saira 글꼴은 라이브에서 apex 가 내주고(`?v=3`),
 E2E · 실측은 Playwright route 로 apex 요청을 사본으로 돌려 세운다(`e2e/shell-assets.ts` — 주소가 절대 주소라 서버가 가로챌 수 없다).
 
 | 자리 | 전 | 후 |
@@ -40,24 +40,25 @@ E2E · 실측은 Playwright route 로 apex 요청을 사본으로 돌려 세운�
 | 대비 | `span.idx` 3.2:1 · `span.unit` 2.98:1 | idx = accent 6.3:1(surface) · unit = ink-faint 5.4:1(surface) · 모든 보조 글자 ≥ 4.5:1 |
 | CLS | 0.955 — 앱이 마운트되며 `.fp-about` 이 통째로 밀림 | `#root { min-height: 100vh }` 자리 예약(무JS 는 `<noscript>` 로 0) — 소개 절이 처음부터 접힘 아래라 밀려도 보이지 않는다 |
 | 구획 해시(D8) | 없음 — 뒤로가기가 앱 밖으로 | `src/app/hash.ts`: 모바일 탭 `#input` · `#results`, 패널 제목 id 아홉(`#source` · `#geometry` · `#readout` · `#repeatability` · `#spectrum` · `#characteristics` · `#operational` · `#iso` · `#uncertainty`, 번호가 그 주소의 링크). 탭을 옮기면 `history.pushState`, `popstate` · `hashchange` 로 복원, 접속 때 해시로 탭 열고 패널로 내려감 |
-| 404 | 없음 | `public/404.html` — `scripts/build-404.mjs`(빌드 첫 단계)가 `renderHeader` + `renderNotFound(section:"pro")` + `renderFooter` 로 **정적** 생성 · 커밋. Vercel 이 산출물 뿌리의 404.html 을 자동으로 쓴다(Workers 이전 때는 `not_found_handling: "404-page"`) |
+| 404 | 없음 | `public/404.html` — `scripts/build-pages.mjs`(빌드 첫 단계)가 `renderHeader` + `renderNotFound(section:"pro")` + `renderFooter` 로 **정적** 생성 · 커밋. Vercel 이 산출물 뿌리의 404.html 을 자동으로 쓴다(Workers 이전 때는 `not_found_handling: "404-page"`) |
+| 구역 메뉴 임시 쪽 | 없음(Guide · Methods · Validation · About 이 404) | `public/{guide,methods,validation,about}/index.html` — 같은 스크립트가 공통 셸 + `renderBreadcrumb`(Radiation Lab / Field Pro / 쪽) + 사실만 담은 2~4문장 + 「Open the workbench」로 **정적** 생성 · 커밋(감독 지시 2026-10-28). 본문은 T6 에서 채우고, 그때까지 `noindex,follow` · canonical · OG 최소. 구역 칸 「현재」는 그 쪽. about 의 `#limits` 는 shell.json pro disclaimer 의 목적지. 글은 `scripts/shell-page.mjs` PAGES 한 곳 |
 | 건너뛰기 링크 | React 가 그림(머리글 뒤 포커스) | `index.html` 의 정적 `<a class="skip">`(body 첫 요소, 모양은 shell.css) |
 
-**실측**(Playwright, dist + 사본 shell/, 2쪽 × 1280/390 × 라이트/다크 = 8, `D:\Files\_작업61028_radiation-lab 사이트 개편\T3_캡처\실측.md`):
-머리글 **56px(1280, 한 줄) · 125px(390, 세 줄 — 2 메뉴 + 구역 5칸이 390px 한 줄에 들어가지 않아 shell.css 규칙대로 둘째 줄이 한 번 더 꺾인다)**,
+**실측**(Playwright, dist + 사본 shell/ v3, 4쪽(/ · /404.html · /guide/ · /about/) × 1280/390 × 라이트/다크 = 16, `D:\Files\_작업\20261028_radiation-lab 사이트 개편\T3_캡처\실측.md`):
+머리글 **56px(1280, 한 줄) · 91px(390, 두 줄 — 셸 파일 v3 의 ☰ 시트가 전역 메뉴 둘과 테마 단추를 품고 구역 5칸은 한 줄; 파일 v2 에서는 125px 세 줄이었다)**,
 앱 머리 블록 108px(1280) · 191px(390), 가로 넘침 0, JS · HTTP 오류 0, 외부 요청 호스트 radiation-lab.com 뿐(Google Fonts 0), shell.css 200 · 적용, Saira 로드,
-`--c-paper` 232 234 230 / 18 21 23, 테마 단추로 전환 · 저장, 뒤로가기 2회가 앱 안(`/#characteristics → /#iso → 뒤로 → 뒤로 → /`).
+`--c-paper` 232 234 230 / 18 21 23, 테마 단추(390 은 ☰ 시트 안 `#thm-sheet`)로 전환 · 저장, 뒤로가기 2회가 앱 안(`/#characteristics → /#iso → 뒤로 → 뒤로 → /`), 임시 쪽의 구역 칸 「현재」 Guide · About.
 Lighthouse(before 라이브 → after 로컬 dist): 모바일 perf 62 → 74 · a11y 97 → **100** · CLS 1 → **0**, 데스크톱 perf 71 → 97 · a11y 97 → **100** · CLS 0.955 → **0**, 대비 미달 35곳 → 0, 제3자 0.
 
 **게이트 `npm run check-shell`**(`gate/check-shell.mjs`, 신설 · 정적 · 우산 · RadCalc 것을 본뜸): dist/index.html · dist/404.html · public/404.html 의
-header.site · footer.site 가 같은 호출의 render.mjs 출력과 **바이트 동일**(머리글 11,891자 · 꼬리말 3,210자) · head 자산 `?v=` = shell.json version ·
+header.site · footer.site 가 같은 호출의 render.mjs 출력과 **바이트 동일**(머리글 14,124자 · 꼬리말 3,210자) · head 자산 `?v=` = shell.json version ·
 Google Fonts · IBM Plex · Pretendard · `@font-face` 0 · 옛 토큰 이름 0 · **hex 색 0**(인라인 + 번들 CSS, 인쇄 블록 제외) · `color-scheme: light` 고정 0 ·
 구획 해시 9 + 탭 2 와 pushState · popstate 가 번들에 있음 · shell.json 절대 주소 · pro 구역 계정 칸 없음 · 사본이 우산 정본과 같은가(옆에 있을 때 경고).
-체인: `npm run gate` = build → check-shell, `npm run ci` = typecheck → test → gate → e2e. `.github/workflows/ci.yml` 이 같은 체인을 돈다.
+임시 쪽 넷(dist · public)도 머리글 · 꼬리말 · 빵부스러기 바이트 동일 · noindex · 현재 칸 · canonical · h1 · 한글 0 을 잰다. 체인: `npm run gate` = build → check-shell, `npm run ci` = typecheck → test → gate → e2e. `.github/workflows/ci.yml` 이 같은 체인을 돈다.
 
-**E2E**(`e2e/workbench.spec.ts`, 데스크톱 1440 · Pixel 7): 기존 11건 유지(h1 「Radiation」 · 한글 0 · 0.57 · N-80 · k = 2.776 · 넘침 0) + 셸 5건 —
+**E2E**(`e2e/workbench.spec.ts`, 데스크톱 1440 · Pixel 7): 기존 11건 유지(h1 「Radiation」 · 한글 0 · 0.57 · N-80 · k = 2.776 · 넘침 0) + 셸 6건 —
 머리글 · 꼬리말 정적 · shell.css 적용(`--c-paper` 232 234 230, h1 Saira) · 외부 요청이 apex 뿐 · 테마 단추로 다크(`18 21 23`) 전환과 새로 고침 뒤 유지 ·
-탭/패널 두 번 옮긴 뒤 뒤로가기 두 번이 앱 안에서 멈춤 · `#uncertainty` 접속 · 404.html.
+탭/패널 두 번 옮긴 뒤 뒤로가기 두 번이 앱 안에서 멈춤 · `#uncertainty` 접속 · 404.html · 구역 메뉴 다섯 링크 전부 200(로컬 서버) + `/validation/` 빵부스러기 · h1.
 
 ## 무엇을 계산하는가
 
@@ -91,7 +92,7 @@ npm ci
 npm run dev          # 개발 서버
 npm test             # 엔진·검증·화면 어댑터 단위 테스트
 npm run typecheck    # 타입 검사
-npm run build        # public/404.html 생성 → dist/ 에 정적 파일 생성(공통 셸 삽입)
+npm run build        # public/404.html + 임시 쪽 넷 생성 → dist/ 에 정적 파일 생성(공통 셸 삽입)
 npm run e2e          # Playwright E2E (데스크톱·모바일, 빌드 뒤 4173 미리보기 서버; 셸 자산은 shell/ 사본으로)
 npm run sync-shell   # 공통 셸 사본 shell/ 을 apex 에서 다시 받기(--from=<dir> 로 로컬 체크아웃)
 npm run gate         # build + check-shell(공통 셸이 정본 그대로인가)
@@ -106,7 +107,7 @@ npm run report:accuracy   # docs/accuracy-spec.md 재생성
 - `src/validation/` — ISO 표값과 대조하는 검증 테스트.
 - `src/app/` — React 화면. `hash.ts` 가 구획 해시(탭 · 패널 주소)를 맡는다.
 - `shell/` — 공통 셸 v3 사본(우산 `radiation-lab/public/shell` 정본, `npm run sync-shell`). 손으로 고치지 않는다.
-- `scripts/` — `sync-shell.mjs` · `shell-page.mjs`(쪽별 셸 값) · `vite-plugin-shell.mjs`(index.html 삽입) · `build-404.mjs`(public/404.html) · 정확도 보고서 · 데이터 생성.
+- `scripts/` — `sync-shell.mjs` · `shell-page.mjs`(쪽별 셸 값) · `vite-plugin-shell.mjs`(index.html 삽입) · `build-pages.mjs`(public/404.html + guide/methods/validation/about) · 정확도 보고서 · 데이터 생성.
 - `gate/` — `check-shell.mjs`(공통 셸 게이트).
 - `docs/` — 정확도 사양, 화면 설계 기록.
 

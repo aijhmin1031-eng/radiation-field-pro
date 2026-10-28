@@ -3,7 +3,7 @@
  *  ★★ 정본은 우산 저장소 `radiation-lab/public/shell/`(HEADER-SPEC v3)이고 실서비스 주소는
  *    https://radiation-lab.com/shell/ 다. 이 저장소는 그 **사본**을 들고 빌드한다 —
  *    · `shell.json` · `render.mjs` → Vite 플러그인(`scripts/vite-plugin-shell.mjs`)이 빌드 때 index.html 에 머리글 · 꼬리말을
- *      그리고, `scripts/build-404.mjs` 가 public/404.html 을 만든다(네트워크 없이, 재현 가능).
+ *      그리고, `scripts/build-pages.mjs` 가 public/404.html 과 구역 메뉴 임시 쪽 넷을 만든다(네트워크 없이, 재현 가능).
  *    · `shell.css` · `shell.js` · `fonts/` → 라이브에서는 쪽이 apex(https://radiation-lab.com/shell/…?v=N)에서 읽으므로
  *      빌드 산출물에는 들어가지 않는다. **E2E · 실측**은 apex 요청을 이 사본으로 돌려 세운다(`e2e/shell-assets.ts`).
  *  ★ 이 사본은 **손으로 고치지 않는다** — 고칠 것이 있으면 우산 저장소의 정본을 고치고 다시 받는다.

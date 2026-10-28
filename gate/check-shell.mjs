@@ -5,11 +5,12 @@
  *  계기: 네 오리진이 「Radiation Lab /」 글자 말고는 글꼴 · 배경 · 메뉴 · 꼬리말이 제각각이었다(2026-10-28 실측 17쪽). Field Pro 는
  *  셸 자체가 없었고(앱 도구막대가 머리글, Google Fonts IBM Plex, hex 토큰, 404 없음), 이제 정본은 우산 `public/shell/`
  *  (shell.json · render.mjs · shell.css · shell.js)이고 이 저장소는 `shell/` 사본(`npm run sync-shell`)으로 빌드 때 머리글 · 꼬리말을
- *  그린다(`scripts/vite-plugin-shell.mjs` · `scripts/build-404.mjs`). 이 게이트는 그 결과가 **그 함수의 출력과 글자 그대로 같은지**
+ *  그린다(`scripts/vite-plugin-shell.mjs` · `scripts/build-pages.mjs`). 이 게이트는 그 결과가 **그 함수의 출력과 글자 그대로 같은지**
  *  잰다 — index.html 에서 자리표시를 지우거나, 옛 글꼴 · 토큰이 다시 들어오거나, 사본만 갱신하고 404 를 안 만들면 빨개진다.
  *
  *  ★ 재는 것
- *    ① dist/index.html · dist/404.html · public/404.html — header.site 가 정확히 하나이고 renderHeader(spec, {section:"pro", currentHref})
+ *    ① dist/index.html · dist/404.html · public/404.html · 구역 메뉴 임시 쪽 넷(dist · public 의 guide/methods/validation/about/index.html) —
+ *       header.site 가 정확히 하나이고 renderHeader(spec, {section:"pro", currentHref})
  *       와 **바이트 동일**(현재 칸 규칙은 `scripts/shell-page.mjs` — 빌드와 게이트가 같은 함수를 부른다). 머리글은 body 의 첫 요소
  *       (건너뛰기 링크 다음), 꼬리말은 마지막 요소(스크립트 앞)다.
  *    ② footer.site 가 정확히 하나이고 renderFooter(…) 와 바이트 동일. 공유 줄은 구역 홈 + HOME_SHARE 를 권한다.
@@ -21,6 +22,8 @@
  *    ⑤ 구획 해시(D8): 패널 제목 id 아홉(source · geometry · readout · repeatability · spectrum · characteristics · operational · iso ·
  *       uncertainty)과 `#input` · `#results` 가 번들 JS 에 있고, pushState · popstate 를 쓴다. `<main id="main">` 이 번들에 있다.
  *    ⑥ 404 — renderNotFound 본문(`div.nf`) · `<main id="main">` · robots noindex · 구역 홈 링크. index 에 #root 와 .fp-about.
+ *       임시 쪽 넷 — renderBreadcrumb 출력이 머리글과 main 사이에 글자 그대로 · 구역 메뉴 「현재」 칸이 그 쪽 · `noindex,follow` · canonical ·
+ *       <title> · description · og:url · h1 · 「Open the workbench」 · 한글 0 · about 에 #limits(shell.json 의 pro disclaimer 목적지).
  *    ⑦ shell.json — version 정수 · 모든 href 가 절대 주소(https://…radiation-lab.com/). pro 구역에 계정 칸이 없다(가짜 칸 금지).
  *    ⑧ vendored 사본(shell/)이 우산 정본과 같은가 — 옆에 우산 체크아웃(`../radiation-lab/public/shell` 또는 SHELL_SOURCE)이 있을 때만
  *       대조해 **경고**로 적는다(실패 아님 — CI 에는 우산이 없고, 정본이 앞서 갔을 수 있다 → `npm run sync-shell`).
@@ -28,7 +31,7 @@
  *    shell.css 자체가 옳은지는 우산의 check-shell 이 잰다(이쪽은 사본을 신뢰한다). */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { ROOT, SECTION, HOME, HOME_SHARE, loadShell, fragmentsFor, PAGES } from "../scripts/shell-page.mjs";
+import { ROOT, SECTION, HOME, HOME_SHARE, loadShell, fragmentsFor, PAGES, SECTION_PAGES } from "../scripts/shell-page.mjs";
 
 const DIST = join(ROOT, "dist");
 const { spec, R } = await loadShell();
@@ -51,6 +54,11 @@ const FILES = [
   { tag: "dist/index.html",  file: join(DIST, "index.html"), page: "home",     is404: false },
   { tag: "dist/404.html",    file: join(DIST, "404.html"),   page: "notFound", is404: true },
   { tag: "public/404.html",  file: join(ROOT, "public", "404.html"), page: "notFound", is404: true },
+  /* 구역 메뉴 임시 쪽 넷(2026-10-28 감독 지시) — dist 와 public 둘 다 */
+  ...SECTION_PAGES.flatMap((k) => [
+    { tag: `dist/${k}/index.html`,   file: join(DIST, k, "index.html"),            page: k, is404: false, section: true },
+    { tag: `public/${k}/index.html`, file: join(ROOT, "public", k, "index.html"),  page: k, is404: false, section: true },
+  ]),
 ];
 const OLD_FONT = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /IBM Plex/, /Pretendard/, /@font-face/];
 const OLD_TOKEN = [/--paper:/, /--paper-2:/, /--ink:/, /--ink-2:/, /--ink-3:/, /--signal:/, /--signal-soft:/, /--sans:/, /--rule:/, /--rule-strong:/, /--panel:/, /--grid:/, /--ok:/, /--bad:/];
@@ -71,7 +79,7 @@ function stripPrint(css) {
 const cssOf = (html) => (html.match(/<style[^>]*>[\s\S]*?<\/style>/g) || []).join("\n");
 
 for (const f of FILES) {
-  if (!existsSync(f.file)) { bad.push(`${f.tag}: 파일이 없다${f.is404 ? " — `npm run build:404`" : ""}`); continue; }
+  if (!existsSync(f.file)) { bad.push(`${f.tag}: 파일이 없다${f.page !== "home" ? " — `npm run build:pages`" : ""}`); continue; }
   const s = lf(readFileSync(f.file, "utf8"));
   const want = fragmentsFor({ spec, R }, f.page);
   /* ① 머리글 */
@@ -92,8 +100,9 @@ for (const f of FILES) {
     if (foots[0] !== want.footer) bad.push(`${f.tag}: 꼬리말이 render.mjs 출력과 다르다(${foots[0].length} vs ${want.footer.length}자)`);
     const after = body.slice(body.indexOf("</footer>") + "</footer>".length).replace(/<script[^>]*>[\s\S]*?<\/script>|<link[^>]*>|\s/g, "");
     if (after !== "</body></html>") bad.push(`${f.tag}: 꼬리말 뒤에 스크립트 말고 다른 것이 있다 — 「${after.slice(0, 60)}」`);
-    if (!foots[0].includes(`data-url="${HOME}?utm_source=copy`)) bad.push(`${f.tag}: 공유 줄이 구역 홈(${HOME})을 권하지 않는다`);
-    if (!foots[0].includes(encodeURIComponent(HOME_SHARE))) bad.push(`${f.tag}: 공유 글이 HOME_SHARE 가 아니다`);
+    const pg = PAGES[f.page];
+    if (!foots[0].includes(`data-url="${pg.pageUrl}?utm_source=copy`)) bad.push(`${f.tag}: 공유 줄이 ${pg.pageUrl} 을 권하지 않는다`);
+    if (!foots[0].includes(encodeURIComponent(pg.shareText))) bad.push(`${f.tag}: 공유 글이 「${pg.shareText}」 가 아니다`);
   }
   /* ③ head 자산 */
   const head = s.slice(0, s.indexOf("<body"));
@@ -109,7 +118,21 @@ for (const f of FILES) {
   if (hex.length) bad.push(`${f.tag}: 인라인 CSS 에 hex 색 ${hex.length}개 — ${[...new Set(hex)].join(" ")}`);
   if (/color-scheme:\s*light\b/.test(css)) bad.push(`${f.tag}: 인라인 CSS 가 color-scheme: light 를 고정한다`);
   /* ⑥ 쪽마다 */
-  if (f.is404) {
+  if (f.section) {
+    const pg = PAGES[f.page];
+    if (!s.includes(want.crumbs)) bad.push(`${f.tag}: 빵부스러기(renderBreadcrumb, Radiation Lab / Field Pro / ${pg.trail[0].label} + JSON-LD)가 글자 그대로 없다`);
+    const crumbAt = body.indexOf('<nav class="crumbs"'), mainAt = body.indexOf('<main id="main"'), hdrEnd = body.indexOf("</header>");
+    if (!(hdrEnd < crumbAt && crumbAt < mainAt)) bad.push(`${f.tag}: 빵부스러기가 머리글과 main 사이에 있지 않다`);
+    if (!heads[0]?.includes(`<a class="hd-item" href="${pg.url}" aria-current="page">`)) bad.push(`${f.tag}: 구역 메뉴의 「현재」 칸이 ${pg.url} 가 아니다`);
+    if (!head.includes('<meta name="robots" content="noindex,follow" />')) bad.push(`${f.tag}: robots noindex,follow 가 없다(T6 에서 본문이 채워질 때까지 색인 제외)`);
+    if (!head.includes(`<link rel="canonical" href="${pg.url}" />`)) bad.push(`${f.tag}: canonical 이 ${pg.url} 가 아니다`);
+    if (!head.includes(`<title>${pg.title}</title>`)) bad.push(`${f.tag}: <title> 이 「${pg.title}」 이 아니다`);
+    if (!head.includes(`<meta property="og:url" content="${pg.url}" />`) || !/<meta name="description" content="[^"]+" \/>/.test(head)) bad.push(`${f.tag}: description · og:url 이 없다`);
+    if (!body.includes(`<main id="main"><div class="pg">\n  <h1>${pg.h1}</h1>`)) bad.push(`${f.tag}: main#main 의 h1 이 「${pg.h1}」 이 아니다`);
+    if (!body.includes(`<a class="open" href="${HOME}">Open the workbench`)) bad.push(`${f.tag}: 「Open the workbench」 링크가 없다`);
+    if (/[가-힣]/.test(s)) bad.push(`${f.tag}: 한글이 있다(영어 전용)`);
+    if (f.page === "about" && !body.includes('id="limits"')) bad.push(`${f.tag}: #limits 가 없다(shell.json pro disclaimer 가 about/#limits 를 가리킨다)`);
+  } else if (f.is404) {
     if (!s.includes(R.renderNotFound(spec, { section: SECTION }))) bad.push(`${f.tag}: renderNotFound 본문(main#main > div.nf)이 글자 그대로 없다`);
     if (!/<meta name="robots" content="noindex/.test(head)) bad.push(`${f.tag}: robots noindex 가 없다`);
     if (!s.includes(`<a href="${HOME}">Field Pro home</a>`)) bad.push(`${f.tag}: 구역 홈 링크가 없다`);
@@ -123,9 +146,10 @@ for (const f of FILES) {
   }
   note(`${f.tag.padEnd(18)} 머리글 ${heads[0]?.length ?? 0}자 · 꼬리말 ${foots[0]?.length ?? 0}자 · 현재 ${(heads[0]?.match(/aria-current="page"/g) || []).length}곳 · 인라인 CSS hex ${hex.length}`);
 }
-/* dist 와 public 의 404 가 같은가 */
-if (existsSync(join(DIST, "404.html")) && existsSync(join(ROOT, "public", "404.html")) && lf(readFileSync(join(DIST, "404.html"), "utf8")) !== lf(readFileSync(join(ROOT, "public", "404.html"), "utf8")))
-  bad.push("dist/404.html 과 public/404.html 이 다르다 — 빌드가 public/ 을 그대로 복사해야 한다");
+/* dist 와 public 의 정적 쪽 다섯이 같은가 */
+for (const rel of ["404.html", ...SECTION_PAGES.map((k) => `${k}/index.html`)])
+  if (existsSync(join(DIST, rel)) && existsSync(join(ROOT, "public", rel)) && lf(readFileSync(join(DIST, rel), "utf8")) !== lf(readFileSync(join(ROOT, "public", rel), "utf8")))
+    bad.push(`dist/${rel} 과 public/${rel} 이 다르다 — 빌드가 public/ 을 그대로 복사해야 한다`);
 
 /* ④⑤ 묶인 CSS · JS */
 const assets = existsSync(join(DIST, "assets")) ? readdirSync(join(DIST, "assets")) : [];
@@ -168,7 +192,6 @@ if (existsSync(join(SRC, "shell.json"))) {
 }
 
 if (bad.length) { console.error(`❌ 공통 셸 v${V} — 정본에서 벗어난 것 ${bad.length}건\n`); bad.forEach((b) => console.error("  · " + b)); process.exit(1); }
-console.log(`✅ 공통 셸 v${V} — index · 404(dist · public) 머리글 · 꼬리말이 render.mjs 출력과 글자 그대로 같다 · head 자산 ?v=${V}(apex 절대 주소) · Google Fonts · IBM Plex · @font-face 0 · 옛 토큰 · hex 색 0(인라인 + assets CSS ${cssN}) · 구획 해시 9 + 탭 2 · shell.json 절대 주소 ${hrefs.length}개 · pro 계정 칸 없음`);
+console.log(`✅ 공통 셸 v${V} — index · 404 · 구역 임시 쪽 4(dist · public, ${FILES.length}파일) 머리글 · 꼬리말(· 빵부스러기)이 render.mjs 출력과 글자 그대로 같다 · 임시 쪽 noindex · 현재 칸 ✓ · head 자산 ?v=${V}(apex 절대 주소) · Google Fonts · IBM Plex · @font-face 0 · 옛 토큰 · hex 색 0(인라인 + assets CSS ${cssN}) · 구획 해시 9 + 탭 2 · shell.json 절대 주소 ${hrefs.length}개 · pro 계정 칸 없음`);
 for (const w of warn) console.log("   ⚠️  " + w);
 if (!existsSync(join(SRC, "shell.json"))) console.log(`   (우산 정본 ${SRC} 이 옆에 없어 사본 대조는 건너뛰었다 — CI 에서는 늘 그렇다)`);
-void PAGES;

@@ -85,4 +85,4 @@
 - 앱 머리글(h1 「Radiation Lab / Field Pro」 · 도구막대)은 사이트 머리글 아래 본문 첫 블록 `div.hdr` 로, h1 은 「Radiation Field Pro」. 앱 꼬리말은 제거(공통 꼬리말; Source (MIT) · accuracy specification 링크는 `.fp-about`).
 - IBM Plex(Google Fonts) 제거 — 본문 system-ui, 제목 Saira, 숫자 ui-monospace. hex 토큰 → `rgb(var(--c-*))`; 셸에 없는 ok · down · warn-soft 만 `--fp-*` 삼중항.
 - 구획 해시(설계 D8): 모바일 탭 `#input` · `#results`, 패널 제목 id 아홉(`#source` … `#uncertainty`), `history.pushState` / `popstate` — 뒤로가기가 앱 안에서 멈추고 구획 링크를 공유할 수 있다(`src/app/hash.ts`).
-- `public/404.html` 신설(공통 셸 + Page not found), `#root` 자리 예약으로 CLS 0.955 → 0, 대비 미달 두 곳(idx · unit) 토큰으로 해소. 게이트 `gate/check-shell.mjs`. 상세는 README 「공통 셸 v3」 절.
+- `public/404.html` 신설(공통 셸 + Page not found), 구역 메뉴 임시 쪽 넷 `public/{guide,methods,validation,about}/index.html`(공통 셸 + 빵부스러기 + 사실 2~4문장, `noindex,follow`, T6 에서 본문 채움), `#root` 자리 예약으로 CLS 0.955 → 0, 대비 미달 두 곳(idx · unit) 토큰으로 해소. 게이트 `gate/check-shell.mjs`. 상세는 README 「공통 셸 v3」 절.
