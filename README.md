@@ -80,6 +80,15 @@ Google Fonts · IBM Plex · Pretendard · `@font-face` 0 · 옛 토큰 이름 0 
 - **게이트(`gate/check-shell.mjs` ⑨)**: 본문 400~900어 · 출처(ol.src) 2개 이상 · 여덟 단어 이상 문장이 두 쪽(+ 소개 절)에 겹치지 않음 · 사이트 안 링크와 `#id` 가
   닿음 · 사이트맵 · noindex 없음 · description 160자 이하. **E2E**: 일곱 쪽 넘침 0 · 한글 0 · 예제 → `/?preset=N-80` 딥링크가 같은 HVL1 을 띄움.
 
+## ★★ 배포 — Cloudflare Workers 로 (2026-10-28, T8)
+
+- **왜**: Vercel Hobby 는 상업적 이용을 금지하고 Google AdSense 를 이름으로 든다. 광고는 Guide 같은 설명 쪽에 실릴 계획이다(결정 D13). 우산 · RadCalc 는 같은 이유로 10-06 에 옮겼고, 여기도 같은 방식이다.
+- **무엇**: `wrangler.jsonc`(정적 자산만 · Worker 스크립트 없음 · `not_found_handling: "404-page"` · `html_handling: "auto-trailing-slash"`) + `cf/_headers`(Vercel 이 보내던 CORS `*` · HSTS 2년 유지, `/assets/*` 1년 immutable) + `.github/workflows/deploy.yml`(master 푸시 → `npm run build` → `wrangler deploy` → workers.dev 연기 시험).
+- **전환**: 라우트 `pro.radiation-lab.com/*` 는 `pro` DNS 레코드가 프록시(주황)일 때만 깨어난다. DNS-only(회색)인 동안은 Vercel 이 계속 나가고 이 Worker 는 `radiation-lab-pro.jhmin1031.workers.dev` 로만 답한다. 되돌리기는 레코드를 다시 DNS-only 로 돌리는 것이다.
+- **달라지는 것 하나**: `/guide` 처럼 끝 슬래시 없는 주소가 Vercel 에서는 200 이었고 Workers 에서는 `/guide/` 로 307 이다. canonical · 사이트맵 · 링크는 전부 슬래시 쪽이다.
+- **실측**(로컬 `wrangler dev`, 2026-10-28): 사이트맵 8쪽 · robots · favicon · 404 본문이 라이브 Vercel 과 같다(이 PC 의 CRLF 만 다르다 — CI 는 LF). 404 는 셸 404 쪽 · 상태 404, `_headers` 는 파일로 나가지 않는다. JS 해시 `index-BiHzizDo.js` 동일.
+- 비밀값은 저장소 Actions secret `CLOUDFLARE_API_TOKEN`, 계정 ID 는 저장소 변수 `CLOUDFLARE_ACCOUNT_ID`.
+
 ## 무엇을 계산하는가
 
 | 영역 | 내용 |
