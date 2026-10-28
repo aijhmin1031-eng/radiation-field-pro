@@ -17,57 +17,76 @@ export const HOME_SHARE = "Field Pro — ISO 4037 reference X-ray and gamma fiel
 
 /** 이 저장소의 쪽들.
  *  - home: 앱(index.html). 404: 제 주소가 없으므로 「현재」 칸 없이, 공유 줄은 구역 홈을 권한다(우산 · RadCalc 의 404 와 같은 처방).
- *  - guide · methods · validation · about: 구역 메뉴의 네 주소에 두는 **임시 쪽**(2026-10-28 감독 지시) — 본문은 T6 에서 채운다.
- *    그때까지 `noindex,follow`. 사실만 적는다(거짓 약속 없음). `about/#limits` 는 shell.json 의 pro disclaimer 가 가리키는 자리다. */
+ *  - guide · methods · validation · about: 구역 메뉴의 네 주소 — 설명 층 본문(2026-10-28 T6, 그전에는 noindex 임시 쪽). 본문은
+ *    `content/<key>.html` 조각이고, 머리 · 빵부스러기 · TechArticle JSON-LD · 끝의 「Open the workbench」 · 쪽 사이 링크는 build-pages 가 두른다.
+ *  - examples: 예제 셋(`/examples/<slug>/`, 본문 `content/examples/<slug>.html`). 구역 메뉴에 칸이 없으므로 「현재」 칸은 Guide 이고
+ *    빵부스러기는 Guide 를 거친다(주소 없는 가운데 조각은 render.mjs 가 「현재」로 그리므로 Guide 에 주소를 준다).
+ *  - 글의 원칙(T6 인계서): 영어 · 쪽당 400~900어 · 숫자마다 출처 · 앱이 실제로 하는 것만. 숫자는 엔진을 같은 입력으로 돌려 얻었다
+ *    (작업 폴더 `T6_원고/_script`). `about/#limits` 는 shell.json 의 pro disclaimer 가 가리키는 자리다.
+ *  - updated: 사이트맵 lastmod 와 JSON-LD dateModified 가 같은 값을 쓴다 — 본문을 고치면 함께 고친다. */
+const UPDATED = "2026-10-28";
 export const PAGES = {
-  home:     { currentHref: HOME, pageUrl: HOME, shareText: HOME_SHARE },
+  home:     { currentHref: HOME, pageUrl: HOME, shareText: HOME_SHARE, updated: UPDATED },
   notFound: { currentHref: "",   pageUrl: HOME, shareText: HOME_SHARE },
   guide: {
-    path: "guide", title: "Guide · Field Pro · Radiation Lab", h1: "Guide",
-    description: "A step-by-step guide to the Field Pro workbench is planned for this page. Until it is written, the workbench carries short hints next to each field.",
-    body: [
-      "This page is reserved for a step-by-step guide to the workbench: choosing the source, setting the filtration and the air path, the geometry and evaluation options, and reading the results and the uncertainty budget.",
-      "It has not been written yet. Until then, the workbench itself carries short hints next to each field, and the section below the workbench summarises what it computes and how accurate it is.",
-    ],
+    path: "guide", crumb: "Guide", updated: UPDATED,
+    title: "Guide to the workbench · Field Pro · Radiation Lab",
+    h1: "Guide: from source settings to a reported result",
+    description: "How to use Field Pro: the four input panels, calculation modes, reading HVL, conversion coefficients and uncertainty, saving and printing, and common mistakes.",
   },
   methods: {
-    path: "methods", title: "Methods · Field Pro · Radiation Lab", h1: "Methods",
-    description: "The methods behind the Field Pro workbench — spectrum model, attenuation data, HVL evaluation, conversion coefficients and the uncertainty budget — are to be documented on this page.",
-    body: [
-      "This page is reserved for the methods behind the workbench: the tungsten-anode spectrum model, the attenuation data, the evaluation of half-value layers and homogeneity, the spectrum-averaged conversion coefficients of ISO 4037-3, and the GUM uncertainty budget.",
-      "It has not been written yet. The engine and its data are published with the source code, and the accuracy specification generated from the engine is linked from the Validation page.",
-    ],
+    path: "methods", crumb: "Methods", updated: UPDATED,
+    title: "Methods: spectra, HVL, conversion, GUM · Field Pro · Radiation Lab",
+    h1: "Methods: how the engine computes a reference field",
+    description: "The data and formulas behind Field Pro: SpekPy spectra, NIST attenuation, HVL, ISO 4037-1 matching, ISO 4037-3 conversion coefficients, decay and the GUM.",
   },
   validation: {
-    path: "validation", title: "Validation · Field Pro · Radiation Lab", h1: "Validation",
-    description: "How the Field Pro engine is checked: HVL1 against the ISO 4037-1 table for all 50 qualities and conversion coefficients against ISO 4037-3, enforced by the test suite.",
-    body: [
-      "This page is reserved for the validation record of the workbench.",
-      "Today the engine's first half-value layer is compared with the ISO 4037-1 table for all 50 radiation qualities (every deviation within 4% below 40 keV mean energy and within 2% above it), and the Cs-137 and Co-60 conversion coefficients with the ISO 4037-3 recommended values (within 2%). These checks run in the test suite, and the generated table is the <a href=\"https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md\">accuracy specification</a> in the repository.",
-    ],
+    path: "validation", crumb: "Validation", updated: UPDATED,
+    title: "Validation against ISO 4037 · Field Pro · Radiation Lab",
+    h1: "Validation: the engine against the ISO 4037 tables",
+    description: "Field Pro against ISO 4037: HVL1 of all 50 qualities within 4% below 40 keV and 2% above, nuclide coefficients within 1.1%, causes of deviations, limits.",
   },
   about: {
-    path: "about", title: "About · Field Pro · Radiation Lab", h1: "About Field Pro",
-    description: "Field Pro is a browser workbench for ISO 4037 reference X-ray and gamma fields, one of the pro workbenches of Radiation Lab. Everything runs in the browser; the source is MIT-licensed.",
-    body: [
-      "Field Pro is one of the pro workbenches of <a href=\"https://radiation-lab.com/\">Radiation Lab</a>: a browser workbench for characterising the reference X-ray and gamma fields of ISO 4037, written for calibration laboratories, dosimetry services and instrument test houses.",
-      "Every calculation runs in your browser; nothing you enter is sent to a server. The source code is published on GitHub under the MIT licence: <a href=\"https://github.com/aijhmin1031-eng/radiation-field-pro\">Source (MIT)</a>.",
-      "<span id=\"limits\">Limits.</span> The workbench supports the measurements and quality procedures of a laboratory; it does not replace them. Values for a real reference field are fixed by that facility's own measurements.",
-    ],
+    path: "about", crumb: "About", updated: UPDATED,
+    title: "About Field Pro · Radiation Lab",
+    h1: "About Field Pro",
+    description: "What Field Pro is for, who writes it, how it is built, what stays on your computer, and its limits: planning and cross-checking, not an accredited calibration.",
+  },
+  "n-80": {
+    path: "examples/n-80-survey-meter-type-test", crumb: "N-80 field example", example: true, updated: UPDATED,
+    title: "Example: N-80 field for a survey-meter test · Field Pro · Radiation Lab",
+    h1: "Example: an N-80 reference field for a survey-meter energy-response test",
+    description: "N-80 in Field Pro: HVL1 0.5753 mm Cu against 0.580 in ISO 4037-1, H*(10)/Ka 1.723 Sv/Gy, the meter's conventional value, and kV and filter errors.",
+  },
+  "cs-137": {
+    path: "examples/cs-137-field-at-2-5-m", crumb: "Cs-137 field example", example: true, updated: UPDATED,
+    title: "Example: Cs-137 field at 2.5 m · Field Pro · Radiation Lab",
+    h1: "Example: a Cs-137 field at 2.5 m — air kerma rate, lead HVL and Hp(10)",
+    description: "A Cs-137 source after 10.8 years of decay: 94.53 µGy/h at 2.5 m, Hp(10) and H*(10) rates, a 5.6 mm lead HVL, and what the point-source model omits.",
+  },
+  uncertainty: {
+    path: "examples/repeat-readings-uncertainty", crumb: "Uncertainty example", example: true, updated: UPDATED,
+    title: "Example: readings to reported uncertainty · Field Pro · Radiation Lab",
+    h1: "Example: from five chamber readings to a reported result",
+    description: "Five chamber readings to 1.5328 ± 0.031: air-density correction 1.0336, Type A k = 2.776, a 1% certificate component, and why the combined k is 1.96.",
   },
 };
 for (const [k, p] of Object.entries(PAGES)) {
   if (!p.path) continue;
   p.url = `${HOME}${p.path}/`;
-  p.currentHref = p.url;
+  p.currentHref = p.example ? `${HOME}guide/` : p.url;
   p.pageUrl = p.url;
   p.shareText = p.title;
-  p.trail = [{ label: k === "about" ? "About" : p.h1 }];
+  p.trail = p.example ? [{ label: "Guide", href: `${HOME}guide/` }, { label: p.crumb }] : [{ label: p.crumb }];
+  p.content = `content/${p.path}.html`; // 본문 조각(저장소 뿌리 기준)
   p.key = k;
 }
-/** 구역 메뉴 임시 쪽 넷(생성 · 검사 순서). */
+/** 구역 메뉴 쪽 넷 · 예제 셋(생성 · 검사 · 사이트맵 순서). */
 export const SECTION_PAGES = ["guide", "methods", "validation", "about"];
-
+export const EXAMPLE_PAGES = ["n-80", "cs-137", "uncertainty"];
+export const CONTENT_PAGES = [...SECTION_PAGES, ...EXAMPLE_PAGES];
+/** HTML 글자 이스케이프 — 빌드와 게이트가 같은 것을 쓴다. */
+export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 /** vendored 사본을 읽는다 — shell.json 과 render.mjs. 둘은 같은 판이어야 한다(sync-shell 이 한 번에 받는다). */
 export async function loadShell() {
   const spec = JSON.parse(readFileSync(join(ROOT, "shell", "shell.json"), "utf8"));

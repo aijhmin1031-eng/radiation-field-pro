@@ -2,6 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pro.radiation-lab.com/</loc>
-    <lastmod>2026-10-25</lastmod>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/guide/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/methods/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/validation/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/about/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/examples/n-80-survey-meter-type-test/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/examples/cs-137-field-at-2-5-m/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://pro.radiation-lab.com/examples/repeat-readings-uncertainty/</loc>
+    <lastmod>2026-10-28</lastmod>
   </url>
 </urlset>

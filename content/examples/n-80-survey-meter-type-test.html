@@ -1,0 +1,50 @@
+<p class="lede">An energy-response test of an H*(10) dose-rate meter needs reference beams whose spectrum is known well enough to name the conventional quantity value at the test point. N-80, from the narrow-spectrum series of ISO&nbsp;4037-1, is one of the qualities such tests step through. This example sets it up, checks it against the table and turns a chamber reading into the value the meter under test should show.</p>
+
+<h2 id="inputs">Inputs</h2>
+<p>Open the workbench with <a href="/?preset=N-80">the N-80 preset</a>; these are also the defaults.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Panel</th><th>Field</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>01 Source</td><td>Source / ISO beam quality</td><td>X-ray tube / N-80</td></tr>
+    <tr><td>01 Source</td><td>Tube voltage</td><td class="n">80 kV</td></tr>
+    <tr><td>01 Source</td><td>Filtration</td><td>4 mm Al (inherent) + 2 mm Cu</td></tr>
+    <tr><td>01 Source</td><td>Air path</td><td class="n">2500 mm</td></tr>
+    <tr><td>02 Geometry</td><td>α / HVL material / ISO comparison / band</td><td>0° / Auto / Auto-match / ±5%</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="results">Results</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Quantity</th><th>Workbench</th><th>ISO 4037-1 (2.5 m)</th><th>Deviation</th></tr></thead>
+  <tbody>
+    <tr><td>Mean energy Ē</td><td class="n">64.96 keV</td><td class="n">65.2 keV</td><td class="n">−0.37%</td></tr>
+    <tr><td>Effective energy E<sub>eff</sub></td><td class="n">63.95 keV</td><td>—</td><td>—</td></tr>
+    <tr><td>HVL1</td><td class="n">0.5753 mm Cu</td><td class="n">0.580 mm Cu</td><td class="n">−0.80%</td></tr>
+    <tr><td>HVL2</td><td class="n">0.6185 mm Cu</td><td class="n">0.623 mm Cu</td><td class="n">−0.72%</td></tr>
+    <tr><td>Homogeneity coefficient h</td><td class="n">0.9302</td><td class="n">0.9310</td><td class="n">−0.08%</td></tr>
+    <tr><td>Air-kerma transmission of the 2 mm Cu</td><td class="n">1.51%</td><td>—</td><td>—</td></tr>
+    <tr><td>H*(10)/K<sub>a</sub></td><td class="n">1.723 Sv/Gy</td><td>—</td><td>—</td></tr>
+    <tr><td>Hp(10, 0°)/K<sub>a</sub>, slab</td><td class="n">1.876 Sv/Gy</td><td>—</td><td>—</td></tr>
+    <tr><td>Hp(10, 60°)/K<sub>a</sub>, slab</td><td class="n">1.496 Sv/Gy</td><td>—</td><td>—</td></tr>
+    <tr><td>H′(0.07, 0°)/K<sub>a</sub></td><td class="n">1.592 Sv/Gy</td><td>—</td><td>—</td></tr>
+  </tbody>
+</table></div>
+<p>Panel&nbsp;C matches N-80 automatically and puts all four characteristics inside the ±5% band.</p>
+
+<h2 id="reading">From chamber reading to conventional value</h2>
+<p>Suppose the reference chamber, after its own calibration factor and k<sub>ρ</sub>, gives an air kerma rate of 1.00&nbsp;mGy/h at the test point. The conventional ambient dose equivalent rate the meter should indicate is 1.00&nbsp;×&nbsp;1.723&nbsp;=&nbsp;1.72&nbsp;mSv/h. The meter's relative response at this quality is its indication divided by 1.72&nbsp;mSv/h, and that ratio is what the type-test limits apply to. The <a href="https://radimeter.radiation-lab.com/standards/iec-60846-1/">IEC&nbsp;60846-1 summary on RadiMeter</a> lists those requirements.</p>
+
+<h2 id="interpretation">What the numbers say</h2>
+<p><strong>HVL is the sensitive check; the conversion coefficient is not.</strong> Moving the tube voltage by 2&nbsp;kV in the workbench shifts HVL1 from 0.5753 to 0.5555&nbsp;mm&nbsp;Cu at 78&nbsp;kV (−3.4%) and to 0.6008 at 82&nbsp;kV (+4.4%). A 0.1&nbsp;mm error in the copper moves it by about 1.5% either way. Across all four of those changes H*(10)/K<sub>a</sub> stays between 1.722 and 1.724&nbsp;Sv/Gy. A measured HVL1 outside the band therefore tells you the beam is not N-80 as specified, usually through kilovoltage or filtration, long before the dose conversion itself is in doubt.</p>
+<p><strong>Average over the spectrum.</strong> Reading the monoenergetic table at Ē&nbsp;=&nbsp;64.96&nbsp;keV would give 1.735 for H*(10)/K<sub>a</sub> and 1.893 for Hp(10,&nbsp;0°)/K<sub>a</sub>, 0.7% and 0.9% above the spectrum averages. In a test whose limits are tens of percent that is small, but it is a systematic error with a known sign, and there is no reason to carry it.</p>
+<p><strong>Output costs filtration.</strong> The 2&nbsp;mm of copper lets through 1.51% of the air kerma that the inherent filtration alone would deliver, about a factor of 66. Plan tube current and distance with that in mind before booking beam time; the kerma overlay on the spectrum chart shows that 80% of what remains lies between 55 and 75&nbsp;keV, peaking at 67&nbsp;keV.</p>
+<p><strong>Angle matters for personal dosemeters.</strong> For a personal dosemeter tested on the slab at 60°, the conversion coefficient drops to 1.496&nbsp;Sv/Gy, 20% below normal incidence. Set α in panel&nbsp;02 to the angle of each irradiation rather than correcting by hand.</p>
+<p>The same steps for a nuclide field are in the <a href="/examples/cs-137-field-at-2-5-m/">Cs-137 example</a>, and the <a href="/guide/">Guide</a> explains each panel.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>ISO 4037-1:2019, Table for the N series: N-80, 80 kV, 4 mm Al inherent and 2 mm Cu added filtration, mean energy 65.2 keV, HVL1 0.580 and HVL2 0.623 mm Cu at 2.5 m.</li>
+  <li>ISO 4037-3:2019, Tables 14 and 46: monoenergetic h*<sub>K</sub>(10) and h<sub>pK</sub>(10; α) used for the spectrum averages.</li>
+  <li>IEC 60846-1:2009, Radiation protection instrumentation — Ambient and/or directional dose equivalent (rate) meters and/or monitors for beta, X and gamma radiation — Part 1: Portable workplace and environmental meters and monitors.</li>
+  <li>Workbench values computed with the published engine on 28 October 2026; formulas on the <a href="/methods/">Methods</a> page.</li>
+</ol>

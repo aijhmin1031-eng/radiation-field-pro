@@ -1,0 +1,44 @@
+<p class="lede">Five readings from a vented ionisation chamber, taken on a warm day at low pressure, have to become one reported value with an expanded uncertainty. This example follows them through the air-density correction, the Type&nbsp;A evaluation and the combination with a certificate component, and shows two places where a hand calculation commonly goes wrong.</p>
+
+<h2 id="inputs">Inputs</h2>
+<p>Keep the default N-80 field and fill panels 03 and 04 in <a href="/">the workbench</a>. The readings are in the instrument's own unit; only ratios matter here.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Panel</th><th>Field</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>03 Readout correction</td><td>Temperature / pressure / relative humidity</td><td class="n">23.4 °C / 99.1 kPa / 45%</td></tr>
+    <tr><td>04 Repeatability</td><td>Repeat readings</td><td class="n">1.482 1.495 1.471 1.488 1.479</td></tr>
+    <tr><td>04 Repeatability</td><td>Apply k<sub>ρ</sub> to each reading</td><td>on</td></tr>
+    <tr><td>04 Repeatability</td><td>Type B: calibration certificate (reference chamber)</td><td class="n">1.0% (relative standard uncertainty)</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="results">Results</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Step</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Air-density correction k<sub>ρ</sub></td><td class="n">1.0336</td></tr>
+    <tr><td>Corrected readings</td><td class="n">1.5317, 1.5452, 1.5204, 1.5379, 1.5286</td></tr>
+    <tr><td>Mean x̄ / standard deviation s</td><td class="n">1.5328 / 0.00939</td></tr>
+    <tr><td>Standard uncertainty of the mean u = s/√5</td><td class="n">0.00420 (0.274%)</td></tr>
+    <tr><td>Degrees of freedom ν / coverage factor k</td><td class="n">4 / 2.776</td></tr>
+    <tr><td>Type A alone: x̄ ± U</td><td class="n">1.5328 ± 0.012</td></tr>
+    <tr><td>Combined relative standard uncertainty</td><td class="n">1.037%</td></tr>
+    <tr><td>Effective degrees of freedom ν<sub>eff</sub></td><td class="n">821</td></tr>
+    <tr><td>Reported result</td><td class="n">1.5328 ± 0.031 (k = 1.96, about 95%)</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="interpretation">What the numbers say</h2>
+<p><strong>The correction is larger than the uncertainty.</strong> k<sub>ρ</sub> raises every reading by 3.4%, while the whole expanded uncertainty is 2.0%. A forgotten correction is therefore not a matter of a slightly wider interval; it moves the result outside it. Temperature and pressure alone would give 296.55/293.15&nbsp;×&nbsp;101.325/99.1&nbsp;=&nbsp;1.0343. The humidity term brings that down to 1.0336, because air at 45% relative humidity is slightly denser than the 65% reference.</p>
+<p><strong>The Type&nbsp;A coverage factor does not survive the combination.</strong> With five readings, t<sub>0.975,&nbsp;4</sub>&nbsp;=&nbsp;2.776 is right for the repeatability on its own. Once the 1.0% certificate component, with its unlimited degrees of freedom, is added in quadrature, Welch–Satterthwaite gives ν<sub>eff</sub>&nbsp;≈&nbsp;821 and the coverage factor drops to 1.96. Multiplying the combined 1.037% by 2.776 instead would report 2.88% rather than 2.04%, an interval 41% too wide.</p>
+<p><strong>When the certificate is good, repeatability takes over.</strong> Changing the certificate entry to 0.2% gives ν<sub>eff</sub>&nbsp;=&nbsp;9.4 and k&nbsp;=&nbsp;2.25, so the expanded uncertainty is 0.76%, no longer dominated by the reference. With only the first three readings and the 1.0% certificate, the Type&nbsp;A factor jumps to 4.303 while the combined k stays at 2.00. The cheapest way to tighten a budget depends on which component dominates, and the component table in panel&nbsp;D shows that at a glance.</p>
+<p><strong>A real budget has more than one Type&nbsp;B line.</strong> Positioning is a typical next entry: an uncertainty of 3&nbsp;mm in a 1&nbsp;m chamber distance is 0.6% in air kerma through the inverse-square law. Adding it with <em>+ Type B component</em> raises the combined relative standard uncertainty from 1.037% to 1.198%, ν<sub>eff</sub> to about 1463 and the expanded uncertainty to 0.036 (2.35%), with k still 1.96. Each new line is cheap to add and shows immediately whether it matters next to the certificate.</p>
+<p><strong>Round the report, not the arithmetic.</strong> The panel shows the value to five significant figures so that nothing is lost between steps. For a certificate, round U to two significant figures and the value to the same decimal place: 1.533&nbsp;±&nbsp;0.031.</p>
+<p>The formulas behind each row are on the <a href="/methods/#uncertainty">Methods</a> page, and the <a href="/guide/#mistakes">Guide</a> lists the other inputs that change an answer.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>JCGM 100:2008, <a href="https://www.bipm.org/en/committees/jc/jcgm/publications">Guide to the expression of uncertainty in measurement</a>: 4.2 (Type A), 5.1.2 (combination), G.3 (Student t), G.4 (Welch–Satterthwaite), 7.2.6 (number of digits).</li>
+  <li>O. A. Alduchov, R. E. Eskridge, Improved Magnus form approximation of saturation vapor pressure, Journal of Applied Meteorology 35 (1996) 601–609.</li>
+  <li>Reference conditions 20 °C, 101.325 kPa, 65% relative humidity as used by the workbench for vented chambers; implementation in <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/src/engine/air-density.ts">air-density.ts</a>.</li>
+</ol>

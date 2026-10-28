@@ -1,0 +1,34 @@
+<p class="lede">Field Pro is the reference-field workbench of <a href="https://radiation-lab.com/">Radiation Lab</a>. It exists for the people who build ISO&nbsp;4037 X-ray and gamma beams and then have to defend the numbers that come out of them.</p>
+
+<h2 id="purpose">What it is for</h2>
+<p>A calibration laboratory, an individual-monitoring service or an instrument test house runs a small set of reference beams over and over. The arithmetic around them is always the same: which filter stack gives this quality, does the measured half-value layer agree with the table, which conversion coefficient turns air kerma into the operational quantity for this spectrum and angle, and how large is the uncertainty of the final reading. Field Pro puts that arithmetic on one screen, with the formulas and data published so that an assessor can follow them. Typical uses are planning a new quality before beam time, cross-checking a measured HVL against the standard, preparing the conventional quantity value for a type test, writing an uncertainty statement, and training new staff on what each step means.</p>
+<p>Two sister workbenches cover the neighbouring jobs: <a href="https://radimeter.radiation-lab.com/">RadiMeter</a> for type-testing survey meters against IEC requirements, and <a href="https://disposal.radiation-lab.com/">M-Phreefiteq</a> for radionuclide speciation and transport.</p>
+
+<h2 id="author">Who writes it</h2>
+<p>Field Pro has the same author as the rest of Radiation Lab, a single radiation-protection practitioner who builds these tools in their own time. The <a href="https://radiation-lab.com/about">Radiation Lab about page</a> describes who that is, how the sites are funded and how corrections are handled. The workbench is not a product of any employer, standards body or calibration laboratory.</p>
+
+<h2 id="build">How it is built</h2>
+<p>The calculation engine is plain TypeScript with no dependence on the screen, so it can be tested on its own; the interface is a React page compiled to static files. Data tables are committed to the repository together with the scripts that produced them. The whole project is open under the MIT licence: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>. The <a href="/methods/">Methods</a> page lists every table and formula, and <a href="/validation/">Validation</a> shows how they compare with ISO&nbsp;4037.</p>
+
+<h2 id="privacy">What stays on your computer</h2>
+<p>There is no server-side calculation and no account. Your inputs and the auto-calculate setting are kept in this browser's local storage under <code>rfp.input.v1</code> and <code>rfp.autoMode.v1</code>, and the light or dark theme under the key shared by all Radiation Lab sites. Session files go to your own downloads folder. The page fetches its header style, script and typeface from radiation-lab.com; nothing you type is part of those requests.</p>
+
+<h2 id="limits">Limits</h2>
+<p>Field Pro is not an accredited calibration and does not replace one. Its results are for planning and for cross-checking measurements; the values of a real reference field are fixed by that facility's own measurements and quality system.</p>
+<ul>
+  <li>Only a tungsten anode at 20° is modelled, with ideal narrow-beam geometry: no scatter, no heel effect, no build-up.</li>
+  <li>Of the ISO&nbsp;4037-1 radiations, only the continuous L, N, W and H series are tabulated; fluorescence and high-energy photon radiations are not.</li>
+  <li>Only Cs-137 and Co-60 are available as nuclide sources, as gamma-line spectra without the accompanying X-rays.</li>
+  <li>Half-value layers in lead are narrow-beam values for characterising a beam, not broad-beam values for shielding design.</li>
+  <li>Type&nbsp;B components are whatever you enter; the workbench cannot know your laboratory's budget.</li>
+</ul>
+
+<h2 id="contact">Contact and corrections</h2>
+<p>Errors in a formula, a transcribed value or a page like this one can be reported through the <a href="https://radiation-lab.com/contact">Radiation Lab contact page</a> or as an issue on the <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/issues">GitHub repository</a>.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="src">
+  <li>ISO 4037-1:2019 and ISO 4037-3:2019, X and gamma reference radiation for calibrating dosemeters and doserate meters.</li>
+  <li>Data provenance and generators: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/data">src/data</a> and <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/scripts">scripts</a> in the repository.</li>
+  <li>Radiation Lab, <a href="https://radiation-lab.com/about">About</a> and <a href="https://radiation-lab.com/privacy">Privacy</a>.</li>
+</ol>
