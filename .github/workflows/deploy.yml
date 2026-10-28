@@ -1,0 +1,39 @@
+# 배포 (Cloudflare Workers) — T8, 2026-10-28. master 에 들어오면 dist/ 를 Worker `radiation-lab-pro` 로 올린다.
+# ★ Vercel 을 떠나는 이유: Vercel Hobby 는 상업적 이용(애드센스)을 금지한다. 우산 · RadCalc 와 같은 방식이다(그쪽 deploy.yml).
+# ★ 비밀값은 CLOUDFLARE_API_TOKEN 하나(Workers Scripts · Routes, 존 radiation-lab.com), 계정 ID 는 저장소 변수.
+# ★ 라우트 pro.radiation-lab.com/* 는 pro DNS 레코드가 프록시(주황)일 때만 깨어난다. 그전에는 workers.dev 주소로만 답한다.
+# ★ 품질 검사는 ci.yml 이 따로 한다(배포를 막지 않는 것은 Vercel 때와 같다).
+name: deploy
+on:
+  push: { branches: [master] }
+  workflow_dispatch:
+concurrency: { group: deploy, cancel-in-progress: false }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - name: Cloudflare headers
+        run: cp cf/_headers dist/_headers
+      - name: Deploy
+        run: npx --yes wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      # 「배포 성공」은 라이브를 말하지 않는다 — 주소로 잰다(우산 deploy.yml 과 같은 원칙).
+      - name: Smoke test
+        run: |
+          set -e
+          B=https://radiation-lab-pro.jhmin1031.workers.dev
+          for i in 1 2 3 4 5 6; do c=$(curl -s -o /dev/null -w '%{http_code}' "$B/"); [ "$c" = 200 ] && break; echo "wait ($c)"; sleep 5; done
+          for p in / /guide/ /methods/ /validation/ /about/ /examples/n-80-survey-meter-type-test/ /examples/cs-137-field-at-2-5-m/ /examples/repeat-readings-uncertainty/ /robots.txt /sitemap.xml /og.png /favicon.svg; do
+            c=$(curl -s -o /dev/null -w '%{http_code}' "$B$p"); echo "$p -> $c"; test "$c" = 200
+          done
+          loc=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$B/guide"); echo "/guide -> $loc"; test "$loc" = "307 $B/guide/"
+          c=$(curl -s -o /dev/null -w '%{http_code}' "$B/no-such-page"); echo "/no-such-page -> $c"; test "$c" = 404
+          h=$(curl -sI "$B/" | tr -d '\r' | grep -i '^strict-transport-security:' || true); echo "$h"; test -n "$h"

@@ -1,0 +1,25 @@
+// Field Pro (pro.radiation-lab.com) on Cloudflare Workers — static assets only, no Worker script. (T8, 2026-10-28)
+//
+// ★★ Why not Vercel any more: Vercel Hobby's fair-use policy forbids commercial use and names Google AdSense, and ads
+//   are planned on the guide pages (decision D13). The umbrella and RadCalc moved for the same reason on 2026-10-06;
+//   this is the same pattern (their wrangler.jsonc).
+// ★ The route acts only while the `pro` DNS record is proxied (orange cloud). While it is DNS-only, Vercel keeps
+//   serving and this Worker answers only at its workers.dev address — that is how it is checked before the switch,
+//   and turning the record back to DNS-only is the rollback.
+// ★ `dist/` is `npm run build`; .github/workflows/deploy.yml copies `cf/_headers` into it before `wrangler deploy`.
+// ★ Pages are directories (`/guide/` — the canonical, the sitemap and every link use the slash). `auto-trailing-slash`
+//   sends `/guide` to `/guide/` with a 307; Vercel answered both forms with 200.
+{
+  "name": "radiation-lab-pro",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "pro.radiation-lab.com/*", "zone_name": "radiation-lab.com" }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}
