@@ -30,6 +30,7 @@ const en = {
   // 인쇄 리포트
   printTitle: "Reference X-ray and gamma field characterisation report",
   printed: "Printed",
+  printVersion: (v: string) => `version ${v}`,
   dateLocale: "en-GB",
   printInputs: "Input conditions",
   rowSource: "Source",
