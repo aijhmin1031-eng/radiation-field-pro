@@ -23,6 +23,8 @@ export const HOME_SHARE = "Field Pro — ISO 4037 reference X-ray and gamma fiel
  *    빵부스러기는 Guide 를 거친다(주소 없는 가운데 조각은 render.mjs 가 「현재」로 그리므로 Guide 에 주소를 준다).
  *  - 글의 원칙(T6 인계서): 영어 · 쪽당 400~900어 · 숫자마다 출처 · 앱이 실제로 하는 것만. 숫자는 엔진을 같은 입력으로 돌려 얻었다
  *    (작업 폴더 `T6_원고/_script`). `about/#limits` 는 shell.json 의 pro disclaimer 가 가리키는 자리다.
+ *  - changelog: 판 사이의 변경 기록(`/changelog/`, T17). 구역 메뉴에 칸이 없으므로 「현재」 칸과 빵부스러기는 About 을 거친다(parent).
+ *    설명 쪽 일곱과 달리 「More on Field Pro」 목록에는 넣지 않는다 — 모든 쪽의 판 줄이 이미 이 쪽을 가리킨다.
  *  - updated: 사이트맵 lastmod 와 JSON-LD dateModified 가 같은 값을 쓴다 — 본문을 고치면 함께 고친다. */
 const UPDATED = "2026-10-28";
 export const PAGES = {
@@ -47,7 +49,7 @@ export const PAGES = {
     description: "Field Pro against ISO 4037: HVL1 of all 50 qualities within 4% below 40 keV and 2% above, nuclide coefficients within 1.1%, causes of deviations, limits.",
   },
   about: {
-    path: "about", crumb: "About", updated: UPDATED,
+    path: "about", crumb: "About", updated: "2026-10-29",
     title: "About Field Pro · Radiation Lab",
     h1: "About Field Pro",
     description: "What Field Pro is for, who writes it, how it is built, what stays on your computer, and its limits: planning and cross-checking, not an accredited calibration.",
@@ -70,21 +72,58 @@ export const PAGES = {
     h1: "Example: from five chamber readings to a reported result",
     description: "Five chamber readings to 1.5328 ± 0.031: air-density correction 1.0336, Type A k = 2.776, a 1% certificate component, and why the combined k is 1.96.",
   },
+  changelog: {
+    path: "changelog", crumb: "Changes", parent: "about", updated: "2026-10-29",
+    title: "Changes between versions · Field Pro · Radiation Lab",
+    h1: "Changes between versions of Field Pro",
+    description: "What changed from one version of Field Pro to the next, calculated values first: the numbering rule, version 1.0.0 and the data its results rest on.",
+  },
 };
 for (const [k, p] of Object.entries(PAGES)) {
   if (!p.path) continue;
+  if (p.example) p.parent = "guide";
+  const up = p.parent && { label: PAGES[p.parent].crumb, href: `${HOME}${PAGES[p.parent].path}/` };
   p.url = `${HOME}${p.path}/`;
-  p.currentHref = p.example ? `${HOME}guide/` : p.url;
+  p.currentHref = up ? up.href : p.url;
   p.pageUrl = p.url;
   p.shareText = p.title;
-  p.trail = p.example ? [{ label: "Guide", href: `${HOME}guide/` }, { label: p.crumb }] : [{ label: p.crumb }];
+  p.trail = up ? [up, { label: p.crumb }] : [{ label: p.crumb }];
   p.content = `content/${p.path}.html`; // 본문 조각(저장소 뿌리 기준)
   p.key = k;
 }
-/** 구역 메뉴 쪽 넷 · 예제 셋(생성 · 검사 · 사이트맵 순서). */
+/** 구역 메뉴 쪽 넷 · 예제 셋(생성 · 검사 · 사이트맵 순서). 변경 기록은 그 뒤 — ARTICLE_PAGES 가 만들고 재고 사이트맵에 넣는 전부다. */
 export const SECTION_PAGES = ["guide", "methods", "validation", "about"];
 export const EXAMPLE_PAGES = ["n-80", "cs-137", "uncertainty"];
 export const CONTENT_PAGES = [...SECTION_PAGES, ...EXAMPLE_PAGES];
+export const ARTICLE_PAGES = [...CONTENT_PAGES, "changelog"];
+
+/** 판 — **정본은 `src/version.json` 한 곳**(T17, 소유주 결정 2026-10-29). 최신이 위.
+ *  ★ 번호 규칙(RadCalc 와 같다): 계산값 · 자료가 바뀌면 가운데 자리(1.0 → 1.1), 글만 고치면 끝자리(1.0.0 → 1.0.1).
+ *  ★ 쪽마다의 판 줄(아래 renderVersion — index.html 은 자리표시 `<!-- rl-version -->`, 나머지는 build-pages) · 인쇄 리포트 머리
+ *    (`src/app/App.tsx`) · 변경 기록 쪽의 절 머리가 여기서 읽는다. 판을 올리면 version.json 맨 위에 한 줄을 더하고
+ *    `content/changelog.html` 맨 위에 그 판의 절(`<h2 id="v1-0-1">1.0.1 — …</h2>`)을 쓴다 — gate/check-shell ⑩ 이 둘이 맞는지 잰다.
+ *  ★ JSON 인 까닭: node 로 바로 도는 이 .mjs 들(CI 는 Node 22 — .ts 를 못 읽는다)과 React 앱이 같은 파일을 읽어야 한다. */
+export const RELEASES = JSON.parse(readFileSync(join(ROOT, "src", "version.json"), "utf8")).releases;
+export const VERSION = RELEASES[0];
+/** 「29 October 2026」 — 영국식 날짜(쪽의 「updated」 줄과 같다). */
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const longDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+/** 변경 기록 쪽의 절 id — 1.0.0 → v1-0-0. */
+export const releaseId = (v) => `v${v.replaceAll(".", "-")}`;
+/** 판 줄 — 모든 쪽(앱 · 404 · 설명 쪽)의 공통 꼬리말 바로 위. 정본 shell 은 고치지 않고 그 앞에 이 저장소의 조각을 둔다.
+ *  `<main>` 밖이라 설명 쪽의 어수(⑨)에 들지 않는다. 인쇄에서는 숨긴다(앱의 인쇄 리포트 머리가 판을 든다).
+ *  게이트는 줄(versionLine)을 바이트로 잰다 — 앞의 <style> 은 Vite 가 index.html 에서 압축하므로 규칙이 있는지만 본다. */
+export const versionLine = () =>
+  `<p class="fp-ver" data-version="${VERSION.version}">Version ${VERSION.version} · ${longDate(VERSION.date)} · <a href="/changelog/">What changed</a></p>`;
+export function renderVersion() {
+  return `<style>
+  .fp-ver { max-width: 1048px; margin: 0 auto; padding: 0 var(--rl-gutter, 20px) 14px; font-size: 13px; color: rgb(var(--c-ink-faint)); }
+  .fp-ver a { color: inherit; text-underline-offset: 3px; }
+  .fp-ver a:hover { color: rgb(var(--c-ink)); }
+  @media print { .fp-ver { display: none; } }
+</style>
+${versionLine()}`;
+}
 /** HTML 글자 이스케이프 — 빌드와 게이트가 같은 것을 쓴다. */
 export const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 /** vendored 사본을 읽는다 — shell.json 과 render.mjs. 둘은 같은 판이어야 한다(sync-shell 이 한 번에 받는다). */
@@ -102,13 +141,14 @@ export function fragmentsFor({ spec, R }, page) {
     header: R.renderHeader(spec, { section: SECTION, currentHref: p.currentHref }),
     crumbs: p.trail ? R.renderBreadcrumb(spec, { section: SECTION, trail: p.trail }) : "",
     footer: R.renderFooter(spec, { section: SECTION, pageUrl: p.pageUrl, shareText: p.shareText }),
+    version: renderVersion(),
   };
 }
 
-/** index.html 의 자리표시 셋. 사람이 읽는 index.html 에는 이 주석만 있고, 산출물에는 render.mjs 출력이 글자 그대로 들어간다. */
-export const SLOTS = { head: "<!-- rl-shell:head -->", header: "<!-- rl-shell:header -->", footer: "<!-- rl-shell:footer -->" };
+/** index.html 의 자리표시 넷. 사람이 읽는 index.html 에는 이 주석만 있고, 산출물에는 render.mjs 출력(셋)과 판 줄이 글자 그대로 들어간다. */
+export const SLOTS = { head: "<!-- rl-shell:head -->", header: "<!-- rl-shell:header -->", version: "<!-- rl-version -->", footer: "<!-- rl-shell:footer -->" };
 
-/** 자리표시를 조각으로 바꾼다. 셋이 다 있어야 한다 — 하나라도 없으면 쪽이 셸 없이 나가므로 실패다. */
+/** 자리표시를 조각으로 바꾼다. 넷이 다 있어야 한다 — 하나라도 없으면 쪽이 셸이나 판 줄 없이 나가므로 실패다. */
 export function fillSlots(html, frag) {
   for (const k of Object.keys(SLOTS)) {
     const n = html.split(SLOTS[k]).length - 1;

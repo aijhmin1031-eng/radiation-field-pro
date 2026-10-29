@@ -8,11 +8,13 @@
  *    gate/check-shell 이 public · dist 둘 다 render.mjs 출력과 바이트 동일한지, 본문 규칙(단어 수 · 출처 · 겹치는 문장 · 사이트맵)을 잰다.
  *    산출물은 손으로 고치지 않는다 — 글은 `content/`, 쪽 정보는 `scripts/shell-page.mjs` 의 PAGES.
  *  ★ 설명 층(T6): 본문 조각을 공통 셸 + 빵부스러기 + h1 + 갱신일 + 본문 + 「Open the workbench」 + 쪽 사이 링크로 두르고, head 에
- *    canonical · OG(article) · TechArticle JSON-LD 를 단다. 그전의 임시 쪽(noindex)은 이것으로 바뀌었다. */
+ *    canonical · OG(article) · TechArticle JSON-LD 를 단다. 그전의 임시 쪽(noindex)은 이것으로 바뀌었다.
+ *  ★ 판(T17): 변경 기록 쪽(`content/changelog.html` → /changelog/)도 같은 틀로 만들고, 모든 쪽(404 포함)의 꼬리말 바로 위에
+ *    판 줄(`renderVersion` — 정본 `src/version.json`)을 둔다. */
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ROOT, SECTION, HOME, PAGES, CONTENT_PAGES, loadShell, fragmentsFor, esc } from "./shell-page.mjs";
+import { ROOT, SECTION, HOME, PAGES, CONTENT_PAGES, ARTICLE_PAGES, loadShell, fragmentsFor, esc, longDate } from "./shell-page.mjs";
 
 const STYLE = `<style>
   * { box-sizing: border-box; }
@@ -81,9 +83,8 @@ ${body}
 `;
 }
 
-/** 「갱신」 날짜를 사람이 읽는 꼴로(2026-10-28 → 28 October 2026). */
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-export const longDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+/** 「갱신」 날짜를 사람이 읽는 꼴로(2026-10-28 → 28 October 2026) — 판 줄과 같은 함수라 `scripts/shell-page.mjs` 로 옮겼다(T17). */
+export { longDate };
 
 /** TechArticle JSON-LD — headline 은 h1, url 은 canonical, dateModified 는 PAGES.updated(사이트맵 lastmod 와 같은 값). */
 export function articleLd(p) {
@@ -106,9 +107,9 @@ ${body}
 </article></main>`;
 }
 
-/** sitemap.xml — 앱(홈)과 설명 쪽 일곱. 404 는 넣지 않는다. lastmod 는 PAGES.updated. */
+/** sitemap.xml — 앱(홈)과 설명 쪽 일곱 · 변경 기록(T17). 404 는 넣지 않는다. lastmod 는 PAGES.updated. */
 export function sitemap() {
-  const urls = [{ loc: HOME, lastmod: PAGES.home.updated }, ...CONTENT_PAGES.map((k) => ({ loc: PAGES[k].url, lastmod: PAGES[k].updated }))];
+  const urls = [{ loc: HOME, lastmod: PAGES.home.updated }, ...ARTICLE_PAGES.map((k) => ({ loc: PAGES[k].url, lastmod: PAGES[k].updated }))];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n  </url>`).join("\n")}
@@ -124,15 +125,15 @@ export async function renderAll() {
   out.set("404.html", doc({
     spec, head: nf.head, title: "Page not found · Field Pro · Radiation Lab", robots: "noindex, follow",
     description: "This address has no page. The Field Pro workbench and the rest of Radiation Lab are linked here.",
-    body: `${nf.header}\n${R.renderNotFound(spec, { section: SECTION })}\n${nf.footer}`,
+    body: `${nf.header}\n${R.renderNotFound(spec, { section: SECTION })}\n${nf.version}\n${nf.footer}`,
   }));
-  for (const k of CONTENT_PAGES) {
+  for (const k of ARTICLE_PAGES) {
     const p = PAGES[k];
     const f = fragmentsFor(shell, k);
     const body = readFileSync(join(ROOT, p.content), "utf8").trim();
     out.set(`${p.path}/index.html`, doc({
       spec, head: f.head, title: p.title, description: p.description, canonical: p.url, ogType: "article", ld: articleLd(p),
-      body: `${f.header}\n${f.crumbs}\n${articleMain(p, body)}\n${f.footer}`,
+      body: `${f.header}\n${f.crumbs}\n${articleMain(p, body)}\n${f.version}\n${f.footer}`,
     }));
   }
   out.set("sitemap.xml", sitemap());

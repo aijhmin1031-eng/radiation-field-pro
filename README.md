@@ -13,6 +13,16 @@ readings into a GUM uncertainty budget. Everything runs in the browser; nothing 
 - Accuracy specification (generated from the engine and enforced by tests): [docs/accuracy-spec.md](docs/accuracy-spec.md)
 - Part of [Radiation Lab](https://radiation-lab.com/) · [About](https://radiation-lab.com/about) · [Contact](https://radiation-lab.com/contact)
 - The interface is in English. Quantity symbols and units follow ISO 4037 and ICRU usage.
+- Versions and what changed between them: https://pro.radiation-lab.com/changelog/ (the number itself lives in `src/version.json`)
+
+---
+
+## ★★★ 판 표시와 변경 기록 (2026-10-29, T17)
+
+- **정본은 `src/version.json` 한 곳**(`releases`, 최신이 위). 번호 규칙(소유주 결정 · RadCalc 와 같다): 계산값 · 자료가 바뀌면 가운데 자리(1.0 → 1.1), 글 · 화면만 고치면 끝자리(1.0.0 → 1.0.1). 첫 번호판은 1.0.0 · 2026-10-29.
+- **읽는 자리**: 모든 쪽(앱 · 404 · 설명 쪽 · 변경 기록)의 공통 꼬리말 바로 위 판 줄 「Version 1.0.0 · 29 October 2026 · What changed」(`scripts/shell-page.mjs` 의 `renderVersion` — index.html 은 자리표시 `<!-- rl-version -->`), 앱 인쇄 리포트 머리(`src/app/App.tsx`), 변경 기록 쪽 `/changelog/`(`content/changelog.html`, 빵부스러기 · 「현재」 칸은 About). 정본 shell 은 고치지 않는다.
+- **판을 올리는 법**: ① `src/version.json` 맨 위에 `{ "version", "date" }` 한 줄 ② `content/changelog.html` 맨 위에 그 판의 절 `<h2 id="v1-1-0">1.1.0 — 12 November 2026</h2>` — 계산값 · 판정이 바뀐 것을 먼저, 무엇이 · 언제 · 얼마나 · 그 전 결과가 어떻게 달랐는지 ③ `changelog` 의 `updated`(`scripts/shell-page.mjs`). `npm run gate`(check-shell ⑩)가 번호 꼴 · 순서 · 날짜, 19파일 모두의 판 줄(꼬리말 바로 앞, 하나), 변경 기록 절 머리가 RELEASES 와 같은지, About 의 링크를 잰다.
+- 릴리스 · 태그는 아직 없다(만들 때는 소유주 확인 뒤).
 
 ---
 

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { routeShellAssets } from "./shell-assets";
 
 // 공통 셸 v3 의 apex 자산(https://radiation-lab.com/shell/*)은 vendored 사본 shell/ 로 대신 내준다 — 네트워크 없이, 빌드와 같은 판으로.
@@ -288,6 +289,25 @@ test.describe("워크벤치 U1/U2/U3", () => {
     await expect(page.getByLabel("ISO beam quality").locator("option:checked")).toHaveText("N-80");
     await showResults(page);
     await expect(page.locator(".ro.primary .v").first()).toContainText("0.5753"); // 예제 쪽 표의 HVL1 과 같은 값
+  });
+
+  test("판 줄(T17): 앱 · 설명 쪽 · 변경 기록의 꼬리말 바로 위, 「What changed」가 /changelog/ 로 — 판 번호는 src/version.json", async ({ page }) => {
+    const v = JSON.parse(readFileSync(new URL("../src/version.json", import.meta.url), "utf8")).releases[0].version as string;
+    for (const p of ["/", "/about/", "/changelog/"]) {
+      await page.goto(p);
+      const line = page.locator("p.fp-ver");
+      await expect(line, p).toHaveCount(1);
+      await expect(line, p).toHaveText(new RegExp(`^Version ${v.replaceAll(".", "\\.")} · \\d{1,2} [A-Z][a-z]+ \\d{4} · What changed$`));
+      await line.scrollIntoViewIfNeeded();
+      await expect(line, p).toBeVisible();
+      // 꼬리말 바로 위: 판 줄 다음 형제가 공통 꼬리말이다
+      expect(await line.evaluate((el) => el.nextElementSibling?.matches("footer.site") ?? false), p).toBe(true);
+    }
+    await page.goto("/");
+    await page.locator("p.fp-ver a").click();
+    await expect(page).toHaveURL(/\/changelog\/$/);
+    await expect(page.locator(`main#main h2#v${v.replaceAll(".", "-")}`)).toHaveCount(1);
+    await expect(page.locator("nav.crumbs li")).toHaveText(["Radiation Lab", "Field Pro", "About", "Changes"]);
   });
 
   test("모바일 스크린샷(확인용)", async ({ page, isMobile }) => {

@@ -26,6 +26,9 @@ import { InputPanel } from "./InputPanel";
 import { SpectrumChart } from "./SpectrumChart";
 import { CharacteristicsPanel, IsoPanel, OperationalPanel, UncertaintyPanel, type Deltas } from "./OutputPanels";
 import { useI18n } from "./i18n";
+// 판 — 정본은 src/version.json(T17). 인쇄 리포트 머리에 적어 어느 판으로 계산했는지 남긴다(화면의 판 줄은 index.html 의 정적 조각).
+import RELEASES from "../version.json";
+const VERSION = RELEASES.releases[0];
 
 const STORAGE_KEY = "rfp.input.v1";
 const MODE_KEY = "rfp.autoMode.v1";
@@ -332,7 +335,7 @@ export function App() {
         )}
       </div>
       <div className="print-only print-head">
-        <strong>Radiation Field Pro</strong> · {t("printTitle")} · {t("printed")} {new Date().toLocaleString(t("dateLocale"))}
+        <strong>Radiation Field Pro</strong> {t("printVersion", VERSION.version)} · {t("printTitle")} · {t("printed")} {new Date().toLocaleString(t("dateLocale"))}
       </div>
       <main id="main" className={`bench${narrow ? " narrow" : ""}`}>
         <div className="no-print" hidden={!showInput}>

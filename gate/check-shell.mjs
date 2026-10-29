@@ -31,13 +31,17 @@
  *       본문의 사이트 안 링크(`/…`)가 실제 파일과 그 안의 #id 로 닿는다 · sitemap.xml(public · dist)이 앱 + 설명 쪽 일곱을 한 번씩,
  *       lastmod = PAGES.updated 로 든다(404 는 빠진다).
  *    ⑦ shell.json — version 정수 · 모든 href 가 절대 주소(https://…radiation-lab.com/). pro 구역에 계정 칸이 없다(가짜 칸 금지).
+ *    ⑩ 판(T17 — 정본 src/version.json): RELEASES 가 x.y.z · 실제 날짜 · 최신이 위(번호가 내려가고 날짜가 거꾸로 가지 않는다). 모든 쪽(앱 · 404 ·
+ *       설명 쪽 · 변경 기록, dist · public)에 renderVersion 출력이 **하나**, 꼬리말 바로 앞(사이에 빈칸뿐)에 글자 그대로 있다.
+ *       변경 기록 쪽에 판마다 `<h2 id="v1-0-0">1.0.0 — 29 October 2026</h2>` 꼴의 절 머리가 하나씩 RELEASES 순서로(첫 절 = 지금 판),
+ *       About 이 /changelog/ 를 링크한다. 변경 기록도 ⑥ · ⑨ 를 설명 쪽과 같이 받는다(색인 · 400~900어 · 출처 · 사이트맵).
  *    ⑧ vendored 사본(shell/)이 우산 정본과 같은가 — 옆에 우산 체크아웃(`../radiation-lab/public/shell` 또는 SHELL_SOURCE)이 있을 때만
  *       대조해 **경고**로 적는다(실패 아님 — CI 에는 우산이 없고, 정본이 앞서 갔을 수 있다 → `npm run sync-shell`).
  *  ★ 못 보는 것 — 화면은 안 본다(머리글 높이 · 넘침 · 다크 전환 · 뒤로가기는 e2e/workbench.spec.ts 가 Chromium 으로 잰다).
  *    shell.css 자체가 옳은지는 우산의 check-shell 이 잰다(이쪽은 사본을 신뢰한다). */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { ROOT, SECTION, HOME, HOME_SHARE, loadShell, fragmentsFor, PAGES, SECTION_PAGES, CONTENT_PAGES, esc } from "../scripts/shell-page.mjs";
+import { ROOT, SECTION, HOME, HOME_SHARE, loadShell, fragmentsFor, PAGES, SECTION_PAGES, CONTENT_PAGES, ARTICLE_PAGES, esc, RELEASES, VERSION, versionLine, releaseId, longDate } from "../scripts/shell-page.mjs";
 
 const DIST = join(ROOT, "dist");
 const { spec, R } = await loadShell();
@@ -61,7 +65,7 @@ const FILES = [
   { tag: "dist/404.html",    file: join(DIST, "404.html"),   page: "notFound", is404: true },
   { tag: "public/404.html",  file: join(ROOT, "public", "404.html"), page: "notFound", is404: true },
   /* 설명 쪽 일곱(구역 메뉴 넷 + 예제 셋, T6) — dist 와 public 둘 다 */
-  ...CONTENT_PAGES.flatMap((k) => [
+  ...ARTICLE_PAGES.flatMap((k) => [
     { tag: `dist/${PAGES[k].path}/index.html`,   file: join(DIST, PAGES[k].path, "index.html"),           page: k, is404: false, section: true },
     { tag: `public/${PAGES[k].path}/index.html`, file: join(ROOT, "public", PAGES[k].path, "index.html"), page: k, is404: false, section: true },
   ]),
@@ -112,6 +116,12 @@ for (const f of FILES) {
     if (!foots[0].includes(`data-url="${pg.pageUrl}?utm_source=copy`)) bad.push(`${f.tag}: 공유 줄이 ${pg.pageUrl} 을 권하지 않는다`);
     if (!foots[0].includes(encodeURIComponent(pg.shareText))) bad.push(`${f.tag}: 공유 글이 「${pg.shareText}」 가 아니다`);
   }
+  /* ⑩ 판 줄 — 하나, 꼬리말 바로 앞 */
+  const line = versionLine();
+  const ver = s.split(line).length - 1;
+  if (ver !== 1) bad.push(`${f.tag}: 판 줄(renderVersion — Version ${VERSION.version} · ${longDate(VERSION.date)} · What changed)이 ${ver}개(하나여야 한다)`);
+  else if (!/^\s*<footer class="site"/.test(s.slice(s.indexOf(line) + line.length))) bad.push(`${f.tag}: 판 줄이 꼬리말 바로 앞에 있지 않다`);
+  if (!/\.fp-ver\s*\{/.test(cssOf(s))) bad.push(`${f.tag}: 판 줄의 CSS(.fp-ver)가 없다`);
   /* ③ head 자산 */
   const head = s.slice(0, s.indexOf("<body"));
   if (!head.includes(want.head)) bad.push(`${f.tag}: head 에 renderHeadAssets 출력(테마 부팅 + preconnect + shell.css?v=${V} + shell.js?v=${V})이 글자 그대로 없다`);
@@ -167,7 +177,7 @@ for (const f of FILES) {
   note(`${f.tag.padEnd(18)} 머리글 ${heads[0]?.length ?? 0}자 · 꼬리말 ${foots[0]?.length ?? 0}자 · 현재 ${(heads[0]?.match(/aria-current="page"/g) || []).length}곳 · 인라인 CSS hex ${hex.length}`);
 }
 /* dist 와 public 의 정적 쪽 · 사이트맵이 같은가 */
-for (const rel of ["404.html", "sitemap.xml", ...CONTENT_PAGES.map((k) => `${PAGES[k].path}/index.html`)])
+for (const rel of ["404.html", "sitemap.xml", ...ARTICLE_PAGES.map((k) => `${PAGES[k].path}/index.html`)])
   if (existsSync(join(DIST, rel)) && existsSync(join(ROOT, "public", rel)) && lf(readFileSync(join(DIST, rel), "utf8")) !== lf(readFileSync(join(ROOT, "public", rel), "utf8")))
     bad.push(`dist/${rel} 과 public/${rel} 이 다르다 — 빌드가 public/ 을 그대로 복사해야 한다`);
 
@@ -181,7 +191,7 @@ const seen = new Map(); // 문장 → 처음 나온 쪽
 const addSentences = (t, where) => { for (const x of sentences(t)) { const w = seen.get(x); if (w && w !== where) bad.push(`겹치는 문장(${w} · ${where}): 「${x.slice(0, 90)}…」`); else seen.set(x, where); } };
 if (homeAbout) addSentences(textOf(homeAbout), "index 소개 절");
 const words = [];
-for (const k of CONTENT_PAGES) {
+for (const k of ARTICLE_PAGES) {
   const got = prose.get(k);
   if (!got) continue;
   const art = articleOf(got.body);
@@ -206,9 +216,33 @@ for (const where of ["public", "dist"]) {
   if (!existsSync(file)) { bad.push(`${where}/sitemap.xml 이 없다`); continue; }
   const xml = readFileSync(file, "utf8");
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/g)].map((m) => [m[1], m[2]]);
-  const want = [[HOME, PAGES.home.updated], ...CONTENT_PAGES.map((k) => [PAGES[k].url, PAGES[k].updated])];
-  if (JSON.stringify(locs) !== JSON.stringify(want)) bad.push(`${where}/sitemap.xml 이 앱 + 설명 쪽 일곱(lastmod = PAGES.updated)과 다르다 — ${locs.map((l) => l[0].replace(HOME, "/")).join(" ")}`);
+  const want = [[HOME, PAGES.home.updated], ...ARTICLE_PAGES.map((k) => [PAGES[k].url, PAGES[k].updated])];
+  if (JSON.stringify(locs) !== JSON.stringify(want)) bad.push(`${where}/sitemap.xml 이 앱 + 설명 쪽 일곱 + 변경 기록(lastmod = PAGES.updated)과 다르다 — ${locs.map((l) => l[0].replace(HOME, "/")).join(" ")}`);
 }
+
+/* ⑩ 판 · 변경 기록 */
+const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
+const num = (v) => v.match(SEMVER).slice(1).map(Number);
+if (!Array.isArray(RELEASES) || !RELEASES.length) bad.push("src/version.json: releases 가 비었다");
+RELEASES.forEach((r, i) => {
+  if (!SEMVER.test(r.version ?? "")) return bad.push(`src/version.json: 판 번호 「${r.version}」 이 x.y.z 가 아니다`);
+  const d = new Date(`${r.date}T00:00:00Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date ?? "") || isNaN(d) || d.toISOString().slice(0, 10) !== r.date) bad.push(`src/version.json: ${r.version} 의 날짜 「${r.date}」 가 실제 날짜가 아니다`);
+  const prev = RELEASES[i - 1];
+  if (prev && SEMVER.test(prev.version)) {
+    const [a, b] = [num(prev.version), num(r.version)];
+    const cmp = a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+    if (cmp <= 0) bad.push(`src/version.json: ${prev.version} 다음에 ${r.version} — 최신이 위여야 한다(번호가 내려가야 한다)`);
+    if (prev.date < r.date) bad.push(`src/version.json: ${prev.version}(${prev.date}) 이 ${r.version}(${r.date}) 보다 이르다`);
+  }
+});
+if (prose.has("changelog")) {
+  const art = articleOf(prose.get("changelog").body);
+  const got = [...art.matchAll(/<h2 id="(v[\d-]+)">([^<]*)<\/h2>/g)].map((m) => `${m[1]} ${m[2]}`);
+  const wantH = RELEASES.map((r) => `${releaseId(r.version)} ${r.version} — ${longDate(r.date)}`);
+  if (JSON.stringify(got) !== JSON.stringify(wantH)) bad.push(`public/changelog: 판 절 머리가 RELEASES 와 다르다 — 있음 [${got.join(" | ")}] · 있어야 [${wantH.join(" | ")}]`);
+}
+if (prose.has("about") && !articleOf(prose.get("about").body).includes('href="/changelog/"')) bad.push("public/about: 변경 기록(/changelog/) 링크가 없다");
 
 /* ④⑤ 묶인 CSS · JS */
 const assets = existsSync(join(DIST, "assets")) ? readdirSync(join(DIST, "assets")) : [];
@@ -251,6 +285,6 @@ if (existsSync(join(SRC, "shell.json"))) {
 }
 
 if (bad.length) { console.error(`❌ 공통 셸 v${V} — 정본에서 벗어난 것 ${bad.length}건\n`); bad.forEach((b) => console.error("  · " + b)); process.exit(1); }
-console.log(`✅ 공통 셸 v${V} — index · 404 · 설명 쪽 7(dist · public, ${FILES.length}파일) 머리글 · 꼬리말(· 빵부스러기)이 render.mjs 출력과 글자 그대로 같다 · 설명 쪽 색인 · TechArticle · 현재 칸 ✓ · 본문 단어(${words.join(", ")}) · 겹치는 문장 0 · 사이트 안 링크 · 사이트맵 ${CONTENT_PAGES.length + 1}주소 ✓ · head 자산 ?v=${V}(apex 절대 주소) · Google Fonts · IBM Plex · @font-face 0 · 옛 토큰 · hex 색 0(인라인 + assets CSS ${cssN}) · 구획 해시 9 + 탭 2 · shell.json 절대 주소 ${hrefs.length}개 · pro 계정 칸 없음`);
+console.log(`✅ 공통 셸 v${V} — index · 404 · 설명 쪽 7 · 변경 기록(dist · public, ${FILES.length}파일) 머리글 · 꼬리말(· 빵부스러기)이 render.mjs 출력과 글자 그대로 같다 · 설명 쪽 색인 · TechArticle · 현재 칸 ✓ · 본문 단어(${words.join(", ")}) · 겹치는 문장 0 · 사이트 안 링크 · 사이트맵 ${ARTICLE_PAGES.length + 1}주소 ✓ · 판 ${VERSION.version} 줄 ${FILES.length}/${FILES.length} · 변경 기록 절 ${RELEASES.length} · head 자산 ?v=${V}(apex 절대 주소) · Google Fonts · IBM Plex · @font-face 0 · 옛 토큰 · hex 색 0(인라인 + assets CSS ${cssN}) · 구획 해시 9 + 탭 2 · shell.json 절대 주소 ${hrefs.length}개 · pro 계정 칸 없음`);
 for (const w of warn) console.log("   ⚠️  " + w);
 if (!existsSync(join(SRC, "shell.json"))) console.log(`   (우산 정본 ${SRC} 이 옆에 없어 사본 대조는 건너뛰었다 — CI 에서는 늘 그렇다)`);
