@@ -76,7 +76,7 @@ export const PAGES = {
     path: "changelog", crumb: "Changes", parent: "about", updated: "2026-10-29",
     title: "Changes between versions · Field Pro · Radiation Lab",
     h1: "Changes between versions of Field Pro",
-    description: "What changed from one version of Field Pro to the next, calculated values first: the numbering rule, version 1.0.0, and the record it rests on.",
+    description: "What changed from one version of Field Pro to the next, calculated values first: the numbering rule, version 1.0.0 and the data its results rest on.",
   },
 };
 for (const [k, p] of Object.entries(PAGES)) {
