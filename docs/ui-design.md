@@ -43,7 +43,7 @@
 전체 재계산 ≈74 ms. ISO 자동매칭 ≈84 ms(50개 선질 HVL 이분법)로 지배적, 나머지(스펙트럼·커마·HVL·운영선량 3종) 합쳐 <10 ms.
 
 ## 배포 (2026-10-25 완료)
-- Vercel 프로젝트 `radiation-field-pro` (팀 aijhmin1031-3885s-projects, id `prj_T72FIbT6PFQjo7NcXRCVYdTXYchv`) ← GitHub `aijhmin1031-eng/radiation-field-pro` `master` 자동 배포. 프레임워크 vite, 출력 `dist`.
+- Vercel 프로젝트 `radiation-field-pro` (개인 Vercel 팀, id `prj_T72FIbT6PFQjo7NcXRCVYdTXYchv`) ← GitHub `radiation-lab-dev/field-pro` `master` 자동 배포. 프레임워크 vite, 출력 `dist`.
 - URL: https://pro.radiation-lab.com/ (정식 주소, canonical) · https://radiation-field-pro.vercel.app — 보호 방식 Standard Protection(`ssoProtection.deploymentType = all_except_custom_domains`, 2026-10-25 변경): 프로덕션 도메인은 누구나 열 수 있고, 미리보기·배포별 URL은 팀 로그인이 필요하다. 자매 프로젝트(radiation-calc·radiation-meter-tester·m-phreefiteq)와 같은 설정.
 - 로컬: `npm run dev` (개발) / `npm run build && npm run preview` (빌드 확인).
 - 디자인 스킬 5단계(frontend-design → ui-ux-pro-max → hallmark → emil-design-eng → web-design-guidelines) 점검·반영 완료.

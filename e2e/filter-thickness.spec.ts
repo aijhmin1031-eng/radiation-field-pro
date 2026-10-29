@@ -43,7 +43,9 @@ test("T19: 1.001 survives input, arrows, calculation, session export and reload"
   await expect(page.locator("section.print-only")).toContainText("1.001 mm Cu");
   await page.emulateMedia({ media: "print" });
   await expect(page.locator("section.print-only")).toBeVisible();
-  await expect(page.locator(".print-head")).toContainText("1.0.1");
+  // 판 번호는 정본(src/version.json)에서 읽는다 — 판을 올릴 때마다 이 시험을 고치지 않게(1.0.2 에서 걸렸다).
+  const version = JSON.parse(readFileSync(new URL("../src/version.json", import.meta.url), "utf8")).releases[0].version as string;
+  await expect(page.locator(".print-head")).toContainText(version);
   await page.emulateMedia({ media: "screen" });
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Save session", exact: true }).click();

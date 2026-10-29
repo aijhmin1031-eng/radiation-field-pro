@@ -184,7 +184,7 @@
 <p>Field Pro has the same author as the rest of Radiation Lab, a single radiation-protection practitioner who builds these tools in their own time. The <a href="https://radiation-lab.com/about">Radiation Lab about page</a> describes who that is, how the sites are funded and how corrections are handled. The workbench is not a product of any employer, standards body or calibration laboratory.</p>
 
 <h2 id="build">How it is built</h2>
-<p>The calculation engine is plain TypeScript with no dependence on the screen, so it can be tested on its own; the interface is a React page compiled to static files. Data tables are committed to the repository together with the scripts that produced them. The whole project is open under the MIT licence: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro">Source (MIT)</a>. The <a href="/methods/">Methods</a> page lists every table and formula, and <a href="/validation/">Validation</a> shows how they compare with ISO&nbsp;4037.</p>
+<p>The calculation engine is plain TypeScript with no dependence on the screen, so it can be tested on its own; the interface is a React page compiled to static files. Data tables are committed to the repository together with the scripts that produced them. The whole project is open under the MIT licence: <a href="https://github.com/radiation-lab-dev/field-pro">Source (MIT)</a>. The <a href="/methods/">Methods</a> page lists every table and formula, and <a href="/validation/">Validation</a> shows how they compare with ISO&nbsp;4037.</p>
 
 <h2 id="privacy">What stays on your computer</h2>
 <p>There is no server-side calculation and no account. Your inputs and the auto-calculate setting are kept in this browser's local storage under <code>rfp.input.v1</code> and <code>rfp.autoMode.v1</code>, and the light or dark theme under the key shared by all Radiation Lab sites. Session files go to your own downloads folder. The page fetches its header style, script and typeface from radiation-lab.com; nothing you type is part of those requests.</p>
@@ -200,12 +200,12 @@
 </ul>
 
 <h2 id="contact">Contact and corrections</h2>
-<p>Errors in a formula, a transcribed value or a page like this one can be reported through the <a href="https://radiation-lab.com/contact">Radiation Lab contact page</a> or as an issue on the <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/issues">GitHub repository</a>. A correction that moves a result is published in a new version: each page shows the current version above its footer, and the <a href="/changelog/">changes between versions</a> are recorded with calculated values listed first.</p>
+<p>Errors in a formula, a transcribed value or a page like this one can be reported through the <a href="https://radiation-lab.com/contact">Radiation Lab contact page</a> or as an issue on the <a href="https://github.com/radiation-lab-dev/field-pro/issues">GitHub repository</a>. A correction that moves a result is published in a new version: each page shows the current version above its footer, and the <a href="/changelog/">changes between versions</a> are recorded with calculated values listed first.</p>
 
 <h2 id="sources">Sources</h2>
 <ol class="src">
   <li>ISO 4037-1:2019 and ISO 4037-3:2019, X and gamma reference radiation for calibrating dosemeters and doserate meters.</li>
-  <li>Data provenance and generators: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/data">src/data</a> and <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/scripts">scripts</a> in the repository.</li>
+  <li>Data provenance and generators: <a href="https://github.com/radiation-lab-dev/field-pro/tree/master/src/data">src/data</a> and <a href="https://github.com/radiation-lab-dev/field-pro/tree/master/scripts">scripts</a> in the repository.</li>
   <li>Radiation Lab, <a href="https://radiation-lab.com/about">About</a> and <a href="https://radiation-lab.com/privacy">Privacy</a>.</li>
 </ol>
   <p><a class="open" href="https://pro.radiation-lab.com/">Open the workbench &rarr;</a></p>
@@ -217,7 +217,7 @@
   .fp-ver a:hover { color: rgb(var(--c-ink)); }
   @media print { .fp-ver { display: none; } }
 </style>
-<p class="fp-ver" data-version="1.0.1">Version 1.0.1 · 29 October 2026 · <a href="/changelog/">What changed</a></p>
+<p class="fp-ver" data-version="1.0.2">Version 1.0.2 · 30 October 2026 · <a href="/changelog/">What changed</a></p>
 <footer class="site" data-shell="4"><div class="ft">
   <div class="share" aria-label="Share this page">
     <span class="share-l">Share</span>

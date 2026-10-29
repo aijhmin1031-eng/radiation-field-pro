@@ -3,6 +3,9 @@
 <h2 id="numbering">How versions are numbered</h2>
 <p>The version number moves in its middle place when a calculated value or a data table changes, as from 1.0.0 to 1.1.0, and in its last place when only wording or layout changes, as from 1.0.0 to 1.0.1. The version and its date appear above the footer of every page, and the printed report carries the version in its heading, so a result kept on paper can be matched to the version that produced it and to that version&rsquo;s entry below.</p>
 
+<h2 id="v1-0-2">1.0.2 — 30 October 2026</h2>
+<p>Links to the source code now point to the repository&rsquo;s new address, <a href="https://github.com/radiation-lab-dev/field-pro">github.com/radiation-lab-dev/field-pro</a>; the old address forwards to it. No calculated value changes.</p>
+
 <h2 id="v1-0-1">1.0.1 — 29 October 2026</h2>
 <p>Filter thickness fields now accept steps of 0.001&nbsp;mm (1&nbsp;µm), matching a micrometre&rsquo;s 0.001&nbsp;mm scale, for both inherent and added filtration. The fields are wider so that a value such as 10.000 and the number arrows fit without hiding digits, including on narrow screens.</p>
 <p>Previously the fields used 0.1&nbsp;mm steps: the arrows moved in tenths of a millimetre, and browsers could mark an entered value such as 1.001&nbsp;mm, or ISO preset thicknesses of 0.15, 0.18, 0.21 and 0.25&nbsp;mm, as a step mismatch. Those warnings are removed. Entered values are retained without rounding in the calculation inputs, saved sessions and printed input summary. The calculation engine and data tables are unchanged; the same inputs produce the same calculated values.</p>
@@ -33,7 +36,7 @@
 
 <h2 id="sources">Sources</h2>
 <ol class="src">
-  <li>The commit history and the pull requests merged up to this version: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/commits/master">github.com/aijhmin1031-eng/radiation-field-pro</a>.</li>
-  <li>The data files, with the scripts that generated the SpekPy tables (the ISO tables are transcribed): <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/data">src/data</a> and <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/scripts">scripts</a>.</li>
-  <li>The <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">accuracy specification</a>, generated from the engine and enforced by its tests.</li>
+  <li>The commit history and the pull requests merged up to this version: <a href="https://github.com/radiation-lab-dev/field-pro/commits/master">github.com/radiation-lab-dev/field-pro</a>.</li>
+  <li>The data files, with the scripts that generated the SpekPy tables (the ISO tables are transcribed): <a href="https://github.com/radiation-lab-dev/field-pro/tree/master/src/data">src/data</a> and <a href="https://github.com/radiation-lab-dev/field-pro/tree/master/scripts">scripts</a>.</li>
+  <li>The <a href="https://github.com/radiation-lab-dev/field-pro/blob/master/docs/accuracy-spec.md">accuracy specification</a>, generated from the engine and enforced by its tests.</li>
 </ol>
