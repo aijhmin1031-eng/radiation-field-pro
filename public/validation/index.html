@@ -177,7 +177,7 @@
 <p class="lede">A reference-field calculator is only useful if you know how far to trust it. This page lists what the engine is compared against, the deviations it produces, the reasons we can identify for them, and what has not been checked.</p>
 
 <h2 id="how">How the checks run</h2>
-<p>The comparisons are code, not a one-off spreadsheet. The unit-test suite (153 tests) recomputes the first half-value layer of every ISO&nbsp;4037-1 quality and fails if any deviation leaves its envelope, and a report script writes the same numbers into the <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">accuracy specification</a> from the engine itself rather than by hand. Browser tests on a 1440&nbsp;px desktop and a Pixel&nbsp;7 profile then open the built site and read the screen: with the default inputs the HVL1 readout must show 0.57&nbsp;mm&nbsp;Cu and the auto-match must name N-80, and five sample readings must produce a Type&nbsp;A coverage factor of 2.776.</p>
+<p>The comparisons are code, not a one-off spreadsheet. The unit-test suite (153 tests) recomputes the first half-value layer of every ISO&nbsp;4037-1 quality and fails if any deviation leaves its envelope, and a report script writes the same numbers into the <a href="https://github.com/radiation-lab-dev/field-pro/blob/master/docs/accuracy-spec.md">accuracy specification</a> from the engine itself rather than by hand. Browser tests on a 1440&nbsp;px desktop and a Pixel&nbsp;7 profile then open the built site and read the screen: with the default inputs the HVL1 readout must show 0.57&nbsp;mm&nbsp;Cu and the auto-match must name N-80, and five sample readings must produce a Type&nbsp;A coverage factor of 2.776.</p>
 
 <h2 id="hvl1">First half-value layer, all 50 qualities</h2>
 <p>Each quality is built from its tabulated tube voltage, inherent and added filtration and a 2.5&nbsp;m air path, and its HVL1 is compared with the 2.5&nbsp;m column of ISO&nbsp;4037-1:2019.</p>
@@ -237,7 +237,7 @@
   <li>ISO 4037-1:2019, Part 1: Radiation characteristics and production methods, Tables 2–6 (HVL1, HVL2 and mean energy at 1.0 m and 2.5 m).</li>
   <li>ISO 4037-3:2019, Part 3: Calibration of area and personal dosemeters and the measurement of their response as a function of energy and angle of incidence.</li>
   <li>IAEA Nuclear Data Section, <a href="https://www-nds.iaea.org/relnsd/vcharthtml/VChartHTML.html">Live Chart of Nuclides</a>, Cs-137 and Co-60 ground states and decay radiation.</li>
-  <li>Generated report: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/docs/accuracy-spec.md">docs/accuracy-spec.md</a>; tests: <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/tree/master/src/validation">src/validation</a> and <a href="https://github.com/aijhmin1031-eng/radiation-field-pro/blob/master/src/engine/decay.test.ts">decay.test.ts</a> (air-kerma rate constants).</li>
+  <li>Generated report: <a href="https://github.com/radiation-lab-dev/field-pro/blob/master/docs/accuracy-spec.md">docs/accuracy-spec.md</a>; tests: <a href="https://github.com/radiation-lab-dev/field-pro/tree/master/src/validation">src/validation</a> and <a href="https://github.com/radiation-lab-dev/field-pro/blob/master/src/engine/decay.test.ts">decay.test.ts</a> (air-kerma rate constants).</li>
 </ol>
   <p><a class="open" href="https://pro.radiation-lab.com/">Open the workbench &rarr;</a></p>
   <nav class="more" aria-label="More Field Pro pages"><h2>More on Field Pro</h2><ul><li><a href="/guide/">Guide</a></li><li><a href="/methods/">Methods</a></li><li><a href="/about/">About</a></li><li><a href="/examples/n-80-survey-meter-type-test/">N-80 field example</a></li><li><a href="/examples/cs-137-field-at-2-5-m/">Cs-137 field example</a></li><li><a href="/examples/repeat-readings-uncertainty/">Uncertainty example</a></li></ul></nav>
@@ -248,7 +248,7 @@
   .fp-ver a:hover { color: rgb(var(--c-ink)); }
   @media print { .fp-ver { display: none; } }
 </style>
-<p class="fp-ver" data-version="1.0.1">Version 1.0.1 · 29 October 2026 · <a href="/changelog/">What changed</a></p>
+<p class="fp-ver" data-version="1.0.2">Version 1.0.2 · 30 October 2026 · <a href="/changelog/">What changed</a></p>
 <footer class="site" data-shell="4"><div class="ft">
   <div class="share" aria-label="Share this page">
     <span class="share-l">Share</span>
