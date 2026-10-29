@@ -125,7 +125,7 @@ export function InputPanel({ input, onChange }: Props) {
               </div>
               <div className="filters">
                 {input.xray.filters.map((f, i) => (
-                  <div className="frow" key={i}>
+                  <div className="frow filter-layer" key={i}>
                     <span className="tag">{i === 0 ? t("tagInherent") : t("tagAdded", i)}</span>
                     <select value={f.material} onChange={(e) => setFilter(i, { material: e.target.value })} aria-label={t("filterMatAria")}>
                       {FILTER_MATERIALS.map((m) => (
@@ -140,7 +140,7 @@ export function InputPanel({ input, onChange }: Props) {
                     inputMode="decimal"
                     autoComplete="off"
                         min={0}
-                        step={0.1}
+                        step={0.001}
                         value={f.thicknessMm}
                         onChange={(e) => setFilter(i, { thicknessMm: num(e.target.value, f.thicknessMm) })}
                         aria-label={t("filterThickAria")}
